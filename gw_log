@@ -1,0 +1,62 @@
+#!/usr/bin/env python
+import argparse
+import pdfcompiler
+import sys
+import textemplate
+def getCompilerArguments(parser, extension):
+    parser.add_argument('filename',
+                        metavar = 'FN',
+                        nargs = '*',
+                        help='''Name of the project {0} file(s).
+                        This will create a new file [FN_{1}.pdf] under the current directory
+                        (or [FN1-FN2-...-FNX_{2}.pdf] if there are multiple files).'''.format(extension, extension, extension))
+    parser.add_argument('-a', '--author',
+                        action='store',
+                        default = 'Gao Wang',
+                        help='''Author's name of the lab notebook''')
+    parser.add_argument('-t', '--title',
+                        action='store',
+                        default = None,
+                        help='''Document title. Default is \'None\'''')
+
+def init(args, extension):
+    for index, nameX in enumerate(args.filename):
+        nameX = nameX.split('.')
+        if nameX[-1] != extension:
+            print('ERROR: wrong input file extentions (should be \'{0}\').'.format(extension))
+            sys.exit(1)
+        else:
+            args.filename[index] = "".join(nameX[0:-1])
+
+def get_log(args):
+    init(args, 'plog')
+    textemplate.getDocBody(args, 'plog')
+    
+def get_history(args):
+    init(args, 'history')
+    textemplate.getDocBody(args, 'history')
+
+if __name__ == '__main__':
+    #
+    master_parser = argparse.ArgumentParser(
+        description = '''Compile lab notes text into pdf file | Gao Wang (c) 2011''',
+        prog = 'labnotes',
+        fromfile_prefix_chars = '@',  
+        epilog = '''Motivated by my ugly/error-filled handwrittings when logging my daily work ... ''')
+    master_parser.add_argument('--version', action='version', version='%(prog)s 1.0')
+    subparsers = master_parser.add_subparsers()
+    
+    # compile a project log file
+    parser = subparsers.add_parser('get_log', help='Compile pdf file from project log file(s)')
+    pdfcompiler.getCompilerArguments(parser, 'log')
+    parser.set_defaults(func=pdfcompiler.get_log)
+    
+    # compile a project bash history file
+    parser = subparsers.add_parser('get_history', help='Compile pdf file from project bash history file(s)')
+    pdfcompiler.getCompilerArguments(parser, 'history')
+    parser.set_defaults(func=pdfcompiler.get_history)
+    
+    # getting args
+    args = master_parser.parse_args()
+    # calling the associated functions
+    args.func(args)
