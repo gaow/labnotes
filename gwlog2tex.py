@@ -159,7 +159,7 @@ fontsize=\\footnotesize, formatcom=\\color{blue},
 frame=lines, framerule=1pt, framesep=2mm,
 label=\\fbox{OUTPUT}, labelposition=topline]\n%s
 \\end{Verbatim}
-           ''' % wraptxt(self.text[i], '', 100)
+           ''' % wraptxt(self.text[i], '', 50)
         return
 
     def m_blockizeList(self):
@@ -191,7 +191,8 @@ label=\\fbox{OUTPUT}, labelposition=topline]\n%s
                 sys.exit("You have so many urgly '#' symbols in a regular line. Please modify this line '{0}'".format(self.text[idx]))
             if not self.text[idx].startswith('#'):
                 # regular cmd
-                self.text[idx] = ''.join(['\\mint[bgcolor=bg, numberblanklines=true, fontsize=\\footnotesize]{bash}|' + x + '|' for x in wraptxt(self.text[idx], '\n', 55).split('\n') if x != ''])
+                cmd = wraptxt(self.text[idx], '\n', 55).split('\n')
+                self.text[idx] = ''.join(['\\mint[bgcolor=bg, numberblanklines=true, fontsize=\\footnotesize]{bash}|' + x + ('\\' if (i + 1) < len(cmd) else '') + '|' for i, x in enumerate(cmd) if x != ''])
                 idx += 1
                 continue
             if self.text[idx].startswith('###') and self.text[idx+1].startswith('#') and self.text[idx+2].startswith('###'):

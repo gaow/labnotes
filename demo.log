@@ -77,12 +77,14 @@ vtools admin --merge_samples
 vtools use cache/esp.ann --file /home/HD1/ESP6900/esp68hvariants -j8
 
 #{ -------
+#{out
 INFO: Importing database esp from source files ['/nfs/data/ESP6900/May02/ESP6900.chr22.May02.release.vcf.gz']
 INFO: Importing annotation data from /nfs/data/ESP6900/May02/ESP6900.chr22.May02.release.vcf.gz
 ESP6900.chr22.May02.release.vcf.gz: 100% [=====================================================================================>] 38,516 414.4/s in 00:01:32
 INFO: 46659 records are handled, 0 ignored.
 INFO: Using annotation DB esp in project chr_22.
 INFO: ESP5500 VCF file
+#}out
 #} -----------
 
 #esp.ann fields
