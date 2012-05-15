@@ -66,7 +66,6 @@ class LogToTex:
 \\usepackage{amssymb}
 \\usepackage{amsthm}
 \\usepackage{bm}
-\\usepackage{extarrows}
 \\usepackage{fancyhdr}
 \\usepackage{fancyvrb}
 \\usepackage[pdftex]{graphicx}
