@@ -24,11 +24,11 @@ def wraptxt(line, sep, by):
     return sline
 
 class LogToTex:
-    def __init__(self, args):
-        self.title = recodeKw(args.title)
-        self.author = recodeKw(args.author)
+    def __init__(self, title, author, filename):
+        self.title = ' '.join([x.capitalize() for x in recodeKw(title).lower().split()])
+        self.author = recodeKw(author)
         self.text = []
-        for fn in args.filename:
+        for fn in filename:
             try:
                 self.text.extend(list(line for line in (l.strip() for l in open(fn).readlines()) if line))
             except IOError as e:
@@ -68,6 +68,7 @@ class LogToTex:
 \\usepackage{bm}
 \\usepackage{fancyhdr}
 \\usepackage{fancyvrb}
+\\usepackage{shadow}
 \\usepackage[pdftex]{graphicx}
 \\usepackage[pdfstartview=FitH]{hyperref}
 \\usepackage[dvipsnames]{xcolor}
@@ -188,7 +189,7 @@ label=\\fbox{OUTPUT}, labelposition=topline]\n%s
             if self.text[idx].startswith('###') and self.text[idx+1].startswith('#') and (not self.text[idx+1].startswith('##')) and self.text[idx+2].startswith('###'):
                 # section
                 self.text[idx] = ''
-                self.text[idx + 1] = '\\section{' + recodeKw(self.text[idx + 1][1:]) + '}'
+                self.text[idx + 1] = '\\section{' + ' '.join([x.capitalize() for x in recodeKw(self.text[idx + 1][1:]).lower().split()]) + '}'
                 self.text[idx + 2] = ''
                 idx += 3
                 continue
@@ -207,7 +208,7 @@ label=\\fbox{OUTPUT}, labelposition=topline]\n%s
                 continue
             if self.text[idx].startswith('#*'):
                 # date
-                self.text[idx] = '\\fbox{' + self.text[idx][2:] + '}'
+                self.text[idx] = '\\shabox{' + self.text[idx][2:] + '}'
                 idx += 1
                 continue
             if self.text[idx].startswith('#'):

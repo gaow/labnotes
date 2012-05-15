@@ -37,13 +37,13 @@ def pdflatex(fname, text):
 
 def lite(args):
     fname = '-'.join([os.path.splitext(name)[0] for name in args.filename]) + '.' + 'lite'
-    tex = LogToTex(args)
+    tex = LogToTex(args.title, args.author, args.filename)
     pdflatex(fname, tex.get(1))
     return
 
 def full(args):
     fname = '-'.join([os.path.splitext(name)[0] for name in args.filename]) + '.' + 'full'
-    tex = LogToTex(args)
+    tex = LogToTex(args.title, args.author, args.filename)
     pdflatex(fname, tex.get(0))
     return
 
