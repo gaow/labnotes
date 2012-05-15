@@ -12,11 +12,11 @@ def getCompilerArguments(parser):
                         (or [FN1-FN2-...-FNX.pdf] if there are multiple files).''')
 	parser.add_argument('-a', '--author',
                         action='store',
-                        default = None,
+                        default = '',
                         help='''Author's name of the pdf document''')
 	parser.add_argument('-t', '--title',
                         action='store',
-                        default = None,
+                        default = '',
                         help='''Document title.''')
 
 def pdflatex(fname, text):

@@ -2,7 +2,7 @@ import sys, re, os
 
 def recodeKw(line):
     if not line:
-        return None
+        return ''
     for item in [('\\', '!!\\backslash!!'),('$', '\$'),('!!\\backslash!!', '$\\backslash$'),
             ('{', '\{'),('}', '\}'),('%', '\%'), ('_', '\_'),('&', '\&'),('<', '$<$'),
             ('>', '$>$'),('~', '\~{}'), ('^', '\^{}'), ('#', '\#')]:
@@ -91,7 +91,7 @@ class LogToTex:
 \\raggedbottom
 \\begin{document}
 %s\n%s
-\\end{document}''' % (str(self.title), str(self.author), '\\maketitle' if self.title else '', '\n'.join(self.text))
+\\end{document}''' % (self.title, self.author, '\\maketitle' if self.title else '', '\n'.join(self.text))
 
     def m_parseBlocks(self):
         idx = 0
