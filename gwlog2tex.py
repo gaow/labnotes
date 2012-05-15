@@ -53,7 +53,7 @@ class LogToTex:
         if code and len(self.blocks['err']) > 0:
             for idx in range(len(self.text)):
                 for item in self.blocks['err']:
-                    if idx in range(item[0], item[1]+1):
+                    if idx in range(item[0], item[1]):
                         self.text[idx] = ''
                         break
         self.text = [x for x in self.text if len(x)>0]
@@ -92,8 +92,7 @@ class LogToTex:
 \\raggedbottom
 \\begin{document}
 %s\n%s
-\\end{document}
-		''' % (str(self.title), str(self.author), '\\maketitle' if self.title else '', '\n'.join(self.text))
+\\end{document}''' % (str(self.title), str(self.author), '\\maketitle' if self.title else '', '\n'.join(self.text))
 
     def m_parseBlocks(self):
         idx = 0
@@ -145,8 +144,7 @@ class LogToTex:
 fontsize=\\tiny, formatcom=\\color{black},
 frame=lines, framerule=1pt, framesep=2mm,
 label=\\fbox{BASH}, labelposition=topline]\n%s
-\\end{Verbatim}
-           ''' % wraptxt(self.text[i], '\\', 200)
+\\end{Verbatim}''' % wraptxt(self.text[i], '\\', 200)
         return
 
     def m_blockizeOut(self):
@@ -158,8 +156,7 @@ label=\\fbox{BASH}, labelposition=topline]\n%s
 fontsize=\\footnotesize, formatcom=\\color{blue},
 frame=lines, framerule=1pt, framesep=2mm,
 label=\\fbox{OUTPUT}, labelposition=topline]\n%s
-\\end{Verbatim}
-           ''' % wraptxt(self.text[i], '', 50)
+\\end{Verbatim}''' % wraptxt(self.text[i], '', 50)
         return
 
     def m_blockizeList(self):
@@ -179,16 +176,13 @@ label=\\fbox{OUTPUT}, labelposition=topline]\n%s
                     skip.append(i)
         idx = 0
         while idx < len(self.text):
-            if idx in skip:
-                # already processed
-                idx += 1
-                continue
-            if self.text[idx] == '':
+            if idx in skip or self.text[idx] == '':
+                # no need to process
                 idx += 1
                 continue
             if '####' in self.text[idx]:
                 # too many #'s
-                sys.exit("You have so many urgly '#' symbols in a regular line. Please modify this line '{0}'".format(self.text[idx]))
+                sys.exit("You have so many urgly '#' symbols in a regular line. Please clear them up in : '{0}'".format(self.text[idx]))
             if not self.text[idx].startswith('#'):
                 # regular cmd
                 cmd = wraptxt(self.text[idx], '\n', 55).split('\n')
