@@ -91,7 +91,7 @@ class LogToTex:
 \\date{Last updated: \\today}
 \\raggedbottom
 \\begin{document}
-        %s\n%s
+%s\n%s
 \\end{document}
 		''' % (str(self.title), str(self.author), '\\maketitle' if self.title else '', '\n'.join(self.text))
 

@@ -74,6 +74,12 @@ vtools admin --merge_samples
 
 #! Create annotation file (by Mengyuan)
 #(please document steps that generated the annotation file ann and data file esp69h_variants.txt)
+#!! step 1: create *.ann file
+# blablabla
+#!! step 2: create esp68hvariants file
+# blablabla
+#!! step 3: build/use annotation database
+# blablabla
 vtools use cache/esp.ann --file /home/HD1/ESP6900/esp68hvariants -j8
 
 #{ -------
