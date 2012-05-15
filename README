@@ -1,16 +1,28 @@
-# install gw_log
-cd path/to/gw_log
-svn co svn+ssh://usrname@csg.bcmd.bcm.edu/nfs/usr/local/svn/gw_log ./
+gw_log
+============================
+Gao Wang (c) 2012, GNU/GPL
 
+Dependencies
+------------------
+sudo apt-get install texlive texlive-xetex texlive-latex-extra python-pygments latexmk
+
+Installation
+------------------
+cd path/to/some/folder
+svn co svn+ssh://usrname@csg.bcmd.bcm.edu/nfs/usr/local/svn/gw_log ./
 svn up
 sudo python3 setup.py install
 
-# install latex on ubuntu
-sudo apt-get install texlive texlive-xetex texlive-latex-extra python-pygments latexmk
-
-# run gw_log
+Example
+------------------
 gw_log -h
 gw_log full -h
 gw_log lite -h
 gw_log lite demo.log --author "John Doe" --title "Example log documentation"
 gw_log full demo.log --author "John Doe" --title "Example log documentation"
+
+Syntax
+------------------
+###			#{ ----------	#{ out	#{ bash, #{ list
+#			
+###, #*, #!, #!!, #, 	#} ----------,  #} out, #} bash, #} list
