@@ -2,6 +2,7 @@
 import argparse, sys, os
 from subprocess import Popen, PIPE, call
 from gwlog2tex import LogToTex
+from minted import wrtminted, MINTED
 def getCompilerArguments(parser):
 	parser.add_argument('filename',
                         metavar = 'FN',
@@ -21,16 +22,17 @@ def getCompilerArguments(parser):
 def pdflatex(fname, text):
     with open(fname+'.tex', 'w') as f:
         f.writelines(text)
-    print(fname)
+    wrtminted(MINTED)
     call(["pdflatex", "-shell-escape", fname+'.tex'])
     #if (tc.returncode):
     #    sys.exit("ERROR: pdflatex returned non-zero exit code. Please manually compile {0}.tex to troubleshoot".format(fname))
     call(["pdflatex", "-shell-escape", fname+'.tex'])
     for ext in ['aux', 'log', 'out', 'pyg']:
         try:
-            call(["rm", '-f', fname + '.' + ext])
+            call(['rm', '-f', fname + '.' + ext])
         except:
             pass
+    call(['rm', '-f', 'minted.sty'])
     return
 
 def lite(args):
