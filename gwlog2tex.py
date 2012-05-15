@@ -180,22 +180,22 @@ label=\\fbox{OUTPUT}, labelposition=topline]\n%s
                 # no need to process
                 idx += 1
                 continue
-            if '####' in self.text[idx]:
-                # too many #'s
-                sys.exit("You have so many urgly '#' symbols in a regular line. Please clear them up in : '{0}'".format(self.text[idx]))
             if not self.text[idx].startswith('#'):
                 # regular cmd
                 cmd = wraptxt(self.text[idx], '\n', 55).split('\n')
                 self.text[idx] = ''.join(['\\mint[bgcolor=bg, numberblanklines=true, fontsize=\\footnotesize]{bash}|' + x + ('\\' if (i + 1) < len(cmd) else '') + '|' for i, x in enumerate(cmd) if x != ''])
                 idx += 1
                 continue
-            if self.text[idx].startswith('###') and self.text[idx+1].startswith('#') and self.text[idx+2].startswith('###'):
+            if self.text[idx].startswith('###') and self.text[idx+1].startswith('#') and (not self.text[idx+1].startswith('##')) and self.text[idx+2].startswith('###'):
                 # section
                 self.text[idx] = ''
                 self.text[idx + 1] = '\\section{' + recodeKw(self.text[idx + 1][1:]) + '}'
                 self.text[idx + 2] = ''
                 idx += 3
                 continue
+            if self.text[idx].startswith('##'):
+                # too many #'s
+                sys.exit("You have so many urgly '#' symbols in a regular line. Please clear them up in this line: '{0}'".format(self.text[idx]))
             if self.text[idx].startswith('#!!'):
                 # subsection, subsubsection ...
                 self.text[idx] = '\\subsubsection*{' + recodeKw(self.text[idx][3:]) + '}'
