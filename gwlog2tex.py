@@ -3,11 +3,10 @@ import sys, re, os
 def recodeKw(line):
     if not line:
         return None
-    for item in [('$', '\$'),('{', '\{'),('}', '\}'),('%', '\%'),
-            ('_', '\_'),('&', '\&'),('<', '$<$'),('>', '$>$')]:
+    for item in [('\\', '!!\\backslash!!'),('$', '\$'),('!!\\backslash!!', '$\\backslash$'),
+            ('{', '\{'),('}', '\}'),('%', '\%'), ('_', '\_'),('&', '\&'),('<', '$<$'),
+            ('>', '$>$'),('~', '\~{}'), ('^', '\^{}'), ('#', '\#')]:
         line = line.replace(item[0], item[1])
-    if not line.startswith('#'):
-        line.replace('#', '\#')
     return line
 
 def wraptxt(line, sep, by):
