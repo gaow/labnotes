@@ -6,7 +6,7 @@ from minted import wrtminted, MINTED
 def getCompilerArguments(parser):
 	parser.add_argument('filename',
                         metavar = 'FN',
-                        nargs = '*',
+                        nargs = '+',
                         help='''Name of the input log file(s).
                         This will create a new file [FN.pdf] under the current directory
                         (or [FN1-FN2-...-FNX.pdf] if there are multiple files).''')
