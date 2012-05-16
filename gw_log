@@ -23,10 +23,10 @@ def pdflatex(fname, text):
     with open(fname+'.tex', 'w') as f:
         f.writelines(text)
     wrtminted(MINTED)
-    call(["pdflatex", "-shell-escape", fname+'.tex'])
+    call(["pdflatex", "-shell-escape", "-halt-on-error", "-file-line-error", fname+'.tex'])
     #if (tc.returncode):
     #    sys.exit("ERROR: pdflatex returned non-zero exit code. Please manually compile {0}.tex to troubleshoot".format(fname))
-    call(["pdflatex", "-shell-escape", fname+'.tex'])
+    call(["pdflatex", "-shell-escape", "-halt-on-error", "-file-line-error", fname+'.tex'])
     for ext in ['aux', 'log', 'out', 'pyg']:
         try:
             call(['rm', '-f', fname + '.' + ext])

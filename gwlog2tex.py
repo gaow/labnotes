@@ -206,7 +206,7 @@ class LogToTex:
 \\newcommand\\me{\\mathrm{e}}
 \\newcommand\\mlog{\\mathrm{log}}
 \\linespread{1.1}
-\\setlength{\\parskip}{8pt plus1pt minus2pt}
+\\setlength{\\parskip}{8pt plus 1pt minus 1pt}
 \\parindent 0ex
 \\geometry{left=0.8in,right=0.8in,top=0.8in,bottom=0.8in}
 \\titleformat{\\subsubsection}
