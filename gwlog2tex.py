@@ -140,9 +140,18 @@ class LogToTex:
                 continue
             if not self.text[idx].startswith('#'):
                 # regular cmd
-                cmd = wraptxt(self.text[idx], '\n', 110).split('\n')
-                self.text[idx] = ''.join(['\\mint[bgcolor=bg, fontsize=\\footnotesize]{text}!' + x + ('\\' if (i + 1) < len(cmd) else '') + '!' for i, x in enumerate(cmd) if x != ''])
-                idx += 1
+                for i in range(idx + 1, len(self.text)):
+                    if self.text[i].startswith('#') or i in skip or self.text[i] == '':
+                        break
+                cmd = '\n'.join([wraptxt(x, '\\', 110) for x in self.text[idx:i]])
+                cmd = cmd.split('\n')
+                if len(cmd) == 1:
+                    self.text[idx] = '\\mint[bgcolor=bg, fontsize=\\footnotesize]{text}!' + cmd[0] + '!'
+                else:
+                    self.text[idx] = '\\begin{minted}[bgcolor=bg, fontsize=\\footnotesize]{text}\n' + '\n'.join(cmd) + '\n\\end{minted}'
+                    for j in range(idx + 1, i):
+                        self.text[j] = ''
+                idx = i
                 continue
             if self.text[idx].startswith('###') and self.text[idx+1].startswith('#') and (not self.text[idx+1].startswith('##')) and self.text[idx+2].startswith('###'):
                 # section
@@ -183,7 +192,7 @@ class LogToTex:
                     if idx in range(item[0], item[1]):
                         self.text[idx] = ''
                         break
-        self.text = [x for x in self.text if len(x)>0]
+        self.text = filter(None, self.text)
         return '''\\documentclass[oneside, 10pt]{article}
 \\usepackage{geometry}
 \\usepackage{fullpage}
