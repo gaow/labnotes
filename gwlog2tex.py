@@ -111,7 +111,7 @@ class LogToTex:
 fontsize=\\scriptsize, xleftmargin=1pt,
 frame=lines, framerule=1pt, framesep=3mm,
 label=\\fbox{%s}]{%s}\n%s
-\\end{minted}''' % (item.upper(), item, wraptxt(self.text[i], '\\', 120))
+\\end{minted}''' % (item.upper(), item, wraptxt(self.text[i], '\\', 65))
         return
 
     def m_blockizeOut(self):
