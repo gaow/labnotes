@@ -107,24 +107,14 @@ class LogToTex:
             if len(self.blocks[item]) == 0:
                 continue
             for i in self.blocks[item]:
-                self.text[i] = '''
-\\begin{minted}[samepage=false, fontfamily=tt,
-fontsize=\\scriptsize, xleftmargin=1pt,
-frame=lines, framerule=1pt, framesep=2mm,
-label=\\fbox{%s}]{%s}\n%s
-\\end{minted}''' % (item.upper(), item, wraptxt(self.text[i], '\\', 130))
+                self.text[i] = '\\begin{minted}[samepage=false, fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{%s}]{%s}\n%s\n\\end{minted}' % (item.upper(), item, wraptxt(self.text[i], '\\', 130))
         return
 
     def m_blockizeOut(self):
         if len(self.blocks['out']) == 0:
             return
         for i in self.blocks['out']:
-           self.text[i] = '''
-\\begin{Verbatim}[samepage=false, fontfamily=tt,
-fontsize=\\footnotesize, formatcom=\\color{rblue},
-frame=lines, framerule=1pt, framesep=2mm,
-label=\\fbox{\\scriptsize OUTPUT}, labelposition=topline]\n%s
-\\end{Verbatim}''' % wraptxt(self.text[i], '', 115)
+           self.text[i] = '\\begin{Verbatim}[samepage=false, fontfamily=tt,\nfontsize=\\footnotesize, formatcom=\\color{rblue},\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{\\scriptsize OUTPUT}, labelposition=topline]\n%s\n\\end{Verbatim}' % wraptxt(self.text[i], '', 115)
         return
 
     def m_blockizeList(self):
