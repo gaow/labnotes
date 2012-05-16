@@ -208,6 +208,7 @@ label=\\fbox{OUTPUT}, labelposition=topline]\n%s
 \\usepackage[pdfstartview=FitH]{hyperref}
 \\usepackage[dvipsnames]{xcolor}
 \\usepackage{minted}
+\\usepackage{upquote}
 \\usepackage{titlesec}
 \\renewcommand\\rmdefault{bch}
 \\newcommand{\\ie}{\\textit{i.e.}}
