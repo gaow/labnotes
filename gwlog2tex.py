@@ -150,7 +150,7 @@ label=\\fbox{OUTPUT}, labelposition=topline]\n%s
             if not self.text[idx].startswith('#'):
                 # regular cmd
                 cmd = wraptxt(self.text[idx], '\n', 55).split('\n')
-                self.text[idx] = ''.join(['\\mint[bgcolor=bg, fontsize=\\footnotesize]{text}|' + x + ('\\' if (i + 1) < len(cmd) else '') + '|' for i, x in enumerate(cmd) if x != ''])
+                self.text[idx] = ''.join(['\\mint[bgcolor=bg, fontsize=\\footnotesize]{text}!' + x + ('\\' if (i + 1) < len(cmd) else '') + '!' for i, x in enumerate(cmd) if x != ''])
                 idx += 1
                 continue
             if self.text[idx].startswith('###') and self.text[idx+1].startswith('#') and (not self.text[idx+1].startswith('##')) and self.text[idx+2].startswith('###'):
