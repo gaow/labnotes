@@ -166,3 +166,9 @@ esp.MQ30                     Fraction of bases with mapQ<=30
 esp.ANNO                     Functional annotation from ANNOVAR software
 esp.SVM                      SVM-based variant quality score
 #}
+#! R codes
+#{ r
+argsv <- commandArgs(trailingOnly = TRUE)
+dat <- read.table(pipe('cat /dev/stdin'), header=TRUE, sep = "\t")
+for (i in argsv) get(i)(dat)
+#}

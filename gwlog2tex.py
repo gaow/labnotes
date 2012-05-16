@@ -33,7 +33,7 @@ class LogToTex:
             except IOError as e:
                 sys.exit(e)
         self.blocks = {}
-        self.blknames = ['err', 'out', 'bash', 'list']
+        self.blknames = ['err', 'out', 'bash', 'r', 'list']
         for item in self.blknames:
             self.blocks[item] = []
 #        for idx, item in enumerate(self.text):
@@ -42,57 +42,12 @@ class LogToTex:
 #        print(self.blocks)
 #        for idx, item in enumerate(self.text):
 #            print idx, item
-        self.m_blockizeBash()
+        self.m_blockizeIn()
         self.m_blockizeOut()
         self.m_blockizeList()
         self.m_parseText()
         #print('\n'.join(self.text))
         #sys.exit(0)
-
-    def get(self, code):
-        if code and len(self.blocks['err']) > 0:
-            for idx in range(len(self.text)):
-                for item in self.blocks['err']:
-                    if idx in range(item[0], item[1]):
-                        self.text[idx] = ''
-                        break
-        self.text = [x for x in self.text if len(x)>0]
-        return '''\\documentclass[oneside, 10pt]{article}
-\\usepackage{geometry}
-\\usepackage{fullpage}
-\\usepackage{amsmath}
-\\usepackage{booktabs}
-\\usepackage{listings}
-\\usepackage{amssymb}
-\\usepackage{amsthm}
-\\usepackage{bm}
-\\usepackage{fancyhdr}
-\\usepackage{fancyvrb}
-\\usepackage{shadow}
-\\usepackage[pdftex]{graphicx}
-\\usepackage[pdfstartview=FitH]{hyperref}
-\\usepackage[dvipsnames]{xcolor}
-\\usepackage{minted}
-\\usepackage{titlesec}
-\\renewcommand\\rmdefault{bch}
-\\newcommand{\\ie}{\\textit{i.e.}}
-\\newcommand\\me{\\mathrm{e}}
-\\newcommand\\mlog{\\mathrm{log}}
-\\linespread{1.1}
-\\setlength{\\parskip}{8pt plus1pt minus2pt}
-\\parindent 0ex
-\\geometry{left=0.8in,right=0.8in,top=0.8in,bottom=0.8in}
-\\titleformat{\\subsubsection}
-{\\color{MidnightBlue}\\normalfont\\large\\bfseries}
-{\\color{MidnightBlue}\\thesection}{1em}{}
-\\definecolor{bg}{rgb}{0.95,0.95,0.95}
-\\title{%s}
-\\author{%s}
-\\date{Last updated: \\today}
-\\raggedbottom
-\\begin{document}
-%s\n%s
-\\end{document}''' % (self.title, self.author, '\\maketitle' if self.title else '', '\n'.join(self.text))
 
     def m_parseBlocks(self):
         idx = 0
@@ -146,16 +101,17 @@ class LogToTex:
                 self.text[endidx] = ''
         return
 
-    def m_blockizeBash(self):
-        if len(self.blocks['bash']) == 0:
-            return
-        for i in self.blocks['bash']:
-           self.text[i] = '''
-\\begin{Verbatim}[samepage=false, fontfamily=courier,
-fontsize=\\tiny, formatcom=\\color{black},
-frame=lines, framerule=1pt, framesep=2mm,
-label=\\fbox{BASH}, labelposition=topline]\n%s
-\\end{Verbatim}''' % wraptxt(self.text[i], '\\', 200)
+    def m_blockizeIn(self):
+        for item in ['bash', 'r']:
+            for i in self.blocks[item]:
+                if len(self.blocks[item]) == 0:
+                    break
+                self.text[i] = '''
+\\begin{minted}[samepage=false, fontfamily=tt,
+fontsize=\\scriptsize, xleftmargin=1pt,
+frame=lines, framerule=1pt, framesep=3mm,
+label=\\fbox{%s}]{%s}\n%s
+\\end{minted}''' % (item.upper(), item, wraptxt(self.text[i], '\\', 120))
         return
 
     def m_blockizeOut(self):
@@ -163,11 +119,11 @@ label=\\fbox{BASH}, labelposition=topline]\n%s
             return
         for i in self.blocks['out']:
            self.text[i] = '''
-\\begin{Verbatim}[samepage=false, fontfamily=courier,
-fontsize=\\footnotesize, formatcom=\\color{blue},
-frame=lines, framerule=1pt, framesep=2mm,
+\\begin{Verbatim}[samepage=false, fontfamily=tt,
+fontsize=\\footnotesize, formatcom=\\color{rblue},
+frame=lines, framerule=1pt, framesep=3mm,
 label=\\fbox{OUTPUT}, labelposition=topline]\n%s
-\\end{Verbatim}''' % wraptxt(self.text[i], '', 50)
+\\end{Verbatim}''' % wraptxt(self.text[i], '', 58)
         return
 
     def m_blockizeList(self):
@@ -194,7 +150,7 @@ label=\\fbox{OUTPUT}, labelposition=topline]\n%s
             if not self.text[idx].startswith('#'):
                 # regular cmd
                 cmd = wraptxt(self.text[idx], '\n', 55).split('\n')
-                self.text[idx] = ''.join(['\\mint[bgcolor=bg, numberblanklines=true, fontsize=\\footnotesize]{bash}|' + x + ('\\' if (i + 1) < len(cmd) else '') + '|' for i, x in enumerate(cmd) if x != ''])
+                self.text[idx] = ''.join(['\\mint[bgcolor=bg, fontsize=\\footnotesize]{text}|' + x + ('\\' if (i + 1) < len(cmd) else '') + '|' for i, x in enumerate(cmd) if x != ''])
                 idx += 1
                 continue
             if self.text[idx].startswith('###') and self.text[idx+1].startswith('#') and (not self.text[idx+1].startswith('##')) and self.text[idx+2].startswith('###'):
@@ -228,3 +184,48 @@ label=\\fbox{OUTPUT}, labelposition=topline]\n%s
                 idx += 1
                 continue
         return
+
+    def get(self, code):
+        if code and len(self.blocks['err']) > 0:
+            for idx in range(len(self.text)):
+                for item in self.blocks['err']:
+                    if idx in range(item[0], item[1]):
+                        self.text[idx] = ''
+                        break
+        self.text = [x for x in self.text if len(x)>0]
+        return '''\\documentclass[oneside, 10pt]{article}
+\\usepackage{geometry}
+\\usepackage{fullpage}
+\\usepackage{amsmath}
+\\usepackage{booktabs}
+\\usepackage{amssymb}
+\\usepackage{amsthm}
+\\usepackage{bm}
+\\usepackage{fancyhdr}
+\\usepackage{fancyvrb}
+\\usepackage{shadow}
+\\usepackage[pdftex]{graphicx}
+\\usepackage[pdfstartview=FitH]{hyperref}
+\\usepackage[dvipsnames]{xcolor}
+\\usepackage{minted}
+\\usepackage{titlesec}
+\\renewcommand\\rmdefault{bch}
+\\newcommand{\\ie}{\\textit{i.e.}}
+\\newcommand\\me{\\mathrm{e}}
+\\newcommand\\mlog{\\mathrm{log}}
+\\linespread{1.1}
+\\setlength{\\parskip}{8pt plus1pt minus2pt}
+\\parindent 0ex
+\\geometry{left=0.8in,right=0.8in,top=0.8in,bottom=0.8in}
+\\titleformat{\\subsubsection}
+{\\color{MidnightBlue}\\normalfont\\large\\bfseries}
+{\\color{MidnightBlue}\\thesection}{1em}{}
+\\definecolor{bg}{rgb}{0.95,0.95,0.95}
+\\definecolor{rblue}{rgb}{0,.14,.41}
+\\title{%s}
+\\author{%s}
+\\date{Last updated: \\today}
+\\raggedbottom
+\\begin{document}
+%s\n%s
+\\end{document}''' % (self.title, self.author, '\\maketitle' if self.title else '', '\n'.join(self.text))
