@@ -13,7 +13,7 @@
 #User name: sftp-espvariants
 #Password: m3nd3l!
 #Directory: data/ESP6900/May02
-#} list
+#}
 #{ out
 ESP6900.chr10.May02.release.vcf.gz      ESP6900.chr20.May02.release.vcf.gz.tbi
 ESP6900.chr10.May02.release.vcf.gz.tbi  ESP6900.chr21.May02.release.vcf.gz
@@ -38,7 +38,7 @@ ESP6900.chr19.May02.release.vcf.gz.tbi  ESP6900.chr9.May02.release.vcf.gz
 ESP6900.chr1.May02.release.vcf.gz       ESP6900.chr9.May02.release.vcf.gz.tbi
 ESP6900.chr1.May02.release.vcf.gz.tbi   ESP6900.chrX.May02.release.vcf.gz
 ESP6900.chr20.May02.release.vcf.gz      ESP6900.chrX.May02.release.vcf.gz.tbi
-#} out
+#}
 #} ----
 #All ESP6900 vtools project are in:
 #/nfs/projects/ESP69h/
@@ -69,7 +69,7 @@ do
         sleep 60
 done
 vtools admin --merge_samples
-#} bash
+#}
 
 #! Create annotation file (by Mengyuan)
 #(please document steps that generated the annotation file ann and data file esp69h_variants.txt)
@@ -89,7 +89,7 @@ ESP6900.chr22.May02.release.vcf.gz: 100% [======================================
 INFO: 46659 records are handled, 0 ignored.
 INFO: Using annotation DB esp in project chr_22.
 INFO: ESP5500 VCF file
-#}out
+#}
 #} -----------
 
 #esp.ann fields
@@ -165,4 +165,4 @@ esp.MQ20                     Fraction of bases with mapQ<=20
 esp.MQ30                     Fraction of bases with mapQ<=30
 esp.ANNO                     Functional annotation from ANNOVAR software
 esp.SVM                      SVM-based variant quality score
-#}out
+#}

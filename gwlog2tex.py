@@ -99,20 +99,29 @@ class LogToTex:
         while True:
             if idx >= len(self.text):
                 break
+            if self.text[idx].startswith('#}') and '--' not in self.text[idx]:
+                sys.exit("ERROR: invalid use of '%s' without previous #{" % (self.text[idx]))
             if self.text[idx].startswith('#{') and '--' not in self.text[idx]:
                 # define block
-                bname = re.sub(r'\s*', '', self.text[idx].split('{')[1])
+                bname = self.text[idx].split('{')[1].strip()
                 if bname not in self.blknames[1:]:
                     sys.exit("ERROR: invalid block definition '#{ %s'" % (bname))
                 endidx = None
                 self.text[idx] = ''
                 # find end of block
                 for i in range(idx+1, len(self.text)):
-                    if self.text[i].startswith('#}') and bname in self.text[i]:
-                        endidx = i
-                        break
+                    # do not allow nested blocks
+                    if self.text[i].startswith('#{'):
+                        sys.exit("ERROR: nested use of blocks is disallowed: '{0}'".format(self.text[i]))
+                    # find end of block
+                    if self.text[i].startswith('#}'):
+                        if self.text[i].rstrip() == '#}':
+                            endidx = i
+                            break
+                        else:
+                            sys.exit("ERROR: invalid %s '%s'" % ('nested use of' if '--' in self.text[i] else 'symbol', self.text[i]))
                 if not endidx:
-                    sys.exit('ERROR: #{ %s and #} %s must appear in pairs' % (bname))
+                    sys.exit("ERROR: '#{ %s' and '#}' must appear in pairs" % (bname))
                 # combine block values
                 for i in range(idx + 1, endidx):
                     self.text[idx] += self.text[i] + '\n'
@@ -165,7 +174,7 @@ label=\\fbox{OUTPUT}, labelposition=topline]\n%s
         if len(self.blocks['list']) == 0:
             return
         for i in self.blocks['list']:
-           self.text[i] = '\\begin{itemize}%s\n\\end{itemize}' % recodeKw(re.sub(r'^#|\n#', '\\item ', self.text[i]))
+           self.text[i] = '\\begin{itemize}%s\n\\end{itemize}' % recodeKw(re.sub(r'^#|\n#', '\\item ', self.text[i])).replace('$\\backslash$item', '\n\\item')
         return
 
     def m_parseText(self):
