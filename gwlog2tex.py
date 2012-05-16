@@ -15,7 +15,7 @@ def wraptxt(line, sep, by):
     for item in list(line):
         if item == '\n':
             i = 0
-        if i % by  == 0 and i > by:
+        if i % by  == 0 and i >= by:
             sline += item + sep + '\n'
         else:
             sline += item
@@ -42,6 +42,7 @@ class LogToTex:
 #        print(self.blocks)
 #        for idx, item in enumerate(self.text):
 #            print idx, item
+#        print(self.text)
         self.m_blockizeIn()
         self.m_blockizeOut()
         self.m_blockizeList()
@@ -79,7 +80,7 @@ class LogToTex:
                     sys.exit("ERROR: '#{ %s' and '#}' must appear in pairs" % (bname))
                 # combine block values
                 for i in range(idx + 1, endidx):
-                    self.text[idx] += self.text[i] + '\n'
+                    self.text[idx] += self.text[i] + ('\n' if not i + 1 == endidx else '')
                 del self.text[(idx + 1) : (endidx + 1)]
                     # keep block index
                 self.blocks[bname].append(idx)
@@ -109,9 +110,9 @@ class LogToTex:
                 self.text[i] = '''
 \\begin{minted}[samepage=false, fontfamily=tt,
 fontsize=\\scriptsize, xleftmargin=1pt,
-frame=lines, framerule=1pt, framesep=3mm,
+frame=lines, framerule=1pt, framesep=2mm,
 label=\\fbox{%s}]{%s}\n%s
-\\end{minted}''' % (item.upper(), item, wraptxt(self.text[i], '\\', 65))
+\\end{minted}''' % (item.upper(), item, wraptxt(self.text[i], '\\', 130))
         return
 
     def m_blockizeOut(self):
@@ -121,9 +122,9 @@ label=\\fbox{%s}]{%s}\n%s
            self.text[i] = '''
 \\begin{Verbatim}[samepage=false, fontfamily=tt,
 fontsize=\\footnotesize, formatcom=\\color{rblue},
-frame=lines, framerule=1pt, framesep=3mm,
-label=\\fbox{OUTPUT}, labelposition=topline]\n%s
-\\end{Verbatim}''' % wraptxt(self.text[i], '', 58)
+frame=lines, framerule=1pt, framesep=2mm,
+label=\\fbox{\\scriptsize OUTPUT}, labelposition=topline]\n%s
+\\end{Verbatim}''' % wraptxt(self.text[i], '', 115)
         return
 
     def m_blockizeList(self):
@@ -149,7 +150,7 @@ label=\\fbox{OUTPUT}, labelposition=topline]\n%s
                 continue
             if not self.text[idx].startswith('#'):
                 # regular cmd
-                cmd = wraptxt(self.text[idx], '\n', 55).split('\n')
+                cmd = wraptxt(self.text[idx], '\n', 110).split('\n')
                 self.text[idx] = ''.join(['\\mint[bgcolor=bg, fontsize=\\footnotesize]{text}!' + x + ('\\' if (i + 1) < len(cmd) else '') + '!' for i, x in enumerate(cmd) if x != ''])
                 idx += 1
                 continue
