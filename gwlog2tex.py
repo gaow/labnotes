@@ -33,7 +33,8 @@ class LogToTex:
             except IOError as e:
                 sys.exit(e)
         self.blocks = {}
-        for item in ['err', 'out', 'bash', 'list']:
+        self.blknames = ['err', 'out', 'bash', 'list']
+        for item in self.blknames:
             self.blocks[item] = []
 #        for idx, item in enumerate(self.text):
 #            print idx, item
@@ -101,6 +102,8 @@ class LogToTex:
             if self.text[idx].startswith('#{') and '--' not in self.text[idx]:
                 # define block
                 bname = re.sub(r'\s*', '', self.text[idx].split('{')[1])
+                if bname not in self.blknames[1:]:
+                    sys.exit("ERROR: invalid block definition '#{ %s'" % (bname))
                 endidx = None
                 self.text[idx] = ''
                 # find end of block
@@ -109,7 +112,7 @@ class LogToTex:
                         endidx = i
                         break
                 if not endidx:
-                    sys.exit('ERROR: #{ %s and #} %s must appear in pairs' %s (bname))
+                    sys.exit('ERROR: #{ %s and #} %s must appear in pairs' % (bname))
                 # combine block values
                 for i in range(idx + 1, endidx):
                     self.text[idx] += self.text[i] + '\n'
