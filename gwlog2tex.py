@@ -29,12 +29,12 @@ class LogToTex:
         self.text = []
         for fn in filename:
             try:
-                self.text.extend(list(line for line in (l.strip() for l in open(fn).readlines()) if line))
+                self.text.extend(list(line for line in (l.rstrip() for l in open(fn).readlines()) if line))
             except IOError as e:
                 sys.exit(e)
         self.blocks = {}
-        self.blknames = ['err', 'out', 'bash', 'r', 'list']
-        for item in self.blknames:
+        self.syntax = ['latex', 'python', 'bash', 'r', 'c', 'cpp']
+        for item in self.syntax + ['err', 'out', 'list']:
             self.blocks[item] = []
 #        for idx, item in enumerate(self.text):
 #            print idx, item
@@ -59,7 +59,7 @@ class LogToTex:
             if self.text[idx].startswith('#{') and '--' not in self.text[idx]:
                 # define block
                 bname = self.text[idx].split('{')[1].strip()
-                if bname not in self.blknames[1:]:
+                if bname not in self.syntax + ['out', 'list']:
                     sys.exit("ERROR: invalid block definition '#{ %s'" % (bname))
                 endidx = None
                 self.text[idx] = ''
@@ -102,10 +102,10 @@ class LogToTex:
         return
 
     def m_blockizeIn(self):
-        for item in ['bash', 'r']:
+        for item in self.syntax:
+            if len(self.blocks[item]) == 0:
+                continue
             for i in self.blocks[item]:
-                if len(self.blocks[item]) == 0:
-                    break
                 self.text[i] = '''
 \\begin{minted}[samepage=false, fontfamily=tt,
 fontsize=\\scriptsize, xleftmargin=1pt,
