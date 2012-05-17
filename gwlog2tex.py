@@ -24,7 +24,7 @@ def wraptxt(line, sep, by):
 
 class LogToTex:
     def __init__(self, title, author, filename):
-        self.title = ' '.join([x.capitalize() for x in recodeKw(title).lower().split()])
+        self.title = ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in recodeKw(title).split()])
         self.author = recodeKw(author)
         self.text = []
         for fn in filename:
@@ -89,6 +89,8 @@ class LogToTex:
         #
         for idx, item in enumerate(self.text):
             # define err block
+            if self.text[idx].startswith('#}') and '--' in self.text[idx]:
+                sys.exit("ERROR: invalid use of '#}----' without previous '#{----', near %s" % (self.text[idx+1] if idx + 1 < len(self.text) else "end of document") )
             if item.startswith('#{') and '--' in item:
                 endidx = None
                 for i in range(idx+1, len(self.text)):
@@ -121,7 +123,9 @@ class LogToTex:
         if len(self.blocks['list']) == 0:
             return
         for i in self.blocks['list']:
-           self.text[i] = '\\begin{itemize}%s\n\\end{itemize}' % recodeKw(re.sub(r'^#|\n#', '\\item ', self.text[i])).replace('$\\backslash$item', '\n\\item')
+            if not self.text[i].startswith('#'):
+                sys.exit('ERROR: items must start with # in list block. Problematic text is: \n {0}'.format(self.text[i]))
+            self.text[i] = '\\begin{itemize}%s\n\\end{itemize}' % recodeKw(re.sub(r'^#|\n#', '\\item ', self.text[i])).replace('$\\backslash$item', '\n\\item')
         return
 
     def m_parseText(self):
@@ -140,9 +144,12 @@ class LogToTex:
                 continue
             if not self.text[idx].startswith('#'):
                 # regular cmd
-                for i in range(idx + 1, len(self.text)):
-                    if self.text[i].startswith('#') or i in skip or self.text[i] == '':
-                        break
+                if idx + 1 < len(self.text):
+                    for i in range(idx + 1, len(self.text)):
+                        if self.text[i].startswith('#') or i in skip or self.text[i] == '':
+                            break
+                else:
+                    i = idx + 1
                 cmd = '\n'.join([wraptxt(x, '\\', 110) for x in self.text[idx:i]])
                 cmd = cmd.split('\n')
                 if len(cmd) == 1:
@@ -156,7 +163,7 @@ class LogToTex:
             if self.text[idx].startswith('###') and self.text[idx+1].startswith('#') and (not self.text[idx+1].startswith('##')) and self.text[idx+2].startswith('###'):
                 # section
                 self.text[idx] = ''
-                self.text[idx + 1] = '\\section{' + ' '.join([x.capitalize() for x in recodeKw(self.text[idx + 1][1:]).lower().split()]) + '}'
+                self.text[idx + 1] = '\\section{' + ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in recodeKw(self.text[idx + 1][1:]).split()]) + '}'
                 self.text[idx + 2] = ''
                 idx += 3
                 continue
