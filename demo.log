@@ -1,12 +1,12 @@
 #* Mon May 7 21:36:19 CDT 2012
 
+#{ ----
 ###
-#FILE LOCATIONS
+#File locations
 ###
 
 #All ESP6900 vcf files are in:
 #/nfs/data/ESP6900
-#{ ----
 #We recieved the following files from Michigan
 #{ list
 #Server: share.sph.umich.edu
@@ -39,13 +39,13 @@ ESP6900.chr1.May02.release.vcf.gz       ESP6900.chr9.May02.release.vcf.gz.tbi
 ESP6900.chr1.May02.release.vcf.gz.tbi   ESP6900.chrX.May02.release.vcf.gz
 ESP6900.chr20.May02.release.vcf.gz      ESP6900.chrX.May02.release.vcf.gz.tbi
 #}
-#} ----
 #All ESP6900 vtools project are in:
 #/nfs/projects/ESP69h/
 #All ESP6900 vtools project and dependent-files (phenotype.txt etc) are in
 #/nfs/projects/ESP69h/cache
 #All ESP6900 vtools project bash files are in
 #/nfs/projects/ESP69h/cache
+#} ----
 ###
 # Import data & create annotations
 ###
