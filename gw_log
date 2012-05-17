@@ -32,7 +32,7 @@ def pdflatex(fname, text):
     #if (tc.returncode):
     #    sys.exit("ERROR: pdflatex returned non-zero exit code. Please manually compile {0}.tex to troubleshoot".format(fname))
     call(["pdflatex", "-shell-escape", "-halt-on-error", "-file-line-error", fname+'.tex'])
-    for ext in ['aux', 'log', 'out', 'toc']:
+    for ext in ['aux', 'log', 'out', 'toc', 'tex']:
         try:
             call(['rm', '-f', fname + '.' + ext])
         except:
