@@ -23,9 +23,10 @@ def wraptxt(line, sep, by):
     return sline
 
 class LogToTex:
-    def __init__(self, title, author, filename):
+    def __init__(self, title, author, notoc, filename):
         self.title = ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in recodeKw(title).split()])
         self.author = recodeKw(author)
+        self.notoc = notoc
         self.text = []
         for fn in filename:
             try:
@@ -212,7 +213,7 @@ class LogToTex:
 \\usepackage{fancyvrb}
 \\usepackage{shadow}
 \\usepackage[pdftex]{graphicx}
-\\usepackage[pdfstartview=FitH]{hyperref}
+\\usepackage[bookmarksnumbered=true,pdfstartview=FitH]{hyperref}
 \\usepackage[dvipsnames]{xcolor}
 \\usepackage{minted}
 \\usepackage{upquote}
@@ -230,10 +231,12 @@ class LogToTex:
 {\\color{MidnightBlue}\\thesection}{1em}{}
 \\definecolor{bg}{rgb}{0.95,0.95,0.95}
 \\definecolor{rblue}{rgb}{0,.14,.41}
+\\definecolor{linkcolour}{rgb}{0,0.2,0.6}
+\\hypersetup{colorlinks, breaklinks,urlcolor=linkcolour, linkcolor=linkcolour}
 \\title{%s}
 \\author{%s}
 \\date{Last updated: \\today}
 \\raggedbottom
 \\begin{document}
-%s\n%s
-\\end{document}''' % (self.title, self.author, '\\maketitle' if self.title else '', '\n'.join(self.text))
+%s\n%s\n\\bigskip\n%s
+\\end{document}''' % (self.title, self.author, '\\maketitle' if self.title else '', '' if self.notoc else '\\tableofcontents', '\n'.join(self.text))

@@ -13,11 +13,15 @@ def getCompilerArguments(parser):
 	parser.add_argument('-a', '--author',
                         action='store',
                         default = '',
-                        help='''Author's name of the pdf document''')
+                        help='''Author's name of the document''')
 	parser.add_argument('-t', '--title',
                         action='store',
                         default = '',
-                        help='''Document title.''')
+                        help='''Title of document''')
+	parser.add_argument('-c', '--notoc',
+                        action='store_true',
+                        default = '',
+                        help='''Do not generate table of contents''')
 
 def pdflatex(fname, text):
     with open(fname+'.tex', 'w') as f:
@@ -28,7 +32,7 @@ def pdflatex(fname, text):
     #if (tc.returncode):
     #    sys.exit("ERROR: pdflatex returned non-zero exit code. Please manually compile {0}.tex to troubleshoot".format(fname))
     call(["pdflatex", "-shell-escape", "-halt-on-error", "-file-line-error", fname+'.tex'])
-    for ext in ['aux', 'log', 'out']:
+    for ext in ['aux', 'log', 'out', 'toc']:
         try:
             call(['rm', '-f', fname + '.' + ext])
         except:
@@ -38,13 +42,13 @@ def pdflatex(fname, text):
 
 def lite(args):
     fname = '-'.join([os.path.splitext(name)[0] for name in args.filename]) + '.' + 'lite'
-    tex = LogToTex(args.title, args.author, args.filename)
+    tex = LogToTex(args.title, args.author, args.notoc, args.filename)
     pdflatex(fname, tex.get(1))
     return
 
 def full(args):
     fname = '-'.join([os.path.splitext(name)[0] for name in args.filename]) + '.' + 'full'
-    tex = LogToTex(args.title, args.author, args.filename)
+    tex = LogToTex(args.title, args.author, args.notoc, args.filename)
     pdflatex(fname, tex.get(0))
     return
 
