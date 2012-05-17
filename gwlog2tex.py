@@ -110,7 +110,7 @@ class LogToTex:
             if len(self.blocks[item]) == 0:
                 continue
             for i in self.blocks[item]:
-                self.text[i] = '\\begin{minted}[samepage=false, fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{%s}]{%s}\n%s\n\\end{minted}' % (item.upper(), item, wraptxt(self.text[i], '\\', 130))
+                self.text[i] = '\\begin{minted}[samepage=false, fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{%s}]{%s}\n%s\n\\end{minted}' % (item.upper(), item, wraptxt(self.text[i], '\\' if item == 'bash' else '', 130))
         return
 
     def m_blockizeOut(self):
