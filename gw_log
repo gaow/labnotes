@@ -36,13 +36,12 @@ def pdflatex(fname, text, rmcache):
     #if (tc.returncode):
     #    sys.exit("ERROR: pdflatex returned non-zero exit code. Please manually compile {0}.tex to troubleshoot".format(fname))
     call(["pdflatex", "-shell-escape", "-halt-on-error", "-file-line-error", fname + '.tex'])
-    torm = ['aux', 'log', 'out', 'toc']
     if rmcache:
-        torm.append('tex')
         call(['rm', '-rf', '.minted_cache'])
+        call(['rm', '-rf', '.' + fname + '.tex'])
     else:
-        call(['mv', fname + '.tex', '.' + fname + '.tex'])
-    for ext in torm:
+        call(['cp', fname + '.tex', '.' + fname + '.tex'])
+    for ext in ['aux', 'log', 'out', 'toc', 'tex']:
         try:
             call(['rm', '-f', fname + '.' + ext])
         except:

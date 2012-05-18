@@ -73,7 +73,7 @@ class LogToTex:
             if idx >= len(self.text):
                 break
             if self.text[idx].startswith('#}') and '--' not in self.text[idx]:
-                sys.exit("ERROR: invalid use of '%s' without previous #{" % (self.text[idx]))
+                sys.exit("ERROR: invalid use of '%s' without previous #{, near %s" % (self.text[idx], self.text[idx+1] if idx + 1 < len(self.text) else "end of document"))
             if self.text[idx].startswith('#{') and '--' not in self.text[idx]:
                 # define block
                 bname = self.text[idx].split('{')[1].strip()
@@ -85,16 +85,16 @@ class LogToTex:
                 for i in range(idx+1, len(self.text)):
                     # do not allow nested blocks
                     if self.text[i].startswith('#{'):
-                        sys.exit("ERROR: nested use of blocks is disallowed: '{0}'".format(self.text[i]))
+                        sys.exit("ERROR: nested use of blocks is disallowed: '{0}', near {1}".format(self.text[i], self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
                     # find end of block
                     if self.text[i].startswith('#}'):
                         if self.text[i].rstrip() == '#}':
                             endidx = i
                             break
                         else:
-                            sys.exit("ERROR: invalid %s '%s'" % ('nested use of' if '--' in self.text[i] else 'symbol', self.text[i]))
+                            sys.exit("ERROR: invalid %s '%s', near %s" % ('nested use of' if '--' in self.text[i] else 'symbol', self.text[i], self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
                 if not endidx:
-                    sys.exit("ERROR: '#{ %s' and '#}' must appear in pairs" % (bname))
+                    sys.exit("ERROR: '#{ %s' and '#}' must appear in pairs, near %s" % (bname, self.text[idx+1] if idx + 1 < len(self.text) else "end of document"))
                 # combine block values
                 for i in range(idx + 1, endidx):
                     self.text[idx] += self.text[i] + ('\n' if not i + 1 == endidx else '')
@@ -115,7 +115,7 @@ class LogToTex:
                         endidx = i
                         break
                 if not endidx:
-                    sys.exit('ERROR: comment blocks must appear in pairs')
+                    sys.exit('ERROR: comment blocks must appear in pairs, near {0}'.format(self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
                 self.blocks['err'].append([idx, endidx])
                 self.text[idx] = ''
                 self.text[endidx] = ''
