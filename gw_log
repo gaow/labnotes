@@ -22,8 +22,12 @@ def getCompilerArguments(parser):
                         action='store_true',
                         default = '',
                         help='''Do not generate table of contents''')
+	parser.add_argument('-r', '--rmcache',
+                        action='store_true',
+                        default = '',
+                        help='''Remove cache files''')
 
-def pdflatex(fname, text):
+def pdflatex(fname, text, rmcache):
     with open(fname + '.tex', 'w') as f:
         f.writelines(text)
     m = minted()
@@ -32,8 +36,13 @@ def pdflatex(fname, text):
     #if (tc.returncode):
     #    sys.exit("ERROR: pdflatex returned non-zero exit code. Please manually compile {0}.tex to troubleshoot".format(fname))
     call(["pdflatex", "-shell-escape", "-halt-on-error", "-file-line-error", fname + '.tex'])
-    call(['mv', fname + '.tex', '.' + fname + '.tex'])
-    for ext in ['aux', 'log', 'out', 'toc']:
+    torm = ['aux', 'log', 'out', 'toc']
+    if rmcache:
+        torm.append('tex')
+        call(['rm', '-rf', '.minted_cache'])
+    else:
+        call(['mv', fname + '.tex', '.' + fname + '.tex'])
+    for ext in torm:
         try:
             call(['rm', '-f', fname + '.' + ext])
         except:
@@ -44,13 +53,13 @@ def pdflatex(fname, text):
 def lite(args):
     fname = '-'.join([os.path.splitext(name)[0] for name in args.filename]) + '.' + 'lite'
     tex = LogToTex(args.title, args.author, args.notoc, args.filename)
-    pdflatex(fname, tex.get(1))
+    pdflatex(fname, tex.get(1), args.rmcache)
     return
 
 def full(args):
     fname = '-'.join([os.path.splitext(name)[0] for name in args.filename]) + '.' + 'full'
     tex = LogToTex(args.title, args.author, args.notoc, args.filename)
-    pdflatex(fname, tex.get(0))
+    pdflatex(fname, tex.get(0), args.rmcache)
     return
 
 if __name__ == '__main__':

@@ -10,16 +10,32 @@ def recodeKw(line):
     return line
 
 def wraptxt(line, sep, by):
+    # will also remove blank lines, if any
     sline = ''
     i = 0
     for item in list(line):
+        if item == '\n' and i == 0:
+            # unnecessary wrap
+            continue
         if item == '\n':
-            i = 0
-        if i % by  == 0 and i >= by:
-            sline += item + sep + '\n'
-        else:
+            # natural wrap
             sline += item
-        i += 1
+            i = 0
+            continue
+        j = 1
+        if item == '\t':
+            # assume 1 tab = 8 white spaces
+            j = 9
+        for k in range(j):
+            if i == by:
+                # time to wrap
+                sline += item + sep + '\n'
+                i = 0
+                break
+            else:
+                i += 1
+        if not i == 0:
+            sline += item
     return sline
 
 class LogToTex:
@@ -110,14 +126,14 @@ class LogToTex:
             if len(self.blocks[item]) == 0:
                 continue
             for i in self.blocks[item]:
-                self.text[i] = '\\begin{minted}[samepage=false, fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{%s}]{%s}\n%s\n\\end{minted}' % (item.upper(), item, wraptxt(self.text[i], '\\' if item == 'bash' else '', 130))
+                self.text[i] = '\\begin{minted}[samepage=false, fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{%s}]{%s}\n%s\n\\end{minted}' % (item.upper(), item, wraptxt(self.text[i], '\\' if item == 'bash' else '', 131))
         return
 
     def m_blockizeOut(self):
         if len(self.blocks['out']) == 0:
             return
         for i in self.blocks['out']:
-           self.text[i] = '\\begin{Verbatim}[samepage=false, fontfamily=tt,\nfontsize=\\footnotesize, formatcom=\\color{rblue},\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{\\scriptsize OUTPUT}, labelposition=topline]\n%s\n\\end{Verbatim}' % wraptxt(self.text[i], '', 115)
+           self.text[i] = '\\begin{Verbatim}[samepage=false, fontfamily=tt,\nfontsize=\\footnotesize, formatcom=\\color{rblue},\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{\\scriptsize OUTPUT}, labelposition=topline]\n%s\n\\end{Verbatim}' % wraptxt(self.text[i], '', 116)
         return
 
     def m_blockizeList(self):
@@ -151,7 +167,7 @@ class LogToTex:
                             break
                 else:
                     i = idx + 1
-                cmd = '\n'.join([wraptxt(x, '\\', 110) for x in self.text[idx:i]])
+                cmd = '\n'.join([wraptxt(x, '\\', 114) for x in self.text[idx:i]])
                 cmd = cmd.split('\n')
                 if len(cmd) == 1:
                     self.text[idx] = '\\mint[bgcolor=bg, fontsize=\\footnotesize]{text}!' + cmd[0] + '!'
