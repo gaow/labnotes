@@ -187,6 +187,11 @@ class LogToTex:
             if self.text[idx].startswith('##'):
                 # too many #'s
                 sys.exit("You have so many urgly '#' symbols in a regular line. Please clear them up in this line: '{0}'".format(self.text[idx]))
+            if self.text[idx].startswith('#!!!'):
+                # box
+                self.text[idx] = '\\shabox{' + self.text[idx][4:] + '}'
+                idx += 1
+                continue
             if self.text[idx].startswith('#!!'):
                 # subsection, subsubsection ...
                 self.text[idx] = '\\subsubsection*{' + recodeKw(self.text[idx][3:]) + '}'
@@ -198,8 +203,17 @@ class LogToTex:
                 idx += 1
                 continue
             if self.text[idx].startswith('#*'):
-                # date
-                self.text[idx] = '\\shabox{' + self.text[idx][2:] + '}'
+                # fig: figure.pdf 0.9
+                try:
+                    fig, width = self.text[idx][2:].split()
+                except ValueError:
+                    fig = self.text[idx][2:].split()[0]
+                    width = 0.9
+                if fig.split('.')[1] not in ['jpg','pdf','png']:
+                    sys.exit("ERROR: Input file format '%s' not supported. Valid extensions are 'pdf', 'png' and 'jpg'" % fig.split('.')[1])
+                if not os.path.exists(fig):
+                    sys.exit("ERROR: Cannot find file %s" % fig)
+                self.text[idx] = '\\begin{center}\\includegraphics[width=%s\\textwidth]{%s}\\end{center}' % (width, fig)
                 idx += 1
                 continue
             if self.text[idx].startswith('#'):
