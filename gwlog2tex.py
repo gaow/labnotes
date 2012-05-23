@@ -3,6 +3,7 @@ import sys, re, os
 def recodeKw(line):
     if not line:
         return ''
+    line = line.strip()
     for item in [('\\', '!!\\backslash!!'),('$', '\$'),('!!\\backslash!!', '$\\backslash$'),
             ('{', '\{'),('}', '\}'),('%', '\%'), ('_', '\_'),('&', '\&'),('<', '$<$'),
             ('>', '$>$'),('~', '$\sim$'), ('^', '\^{}'), ('#', '\#')]:
