@@ -2,11 +2,18 @@
 
 #{ ----
 ###
-#File locations
+# Full
 ###
+# with the #{---- mark, a section will show up only in full version.
+#} ----
 
-#All ESP6900 vcf files are in:
-#/nfs/data/ESP6900
+###
+# A section of toys
+###
+#! Examples 1
+# This is a regular sentence with supported emphasis signs: ``double quote'', `single quote',  "italics", ""bold"", """bold italics""", @@monospaced@@
+#! Examples 2
+#!! Example of list
 #We recieved the following files from Michigan
 #{ list
 #Server: share.sph.umich.edu
@@ -14,6 +21,7 @@
 #Password: m3nd3l!
 #Directory: data/ESP6900/May02
 #}
+#!! Example of outpout
 #{ out
 ESP6900.chr10.May02.release.vcf.gz      ESP6900.chr20.May02.release.vcf.gz.tbi
 ESP6900.chr10.May02.release.vcf.gz.tbi  ESP6900.chr21.May02.release.vcf.gz
@@ -39,26 +47,19 @@ ESP6900.chr1.May02.release.vcf.gz       ESP6900.chr9.May02.release.vcf.gz.tbi
 ESP6900.chr1.May02.release.vcf.gz.tbi   ESP6900.chrX.May02.release.vcf.gz
 ESP6900.chr20.May02.release.vcf.gz      ESP6900.chrX.May02.release.vcf.gz.tbi
 #}
-#All ESP6900 vtools project are in:
-#/nfs/projects/ESP69h/
-#All ESP6900 vtools project and dependent-files (phenotype.txt etc) are in
-#/nfs/projects/ESP69h/cache
-#All ESP6900 vtools project bash files are in
-#/nfs/projects/ESP69h/cache
-#} ----
-###
-# Import data & create annotations
-###
 
-#! Import (by Gao) 
-# these are done on the i7 server
+#!! Example of bash commands
+# Import data & create annotations
 cd /home/SSD; mkdir esp69h
 ln -s /home/HD2/esp69h_textfiles cache
 vtools init esp69h
+
 #{ ------------------------
 # we could import all chroms but is better to import one by one with an interval between imports
 vtools import --format cache/esp.fmt /home/HD1/ESP6900/May02/ESP6900*.vcf.gz --build hg19 -j7
 #} ------------------------
+
+#! Syntax highlights in language blocks
 #{ bash
 vtools init esp69h
 chrs='X 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22'
@@ -70,103 +71,6 @@ do
 done
 vtools admin --merge_samples
 #}
-
-#! Create annotation file (by Mengyuan)
-#(please document steps that generated the annotation file ann and data file esp69h_variants.txt)
-#!! step 1: create *.ann file
-# blablabla
-#!! step 2: create esp68hvariants file
-# blablabla
-#!! step 3: build/use annotation database
-# blablabla
-vtools use cache/esp.ann --file /home/HD1/ESP6900/esp68hvariants -j8
-
-#{ -------
-#{out
-INFO: Importing database esp from source files ['/nfs/data/ESP6900/May02/ESP6900.chr22.May02.release.vcf.gz']
-INFO: Importing annotation data from /nfs/data/ESP6900/May02/ESP6900.chr22.May02.release.vcf.gz
-ESP6900.chr22.May02.release.vcf.gz: 100% [=====================================================================================>] 38,516 414.4/s in 00:01:32
-INFO: 46659 records are handled, 0 ignored.
-INFO: Using annotation DB esp in project chr_22.
-INFO: ESP5500 VCF file
-#}
-#} -----------
-
-#esp.ann fields
-#{out
-variant.variant_id
-variant.bin
-variant.chr
-variant.pos
-variant.ref
-variant.alt
-esp.chr                      Chromosome
-esp.pos                      1-based position
-esp.dbsnp_id                 variant id (rs number or other IDs)
-esp.ref                      Reference allele, '-' for insertion.
-esp.alt                      Alternative allele, '-' for deletion.
-esp.qual                     phred-scaled quality score for the assertion made
-                             in ALT. High QUAL scores indicate high
-                             confidence calls.
-esp.filter                   PASS if this position has passed all filters, i.e. a
-                             call is made at this position. Otherwise,
-                             if the site has not passed all filters, a
-                             semicolon-separated list of codes for
-                             filters that fail.
-esp.DP                       Total Depth at Site
-esp.MQ                       Root Mean Squared Mapping Quality
-esp.NS                       Number of Samples With Coverage
-esp.AN                       Number of Alleles in Samples with Coverage
-esp.AC                       Alternate Allele Counts in Samples with Coverage
-esp.AF                       Alternate Allele Frequencies
-esp.AB                       Allele Balance in Heterozygotes
-esp.LBS_A1                   Number of low-quality (q<13) of *A* base, strand 1
-esp.LBS_A2                   Number of low-quality (q<13) of *A* base, strand 2
-esp.LBS_C1                   Number of low-quality (q<13) of *C* base, strand 1
-esp.LBS_C2                   Number of low-quality (q<13) of *C* base, strand 2
-esp.LBS_G1                   Number of low-quality (q<13) of *G* base, strand 1
-esp.LBS_G2                   Number of low-quality (q<13) of *G* base, strand 2
-esp.LBS_T1                   Number of low-quality (q<13) of *T* base, strand 1
-esp.LBS_T2                   Number of low-quality (q<13) of *T* base, strand 2
-esp.OBS_A1                   Number of low-quality (q>13) of *A* base, strand 1
-esp.OBS_A2                   Number of low-quality (q>13) of *A* base, strand 2
-esp.OBS_C1                   Number of low-quality (q>13) of *C* base, strand 1
-esp.OBS_C2                   Number of low-quality (q>13) of *C* base, strand 2
-esp.OBS_G1                   Number of low-quality (q>13) of *G* base, strand 1
-esp.OBS_G2                   Number of low-quality (q>13) of *G* base, strand 2
-esp.OBS_T1                   Number of low-quality (q>13) of *T* base, strand 1
-esp.OBS_T2                   Number of low-quality (q>13) of *T* base, strand 2
-esp.STR                      Strand Bias Pearson's Correlation
-esp.STZ                      Strand Bias z-score
-esp.CBR                      Cycle Bias Peason's correlation
-esp.CBZ                      Cycle Bias z-score
-esp.QBR                      Base quality bias Pearson's correlation
-esp.QBZ                      Base quality bias z-score
-esp.MBR                      Mapping quality bias Pearson's coreelation
-esp.MSR                      Mapping quality - strand bias Pearson's
-                             coreelation
-esp.MBZ                      Mapping quality bias z-score
-esp.IOR                      Ratio of base-quality inflation
-esp.IOZ                      Base quality inflation z-score
-esp.IOH                      Ratio of base-quality inflation at HETs
-esp.IOD                      Ratio of base-quality inflation difference
-                             between HETs and others
-esp.AOI                      Alternate allele inflation score
-esp.AOZ                      Alternate allele quality z-score
-esp.ABE                      Exact allele balance score from base quality
-esp.ABZ                      Exact allele balance z-score from base and
-                             quality
-esp.BCS                      Bayesian SNP call score
-esp.FIC                      Inbreeding coefficient
-esp.LQR                      Fraction of low quality (q<13) bases
-esp.MQ0                      Fraction of bases with mapQ=0
-esp.MQ10                     Fraction of bases with mapQ<=10
-esp.MQ20                     Fraction of bases with mapQ<=20
-esp.MQ30                     Fraction of bases with mapQ<=30
-esp.ANNO                     Functional annotation from ANNOVAR software
-esp.SVM                      SVM-based variant quality score
-#}
-#! Other languages
 #{ r
 argsv <- commandArgs(trailingOnly = TRUE)
 dat <- read.table(pipe('cat /dev/stdin'), header=TRUE, sep = "\t")
@@ -187,3 +91,9 @@ void main()
   cout << "Hello World!" << endl; 
 }
 #}
+
+#!Figures
+#Support pdf, png and jpg. This is bcm logo
+#* bcm.png 
+# and smaller ...
+#* bcm.png 0.5

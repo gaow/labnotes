@@ -7,6 +7,10 @@ def recodeKw(line):
             ('{', '\{'),('}', '\}'),('%', '\%'), ('_', '\_'),('&', '\&'),('<', '$<$'),
             ('>', '$>$'),('~', '$\sim$'), ('^', '\^{}'), ('#', '\#')]:
         line = line.replace(item[0], item[1])
+    line = re.sub(r'"""(.*?)"""', r'\\textbf{\\textit{\1}}', line)
+    line = re.sub(r'""(.*?)""', r'\\textbf{\1}', line)
+    line = re.sub(r'"(.*?)"', r'\\textit{\1}', line)
+    line = re.sub(r'@@(.*?)@@', r'\\texttt{\1}', line)
     return line
 
 def wraptxt(line, sep, by):
