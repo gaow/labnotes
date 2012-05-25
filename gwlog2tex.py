@@ -55,7 +55,7 @@ class LogToTex:
             except IOError as e:
                 sys.exit(e)
         self.blocks = {}
-        self.syntax = ['latex', 'python', 'bash', 'r', 'c', 'cpp']
+        self.syntax = ['latex', 'python', 'bash', 'r', 'c', 'cpp', 'sql']
         for item in self.syntax + ['err', 'out', 'list']:
             self.blocks[item] = []
 #        for idx, item in enumerate(self.text):

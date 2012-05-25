@@ -91,7 +91,24 @@ void main()
   cout << "Hello World!" << endl; 
 }
 #}
+#{ sql
+SELECT
+  kEntity, sTranType, sItemType,
+  COUNT(*) AS SaleLineCount,
+  SUM(mAmount) AS sum_mAmount
 
+FROM aTranLine
+
+WHERE
+  sTranType IN
+    ('CashSale','CustInvc','CustChrg','CustCred')
+ AND
+   bDocMain = False
+ AND
+   sEntity2Type = 'CustJob'
+
+GROUP BY kEntity, sTranType, sItemType
+#}
 #!Figures
 #Support pdf, png and jpg. This is bcm logo
 #* bcm.png 
