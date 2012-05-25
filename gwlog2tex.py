@@ -51,7 +51,7 @@ class LogToTex:
         self.text = []
         for fn in filename:
             try:
-                lines = list(line for line in (l.rstrip() for l in open(fn).readlines()) if line)
+                lines = [l.rstrip() for l in open(fn).readlines() if l.rstrip()]
                 if fn.split('.')[-1].lower() in ['r','sh','python']:
                     if lines[0].startswith('#!/') and fn.split('.')[-1].lower() in lines[0].lower():
                         del lines[0]
