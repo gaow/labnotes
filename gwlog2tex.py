@@ -194,7 +194,7 @@ class LogToTex:
                 sys.exit("You have so many urgly '#' symbols in a regular line. Please clear them up in this line: '{0}'".format(self.text[idx]))
             if self.text[idx].startswith('#!!!'):
                 # box
-                self.text[idx] = '\\shabox{' + self.text[idx][4:] + '}'
+                self.text[idx] = '\\shabox{' + recodeKw(self.text[idx][4:]) + '}'
                 idx += 1
                 continue
             if self.text[idx].startswith('#!!'):
