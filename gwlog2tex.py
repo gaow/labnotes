@@ -43,23 +43,35 @@ def wraptxt(line, sep, by):
             sline += item
     return sline
 
+SYNTAX = {'r':'r',
+          'sh':'bash',
+          'py':'python',
+          'tex':'latex',
+          'c':'c',
+          'cpp':'cpp',
+          'h':'c',
+          'sqlite':'sql'
+          }
+
 class LogToTex:
     def __init__(self, title, author, notoc, filename):
         self.title = ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in recodeKw(title).split()])
         self.author = recodeKw(author)
         self.notoc = notoc
         self.text = []
+        self.ftype = []
         for fn in filename:
             try:
                 lines = [l.rstrip() for l in open(fn).readlines() if l.rstrip()]
-                if fn.split('.')[-1].lower() in ['r','sh','python']:
+                if fn.split('.')[-1].lower() in ['r','sh','py']:
+                    self.ftype.append(fn.split('.')[-1].lower())
                     if lines[0].startswith('#!/') and fn.split('.')[-1].lower() in lines[0].lower():
                         del lines[0]
                 self.text.extend(lines)
             except IOError as e:
                 sys.exit(e)
         self.blocks = {}
-        self.syntax = ['latex', 'python', 'bash', 'r', 'c', 'cpp', 'sql']
+        self.syntax = list(set(SYNTAX.values()))
         for item in self.syntax + ['err', 'out', 'list']:
             self.blocks[item] = []
 #        for idx, item in enumerate(self.text):
@@ -169,19 +181,34 @@ class LogToTex:
                 idx += 1
                 continue
             if not self.text[idx].startswith('#'):
-                # regular cmd
+                # regular cmd text, or with syntax
                 if idx + 1 < len(self.text):
-                    for i in range(idx + 1, len(self.text)):
-                        if self.text[i].startswith('#') or i in skip or self.text[i] == '':
-                            break
+                    for i in range(idx + 1, len(self.text) + 1):
+                        try:
+                            if self.text[i].startswith('#') or i in skip or self.text[i] == '':
+                                break
+                        except IndexError:
+                            pass
                 else:
                     i = idx + 1
-                cmd = '\n'.join([wraptxt(x, '\\', 114) for x in self.text[idx:i]])
+                lan = list(set(self.ftype))
+                sep = '\\'
+                cnt = 114
+                sminted = '\\mint[bgcolor=bg, fontsize=\\footnotesize]{text}!'
+                lminted = '\\begin{minted}[bgcolor=bg, fontsize=\\footnotesize]{text}\n'
+                #
+                if len(lan) == 1 and lan[0] in ['r','sh','py']:
+                    sep = '' if not lan[0] == 'sh' else '\\'
+                    cnt = 131
+                    sminted = '\\mint[fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=0.5pt, framesep=2mm]{%s}!' % (SYNTAX[lan[0]])
+                    lminted =  '\\begin{minted}[samepage=false, fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=0.5pt, framesep=2mm]{%s}\n' % (SYNTAX[lan[0]])
+                #
+                cmd = '\n'.join([wraptxt(x, sep, cnt) for x in self.text[idx:i]])
                 cmd = cmd.split('\n')
                 if len(cmd) == 1:
-                    self.text[idx] = '\\mint[bgcolor=bg, fontsize=\\footnotesize]{text}!' + cmd[0] + '!'
+                    self.text[idx] = sminted + cmd[0] + '!'
                 else:
-                    self.text[idx] = '\\begin{minted}[bgcolor=bg, fontsize=\\footnotesize]{text}\n' + '\n'.join(cmd) + '\n\\end{minted}'
+                    self.text[idx] = lminted + '\n'.join(cmd) + '\n\\end{minted}'
                     for j in range(idx + 1, i):
                         self.text[j] = ''
                 idx = i
