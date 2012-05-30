@@ -60,16 +60,19 @@ class LogToTex:
         self.notoc = notoc
         self.text = []
         self.ftype = []
+        self.mark = '#'
         for fn in filename:
             try:
+                self.ftype.append(fn.split('.')[-1].lower())
                 lines = [l.rstrip() for l in open(fn).readlines() if l.rstrip()]
                 if fn.split('.')[-1].lower() in ['r','sh','py']:
-                    self.ftype.append(fn.split('.')[-1].lower())
                     if lines[0].startswith('#!/') and fn.split('.')[-1].lower() in lines[0].lower():
                         del lines[0]
                 self.text.extend(lines)
             except IOError as e:
                 sys.exit(e)
+        if sum([x.lower() in ['c','cpp','h'] for x in list(set(self.ftype))]) == len(set(self.ftype)):
+            self.mark = '//'
         self.blocks = {}
         self.syntax = list(set(SYNTAX.values()))
         for item in self.syntax + ['err', 'out', 'list']:
@@ -93,29 +96,29 @@ class LogToTex:
         while True:
             if idx >= len(self.text):
                 break
-            if self.text[idx].startswith('#}') and '--' not in self.text[idx]:
-                sys.exit("ERROR: invalid use of '%s' without previous #{, near %s" % (self.text[idx], self.text[idx+1] if idx + 1 < len(self.text) else "end of document"))
-            if self.text[idx].startswith('#{') and '--' not in self.text[idx]:
+            if self.text[idx].startswith(self.mark + '}') and '--' not in self.text[idx]:
+                sys.exit("ERROR: invalid use of '%s' without previous %s{, near %s" % (self.text[idx], self.mark, self.text[idx+1] if idx + 1 < len(self.text) else "end of document"))
+            if self.text[idx].startswith(self.mark + '{') and '--' not in self.text[idx]:
                 # define block
                 bname = self.text[idx].split('{')[1].strip()
                 if bname not in self.syntax + ['out', 'list']:
-                    sys.exit("ERROR: invalid block definition '#{ %s'" % (bname))
+                    sys.exit("ERROR: invalid block definition '%s{ %s'" % (self.mark, bname))
                 endidx = None
                 self.text[idx] = ''
                 # find end of block
                 for i in range(idx+1, len(self.text)):
                     # do not allow nested blocks
-                    if self.text[i].startswith('#{'):
+                    if self.text[i].startswith(self.mark + '{'):
                         sys.exit("ERROR: nested use of blocks is disallowed: '{0}', near {1}".format(self.text[i], self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
                     # find end of block
-                    if self.text[i].startswith('#}'):
-                        if self.text[i].rstrip() == '#}':
+                    if self.text[i].startswith(self.mark + '}'):
+                        if self.text[i].rstrip() == self.mark + '}':
                             endidx = i
                             break
                         else:
                             sys.exit("ERROR: invalid %s '%s', near %s" % ('nested use of' if '--' in self.text[i] else 'symbol', self.text[i], self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
                 if not endidx:
-                    sys.exit("ERROR: '#{ %s' and '#}' must appear in pairs, near %s" % (bname, self.text[idx+1] if idx + 1 < len(self.text) else "end of document"))
+                    sys.exit("ERROR: '%s{ %s' and '%s}' must appear in pairs, near %s" % (self.mark, bname, self.mark, self.text[idx+1] if idx + 1 < len(self.text) else "end of document"))
                 # combine block values
                 for i in range(idx + 1, endidx):
                     self.text[idx] += self.text[i] + ('\n' if not i + 1 == endidx else '')
@@ -127,12 +130,12 @@ class LogToTex:
         #
         for idx, item in enumerate(self.text):
             # define err block
-            if self.text[idx].startswith('#}') and '--' in self.text[idx]:
-                sys.exit("ERROR: invalid use of '#}----' without previous '#{----', near %s" % (self.text[idx+1] if idx + 1 < len(self.text) else "end of document") )
-            if item.startswith('#{') and '--' in item:
+            if self.text[idx].startswith(self.mark + '}') and '--' in self.text[idx]:
+                sys.exit("ERROR: invalid use of '%s}----' without previous '%s{----', near %s" % (self.mark, self.mark, self.text[idx+1] if idx + 1 < len(self.text) else "end of document") )
+            if item.startswith(self.mark + '{') and '--' in item:
                 endidx = None
                 for i in range(idx+1, len(self.text)):
-                    if self.text[i].startswith('#}') and '--' in self.text[i]:
+                    if self.text[i].startswith(self.mark + '}') and '--' in self.text[i]:
                         endidx = i
                         break
                 if not endidx:
@@ -161,9 +164,9 @@ class LogToTex:
         if len(self.blocks['list']) == 0:
             return
         for i in self.blocks['list']:
-            if not self.text[i].startswith('#'):
-                sys.exit('ERROR: items must start with # in list block. Problematic text is: \n {0}'.format(self.text[i]))
-            self.text[i] = '\\begin{itemize}%s\n\\end{itemize}' % recodeKw(re.sub(r'^#|\n#', '\\item ', self.text[i])).replace('$\\backslash$item', '\n\\item')
+            if not self.text[i].startswith(self.mark):
+                sys.exit('ERROR: items must start with "{0}" in list block. Problematic text is: \n {1}'.format(self.mark, self.text[i]))
+            self.text[i] = '\\begin{itemize}%s\n\\end{itemize}' % recodeKw(re.sub(r'^{0}|\n{0}'.format(self.mark), '\\item ', self.text[i])).replace('$\\backslash$item', '\n\\item')
         return
 
     def m_parseText(self):
@@ -180,12 +183,12 @@ class LogToTex:
                 # no need to process
                 idx += 1
                 continue
-            if not self.text[idx].startswith('#'):
+            if not self.text[idx].startswith(self.mark):
                 # regular cmd text, or with syntax
                 if idx + 1 < len(self.text):
                     for i in range(idx + 1, len(self.text) + 1):
                         try:
-                            if self.text[i].startswith('#') or i in skip or self.text[i] == '':
+                            if self.text[i].startswith(self.mark) or i in skip or self.text[i] == '':
                                 break
                         except IndexError:
                             pass
@@ -197,7 +200,8 @@ class LogToTex:
                 sminted = '\\mint[bgcolor=bg, fontsize=\\footnotesize]{text}!'
                 lminted = '\\begin{minted}[bgcolor=bg, fontsize=\\footnotesize]{text}\n'
                 #
-                if len(lan) == 1 and lan[0] in ['r','sh','py']:
+                if (len(lan) == 1 and lan[0] in ['r','sh','py']) or self.mark == '//':
+                    if lan[0] == 'h': lan[0] = 'cpp'
                     sep = '' if not lan[0] == 'sh' else '\\'
                     cnt = 131
                     sminted = '\\mint[fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=0.5pt, framesep=2mm]{%s}!' % (SYNTAX[lan[0]])
@@ -213,37 +217,37 @@ class LogToTex:
                         self.text[j] = ''
                 idx = i
                 continue
-            if self.text[idx].startswith('###') and self.text[idx+1].startswith('#') and (not self.text[idx+1].startswith('##')) and self.text[idx+2].startswith('###'):
+            if self.text[idx].startswith(self.mark * 3) and self.text[idx+1].startswith(self.mark) and (not self.text[idx+1].startswith(self.mark * 2)) and self.text[idx+2].startswith(self.mark * 3):
                 # section
                 self.text[idx] = ''
-                self.text[idx + 1] = '\\section{' + ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in recodeKw(self.text[idx + 1][1:]).split()]) + '}'
+                self.text[idx + 1] = '\\section{' + ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in recodeKw(self.text[idx + 1][len(self.mark):]).split()]) + '}'
                 self.text[idx + 2] = ''
                 idx += 3
                 continue
-            if self.text[idx].startswith('##'):
+            if self.text[idx].startswith(self.mark * 2):
                 # too many #'s
-                sys.exit("You have so many urgly '#' symbols in a regular line. Please clear them up in this line: '{0}'".format(self.text[idx]))
-            if self.text[idx].startswith('#!!!'):
+                sys.exit("You have so many urgly '{0}' symbols in a regular line. Please clear them up in this line: '{1}'".format(self.mark, self.text[idx]))
+            if self.text[idx].startswith(self.mark + '!!!'):
                 # box
-                self.text[idx] = '\\shabox{' + recodeKw(self.text[idx][4:]) + '}'
+                self.text[idx] = '\\shabox{' + recodeKw(self.text[idx][len(self.mark)+3:]) + '}'
                 idx += 1
                 continue
-            if self.text[idx].startswith('#!!'):
+            if self.text[idx].startswith(self.mark + '!!'):
                 # subsection, subsubsection ...
-                self.text[idx] = '\\subsubsection*{' + recodeKw(self.text[idx][3:]) + '}'
+                self.text[idx] = '\\subsubsection*{' + recodeKw(self.text[idx][len(self.mark)+2:]) + '}'
                 idx += 1
                 continue
-            if self.text[idx].startswith('#!'):
+            if self.text[idx].startswith(self.mark + '!'):
                 # subsection, subsubsection ...
-                self.text[idx] = '\\subsection{' + recodeKw(self.text[idx][2:]) + '}'
+                self.text[idx] = '\\subsection{' + recodeKw(self.text[idx][len(self.mark)+1:]) + '}'
                 idx += 1
                 continue
-            if self.text[idx].startswith('#*'):
+            if self.text[idx].startswith(self.mark + '*'):
                 # fig: figure.pdf 0.9
                 try:
-                    fig, width = self.text[idx][2:].split()
+                    fig, width = self.text[idx][len(self.mark)+1:].split()
                 except ValueError:
-                    fig = self.text[idx][2:].split()[0]
+                    fig = self.text[idx][len(self.mark)+1:].split()[0]
                     width = 0.9
                 if fig.split('.')[1] not in ['jpg','pdf','png']:
                     sys.exit("ERROR: Input file format '%s' not supported. Valid extensions are 'pdf', 'png' and 'jpg'" % fig.split('.')[1])
@@ -252,9 +256,9 @@ class LogToTex:
                 self.text[idx] = '\\begin{center}\\includegraphics[width=%s\\textwidth]{%s}\\end{center}' % (width, fig)
                 idx += 1
                 continue
-            if self.text[idx].startswith('#'):
+            if self.text[idx].startswith(self.mark):
                 # a plain line here
-                self.text[idx] = '\n' + recodeKw(self.text[idx][1:]) + '\n'
+                self.text[idx] = '\n' + recodeKw(self.text[idx][len(self.mark):]) + '\n'
                 idx += 1
                 continue
         return
