@@ -68,6 +68,9 @@ class LogToTex:
                 if fn.split('.')[-1].lower() in ['r','sh','py']:
                     if lines[0].startswith('#!/') and fn.split('.')[-1].lower() in lines[0].lower():
                         del lines[0]
+                        lines.insert(0,'###')
+                        lines.insert(0,'#' + fn.upper())
+                        lines.insert(0,'###')
                 self.text.extend(lines)
             except IOError as e:
                 sys.exit(e)
