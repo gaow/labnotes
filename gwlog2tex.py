@@ -183,6 +183,8 @@ class LogToTex:
                 # no need to process
                 idx += 1
                 continue
+            if list(set(self.ftype)) == ['txt'] and not self.text[idx].startswith(self.mark):
+                self.text[idx] = self.mark + self.text[idx]
             if not self.text[idx].startswith(self.mark):
                 # regular cmd text, or with syntax
                 if idx + 1 < len(self.text):
