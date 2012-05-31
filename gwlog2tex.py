@@ -61,21 +61,21 @@ class LogToTex:
         self.text = []
         self.ftype = []
         self.mark = '#'
+        if sum([x.split('.')[-1].lower() in ['c','cpp','h'] for x in filename]) == len(filename):
+            self.mark = '//'
         for fn in filename:
             try:
                 self.ftype.append(fn.split('.')[-1].lower())
                 lines = [l.rstrip() for l in open(fn).readlines() if l.rstrip()]
-                if fn.split('.')[-1].lower() in ['r','sh','py']:
+                if fn.split('.')[-1].lower() in ['r','sh','py','c','cpp','h']:
                     if lines[0].startswith('#!/') and fn.split('.')[-1].lower() in lines[0].lower():
                         del lines[0]
-                        lines.insert(0,'###')
-                        lines.insert(0,'#' + fn.upper())
-                        lines.insert(0,'###')
+                    lines.insert(0,self.mark*3)
+                    lines.insert(0,self.mark + fn.upper())
+                    lines.insert(0,self.mark*3)
                 self.text.extend(lines)
             except IOError as e:
                 sys.exit(e)
-        if sum([x.lower() in ['c','cpp','h'] for x in list(set(self.ftype))]) == len(set(self.ftype)):
-            self.mark = '//'
         self.blocks = {}
         self.syntax = list(set(SYNTAX.values()))
         for item in self.syntax + ['err', 'out', 'list']:
