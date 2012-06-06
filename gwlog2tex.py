@@ -255,7 +255,7 @@ class LogToTex:
                     fig = self.text[idx][len(self.mark)+1:].split()[0]
                     width = 0.9
                 if not '.' in fig:
-                    sys.exit("ERROR: Cannot determine graphic file type. Valid extensions are 'pdf', 'png' and 'jpg'")
+                    sys.exit("ERROR: Cannot determine graphic file format for '%s'. Valid extensions are 'pdf', 'png' and 'jpg'" % fig)
                 if fig.split('.')[1] not in ['jpg','pdf','png']:
                     sys.exit("ERROR: Input file format '%s' not supported. Valid extensions are 'pdf', 'png' and 'jpg'" % fig.split('.')[1])
                 if not os.path.exists(fig):
