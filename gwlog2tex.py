@@ -142,7 +142,7 @@ class LogToTex:
                         endidx = i
                         break
                 if not endidx:
-                    sys.exit('ERROR: comment blocks must appear in pairs, near {0}'.format(self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
+                    sys.exit('ERROR: comment blocks must appear in pairs, near {0}'.format(self.text[i+1] if i + 1 < len(self.text) else "end of document"))
                 self.blocks['err'].append([idx, endidx])
                 self.text[idx] = ''
                 self.text[endidx] = ''
