@@ -138,11 +138,13 @@ class LogToTex:
             if item.startswith(self.mark + '{') and '--' in item:
                 endidx = None
                 for i in range(idx+1, len(self.text)):
+                    if self.text[i].startswith(self.mark + '{') and '--' in self.text[i]:
+                        sys.exit("ERROR: nested use of blocks is disallowed: '{0}', near {1}".format(self.text[i], self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
                     if self.text[i].startswith(self.mark + '}') and '--' in self.text[i]:
                         endidx = i
                         break
                 if not endidx:
-                    sys.exit('ERROR: comment blocks must appear in pairs, near {0}'.format(self.text[i+1] if i + 1 < len(self.text) else "end of document"))
+                    sys.exit('ERROR: comment blocks must appear in pairs, near {0}'.format(self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
                 self.blocks['err'].append([idx, endidx])
                 self.text[idx] = ''
                 self.text[endidx] = ''
