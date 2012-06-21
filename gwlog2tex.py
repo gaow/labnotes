@@ -12,6 +12,7 @@ def recodeKw(line):
     line = re.sub(r'""(.*?)""', r'\\textbf{\1}', line)
     line = re.sub(r'"(.*?)"', r'\\textit{\1}', line)
     line = re.sub(r'@@(.*?)@@', r'\\texttt{\1}', line)
+    line = re.sub(r'@(.*?)@', r'\\url{\1}', line)
     return line
 
 def wraptxt(line, sep, by):
