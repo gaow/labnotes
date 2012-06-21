@@ -11,7 +11,7 @@
 # A section of toys
 ###
 #! Examples 1
-# This is a regular sentence with supported emphasis signs: ``double quote'', `single quote',  "italics", ""bold"", """bold italics""", @@monospaced@@
+# This is a regular sentence with supported emphasis signs: ``double quote'', `single quote',  "italics", ""bold"", """bold italics""", @@monospaced@@, @www.google.com@
 #! Examples 2
 #!! Example of list
 #We recieved the following files from Michigan
