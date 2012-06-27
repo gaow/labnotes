@@ -46,10 +46,10 @@ def pdflatex(fname, text):
 	tc = Popen(["pdflatex", "-shell-escape", "-halt-on-error", "-file-line-error", fname + '.tex'],
 		stdin = PIPE, stdout = PIPE, stderr = PIPE)
 	out, error = tc.communicate()
-	if (tc.returncode) or (not os.path.exists(fname + '.pd')):
+	if (tc.returncode) or (not os.path.exists(fname + '.pdf')):
 		sys.exit('ERROR: pdflatex is not happy. Compilation aborted.\nPlease manually execute the following commands to see what is going on:\n\t$ cd {0}\n\t$ pdflatex -shell-escape -halt-on-error -file-line-error {1}\n'.format(tmp_dir, fname + '.tex'))
 	os.system("pdflatex -shell-escape -halt-on-error -file-line-error {0} > /dev/null".format(fname + '.tex'))
-	os.system('cp {0} {1}'.format(fname + '.pdf', dest_dir))
+	os.system('mv {0} {1}'.format(fname + '.pdf', dest_dir))
 	sys.stderr.write('Done!\n')
 	return
 
