@@ -69,6 +69,7 @@ class LogToTex:
                 self.ftype.append(fn.split('.')[-1].lower())
                 lines = [l.rstrip() for l in open(fn).readlines() if l.rstrip()]
                 if fn.split('.')[-1].lower() in ['r','sh','py','c','cpp','h']:
+                    sys.stderr.write("WARNING: Treating input as {0} source code. Please use a different filename extension if this is not your intension.".format(SYNTAX[fn.split('.')[-1].lower()]))
                     if lines[0].startswith('#!/') and fn.split('.')[-1].lower() in lines[0].lower():
                         del lines[0]
                     lines.insert(0,self.mark*3)
@@ -163,7 +164,7 @@ class LogToTex:
         if len(self.blocks['out']) == 0:
             return
         for i in self.blocks['out']:
-           self.text[i] = '\\begin{Verbatim}[samepage=false, fontfamily=tt,\nfontsize=\\footnotesize, formatcom=\\color{rblue},\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{\\scriptsize OUTPUT}, labelposition=topline]\n%s\n\\end{Verbatim}' % wraptxt(self.text[i], '', 116)
+            self.text[i] = '\\begin{Verbatim}[samepage=false, fontfamily=tt,\nfontsize=\\footnotesize, formatcom=\\color{rblue},\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{\\scriptsize OUTPUT}, labelposition=topline]\n%s\n\\end{Verbatim}' % wraptxt(self.text[i], '', 116)
         return
 
     def m_blockizeList(self):

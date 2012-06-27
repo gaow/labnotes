@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-import argparse, sys, os
-from subprocess import call
+import argparse, sys, os, re
+from subprocess import PIPE, Popen
+import tempfile
 from gwlog2tex import LogToTex
 from minted import minted
 def getCompilerArguments(parser):
@@ -22,44 +23,47 @@ def getCompilerArguments(parser):
                         action='store_true',
                         default = '',
                         help='''Do not generate table of contents''')
-	parser.add_argument('-r', '--rmcache',
-                        action='store_true',
-                        default = '',
-                        help='''Remove cache files''')
 
-def pdflatex(fname, text, rmcache):
-    with open(fname + '.tex', 'w') as f:
-        f.writelines(text)
-    m = minted()
-    m.put()
-    call(["pdflatex", "-shell-escape", "-halt-on-error", "-file-line-error", fname + '.tex'])
-    #if (tc.returncode):
-    #    sys.exit("ERROR: pdflatex returned non-zero exit code. Please manually compile {0}.tex to troubleshoot".format(fname))
-    call(["pdflatex", "-shell-escape", "-halt-on-error", "-file-line-error", fname + '.tex'])
-    if rmcache:
-        call(['rm', '-rf', '.minted_cache'])
-        call(['rm', '-rf', '.' + fname + '.tex'])
-    else:
-        call(['cp', fname + '.tex', '.' + fname + '.tex'])
-    for ext in ['aux', 'log', 'out', 'toc', 'tex']:
-        try:
-            call(['rm', '-f', fname + '.' + ext])
-        except:
-            pass
-    m.delete()
-    return
+def pdflatex(fname, text):
+	tmp_dir = None
+	pattern = re.compile(r'gw_log_cache*(.*)')
+	for fn in os.listdir(tempfile.gettempdir()):
+		if pattern.match(fn):
+			tmp_dir = os.path.join(tempfile.gettempdir(), fn)
+			break
+	if not tmp_dir:
+		tmp_dir = tempfile.mkdtemp(prefix='gw_log_cache_')
+	dest_dir = os.getcwd()
+	os.chdir(tmp_dir)
+	# write tex file
+	with open(fname + '.tex', 'w') as f:
+		f.writelines(text)
+	# write sty file
+	m = minted(tmp_dir)
+	m.put()
+	sys.stderr.write('Building document "{0}" ...\n'.format(fname + '.pdf'))
+	# too bad we cannot pipe tex to pdflatex with the output behavior under ctrl ... have to write the disk
+	tc = Popen(["pdflatex", "-shell-escape", "-halt-on-error", "-file-line-error", fname + '.tex'],
+		stdin = PIPE, stdout = PIPE, stderr = PIPE)
+	out, error = tc.communicate()
+	if (tc.returncode) or (not os.path.exists(fname + '.pdf')):
+		sys.exit("ERROR: pdflatex error message below. \n\n".format(out.decode(sys.getdefaultencoding())))
+	os.system("pdflatex -shell-escape -halt-on-error -file-line-error {0} > /dev/null".format(fname + '.tex'))
+	os.system('cp {0} {1}'.format(fname + '.pdf', dest_dir))
+	sys.stderr.write('Done!\n')
+	return
 
 def lite(args):
-    fname = '-'.join([os.path.splitext(name)[0] for name in args.filename]) + '.' + 'lite'
-    tex = LogToTex(args.title, args.author, args.notoc, args.filename)
-    pdflatex(fname, tex.get(1), args.rmcache)
-    return
+	fname = '-'.join([os.path.splitext(name)[0] for name in args.filename]) + '.' + 'lite'
+	tex = LogToTex(args.title, args.author, args.notoc, args.filename)
+	pdflatex(fname, tex.get(1))
+	return
 
 def full(args):
-    fname = '-'.join([os.path.splitext(name)[0] for name in args.filename]) + '.' + 'full'
-    tex = LogToTex(args.title, args.author, args.notoc, args.filename)
-    pdflatex(fname, tex.get(0), args.rmcache)
-    return
+	fname = '-'.join([os.path.splitext(name)[0] for name in args.filename]) + '.' + 'full'
+	tex = LogToTex(args.title, args.author, args.notoc, args.filename)
+	pdflatex(fname, tex.get(0))
+	return
 
 if __name__ == '__main__':
 	master_parser = argparse.ArgumentParser(
