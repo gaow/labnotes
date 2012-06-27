@@ -264,7 +264,7 @@ class LogToTex:
                     sys.exit("ERROR: Input file format '%s' not supported. Valid extensions are 'pdf', 'png' and 'jpg'" % fig.split('.')[1])
                 if not os.path.exists(fig):
                     sys.exit("ERROR: Cannot find file %s" % fig)
-                self.text[idx] = '\\begin{center}\\includegraphics[width=%s\\textwidth]{%s}\\end{center}' % (width, fig)
+                self.text[idx] = '\\begin{center}\\includegraphics[width=%s\\textwidth]{%s}\\end{center}' % (width, os.path.abspath(fig))
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark):
