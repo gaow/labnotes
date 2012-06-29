@@ -59,6 +59,7 @@ class LogToTex:
         self.title = ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in recodeKw(title).split()])
         self.author = recodeKw(author)
         self.notoc = notoc
+        self.doctype = 'article'
         self.text = []
         self.ftype = []
         self.mark = '#'
@@ -226,6 +227,14 @@ class LogToTex:
                         self.text[j] = ''
                 idx = i
                 continue
+            if self.text[idx].startswith(self.mark * 3) and self.text[idx+1].startswith(self.mark + '!') and self.text[idx+2].startswith(self.mark * 3):
+                # chapter
+                self.doctype = 'report'
+                self.text[idx] = ''
+                self.text[idx + 1] = '\\chapter{' + ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in recodeKw(self.text[idx + 1][len(self.mark)+1:]).split()]) + '}'
+                self.text[idx + 2] = ''
+                idx += 3
+                continue
             if self.text[idx].startswith(self.mark * 3) and self.text[idx+1].startswith(self.mark) and (not self.text[idx+1].startswith(self.mark * 2)) and self.text[idx+2].startswith(self.mark * 3):
                 # section
                 self.text[idx] = ''
@@ -282,7 +291,7 @@ class LogToTex:
                         self.text[idx] = ''
                         break
         self.text = filter(None, self.text)
-        return '''\\documentclass[oneside, 10pt]{article}
+        return '''\\documentclass[oneside, 10pt]{%s}
 \\usepackage{geometry}
 \\usepackage{fullpage}
 \\usepackage{amsmath}
@@ -299,6 +308,7 @@ class LogToTex:
 \\usepackage{minted}
 \\usepackage{upquote}
 \\usepackage{titlesec}
+%s
 \\renewcommand\\rmdefault{bch}
 \\newcommand{\\ie}{\\textit{i.e.}}
 \\newcommand\\me{\\mathrm{e}}
@@ -320,4 +330,4 @@ class LogToTex:
 \\raggedbottom
 \\begin{document}
 %s\n%s\n\\bigskip\n%s
-\\end{document}''' % (self.title, self.author, '\\maketitle' if self.title else '', '' if self.notoc else '\\tableofcontents', '\n'.join(self.text))
+\\end{document}''' % (self.doctype, '\\usepackage[Lenny]{fncychap}' if self.doctype == 'report' else '', self.title, self.author, '\\maketitle' if self.title else '', '' if self.notoc else '\\tableofcontents', '\n'.join(self.text))

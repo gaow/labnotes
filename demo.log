@@ -1,3 +1,7 @@
+###
+#! a short demo below
+###
+
 #!!! Mon May 7 21:36:19 CDT 2012
 
 #{ ----
@@ -114,3 +118,11 @@ GROUP BY kEntity, sTranType, sItemType
 #* bcm.png 
 # and smaller ...
 #* bcm.png 0.5
+
+###
+# another section
+###
+
+###
+#! Another demo
+###

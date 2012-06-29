@@ -23,8 +23,8 @@ gw_log full demo.log --author "John Doe" --title "Example log documentation"
 
 Syntax
 ------
-###				#{ ----------	#{ out	#{ list, #{ xxx (where xxx can be one of : latex, bash, r, cpp, python, sql)
-#			
-###, #*, #!, #!!, #!!!, #, 	#} ----------,  #}    , #}     , #}
+###  ###				#{ ----------	#{ out	#{ list, #{ xxx (where xxx can be one of : latex, bash, r, cpp, python, sql)
+#!   #			
+###, ###, #*, #!, #!!, #!!!, #, 	#} ----------,  #}    , #}     , #}
 
 Emphasis: ``double quote'', `single quote',  "italics", ""bold"", """bold italics""", @@monospaced@@, @url@
