@@ -77,6 +77,11 @@ class LogToTex:
         self.m_parseBib()
 
     def m_recode(self, line):
+        # the use of ? is very important
+        #>>> re.sub(r'@@(.*)@@', r'\\texttt{\1}', line)
+        #'\\texttt{aa@@, @@aabb}'
+        #>>> re.sub(r'@@(.*?)@@', r'\\texttt{\1}', line)
+        #'\\texttt{aa}, \\texttt{aabb}'
         if not line:
             return ''
         line = line.strip()
@@ -84,19 +89,19 @@ class LogToTex:
                 ('{', '\{'),('}', '\}'),('%', '\%'), ('_', '\_'),('&', '\&'),('<', '$<$'),
                 ('>', '$>$'),('~', '$\sim$'), ('^', '\^{}'), ('#', '\#')]:
             line = line.replace(item[0], item[1])
-        line = re.sub(r'"""(.*)"""', r'\\textbf{\\textit{\1}}', line)
-        line = re.sub(r'""(.*)""', r'\\textbf{\1}', line)
-        line = re.sub(r'"(.*)"', r'\\textit{\1}', line)
-        line = re.sub(r'@@(.*)@@', r'\\texttt{\1}', line)
-        line = re.sub(r'@(.*)@', r'\\url{\1}', line)
+        line = re.sub(r'"""(.*?)"""', r'\\textbf{\\textit{\1}}', line)
+        line = re.sub(r'""(.*?)""', r'\\textbf{\1}', line)
+        line = re.sub(r'"(.*?)"', r'\\textit{\1}', line)
+        line = re.sub(r'@@(.*?)@@', r'\\texttt{\1}', line)
+        line = re.sub(r'@(.*?)@', r'\\url{\1}', line)
         # citation
-        pattern = re.compile("\[(?P<a>.+)\|(?P<b>.+)\]")
+        pattern = re.compile('\[(?P<a>.+?)\|(?P<b>.+?)\]')
         m = re.search(pattern, line)
         if m:
             if m.group('a') in self.bib.keys():
                 sys.exit("Duplicated citation keyword {}.".format(self.bib[m.group('a')]))
             self.bib[m.group('a')] = m.group('b')
-        line = re.sub(r'\[(.+)\|(.+)\]', r'\\cite{\1}', line)
+        line = re.sub(r'\[(.+?)\|(.+?)\]', r'\\cite{\1}', line)
         return line
 
     def m_parseBlocks(self):
