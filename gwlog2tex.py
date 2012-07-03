@@ -1,20 +1,5 @@
 import sys, re, os
 
-def recodeKw(line):
-    if not line:
-        return ''
-    line = line.strip()
-    for item in [('\\', '!!\\backslash!!'),('$', '\$'),('!!\\backslash!!', '$\\backslash$'),
-            ('{', '\{'),('}', '\}'),('%', '\%'), ('_', '\_'),('&', '\&'),('<', '$<$'),
-            ('>', '$>$'),('~', '$\sim$'), ('^', '\^{}'), ('#', '\#')]:
-        line = line.replace(item[0], item[1])
-    line = re.sub(r'"""(.*?)"""', r'\\textbf{\\textit{\1}}', line)
-    line = re.sub(r'""(.*?)""', r'\\textbf{\1}', line)
-    line = re.sub(r'"(.*?)"', r'\\textit{\1}', line)
-    line = re.sub(r'@@(.*?)@@', r'\\texttt{\1}', line)
-    line = re.sub(r'@(.*?)@', r'\\url{\1}', line)
-    return line
-
 def wraptxt(line, sep, by):
     # will also remove blank lines, if any
     sline = ''
@@ -56,15 +41,16 @@ SYNTAX = {'r':'r',
 
 class LogToTex:
     def __init__(self, title, author, notoc, filename):
-        self.title = ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in recodeKw(title).split()])
-        self.author = recodeKw(author)
+        self.title = ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(title).split()])
+        self.author = self.m_recode(author)
         self.notoc = notoc
         self.doctype = 'article'
-        self.text = []
-        self.ftype = []
         self.mark = '#'
         if sum([x.split('.')[-1].lower() in ['c','cpp','h'] for x in filename]) == len(filename):
             self.mark = '//'
+        self.text = []
+        self.bib = {}
+        self.ftype = []
         for fn in filename:
             try:
                 self.ftype.append(fn.split('.')[-1].lower())
@@ -83,19 +69,35 @@ class LogToTex:
         self.syntax = list(set(SYNTAX.values()))
         for item in self.syntax + ['err', 'out', 'list']:
             self.blocks[item] = []
-#        for idx, item in enumerate(self.text):
-#            print idx, item
         self.m_parseBlocks()
-#        print(self.blocks)
-#        for idx, item in enumerate(self.text):
-#            print idx, item
-#        print(self.text)
         self.m_blockizeIn()
         self.m_blockizeOut()
         self.m_blockizeList()
         self.m_parseText()
-        #print('\n'.join(self.text))
-        #sys.exit(0)
+        self.m_parseBib()
+
+    def m_recode(self, line):
+        if not line:
+            return ''
+        line = line.strip()
+        for item in [('\\', '!!\\backslash!!'),('$', '\$'),('!!\\backslash!!', '$\\backslash$'),
+                ('{', '\{'),('}', '\}'),('%', '\%'), ('_', '\_'),('&', '\&'),('<', '$<$'),
+                ('>', '$>$'),('~', '$\sim$'), ('^', '\^{}'), ('#', '\#')]:
+            line = line.replace(item[0], item[1])
+        line = re.sub(r'"""(.*)"""', r'\\textbf{\\textit{\1}}', line)
+        line = re.sub(r'""(.*)""', r'\\textbf{\1}', line)
+        line = re.sub(r'"(.*)"', r'\\textit{\1}', line)
+        line = re.sub(r'@@(.*)@@', r'\\texttt{\1}', line)
+        line = re.sub(r'@(.*)@', r'\\url{\1}', line)
+        # citation
+        pattern = re.compile("\[(?P<a>.+)\|(?P<b>.+)\]")
+        m = re.search(pattern, line)
+        if m:
+            if m.group('a') in self.bib.keys():
+                sys.exit("Duplicated citation keyword {}.".format(self.bib[m.group('a')]))
+            self.bib[m.group('a')] = m.group('b')
+        line = re.sub(r'\[(.+)\|(.+)\]', r'\\cite{\1}', line)
+        return line
 
     def m_parseBlocks(self):
         idx = 0
@@ -174,7 +176,7 @@ class LogToTex:
         for i in self.blocks['list']:
             if not self.text[i].startswith(self.mark):
                 sys.exit('ERROR: items must start with "{0}" in list block. Problematic text is: \n {1}'.format(self.mark, self.text[i]))
-            self.text[i] = '\\begin{itemize}%s\n\\end{itemize}' % recodeKw(re.sub(r'^{0}|\n{0}'.format(self.mark), '\\item ', self.text[i])).replace('$\\backslash$item', '\n\\item')
+            self.text[i] = '\\begin{itemize}%s\n\\end{itemize}' % self.m_recode(re.sub(r'^{0}|\n{0}'.format(self.mark), '\\item ', self.text[i])).replace('$\\backslash$item', '\n\\item')
         return
 
     def m_parseText(self):
@@ -231,14 +233,14 @@ class LogToTex:
                 # chapter
                 self.doctype = 'report'
                 self.text[idx] = ''
-                self.text[idx + 1] = '\\chapter{' + ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in recodeKw(self.text[idx + 1][len(self.mark)+1:]).split()]) + '}'
+                self.text[idx + 1] = '\\chapter{' + ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(self.text[idx + 1][len(self.mark)+1:]).split()]) + '}'
                 self.text[idx + 2] = ''
                 idx += 3
                 continue
             if self.text[idx].startswith(self.mark * 3) and self.text[idx+1].startswith(self.mark) and (not self.text[idx+1].startswith(self.mark * 2)) and self.text[idx+2].startswith(self.mark * 3):
                 # section
                 self.text[idx] = ''
-                self.text[idx + 1] = '\\section{' + ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in recodeKw(self.text[idx + 1][len(self.mark):]).split()]) + '}'
+                self.text[idx + 1] = '\\section{' + ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(self.text[idx + 1][len(self.mark):]).split()]) + '}'
                 self.text[idx + 2] = ''
                 idx += 3
                 continue
@@ -247,17 +249,17 @@ class LogToTex:
                 sys.exit("You have so many urgly '{0}' symbols in a regular line. Please clear them up in this line: '{1}'".format(self.mark, self.text[idx]))
             if self.text[idx].startswith(self.mark + '!!!'):
                 # box
-                self.text[idx] = '\\shabox{' + recodeKw(self.text[idx][len(self.mark)+3:]) + '}'
+                self.text[idx] = '\\shabox{' + self.m_recode(self.text[idx][len(self.mark)+3:]) + '}'
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark + '!!'):
                 # subsection, subsubsection ...
-                self.text[idx] = '\\subsubsection*{' + recodeKw(self.text[idx][len(self.mark)+2:]) + '}'
+                self.text[idx] = '\\subsubsection*{' + self.m_recode(self.text[idx][len(self.mark)+2:]) + '}'
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark + '!'):
                 # subsection, subsubsection ...
-                self.text[idx] = '\\subsection{' + recodeKw(self.text[idx][len(self.mark)+1:]) + '}'
+                self.text[idx] = '\\subsection{' + self.m_recode(self.text[idx][len(self.mark)+1:]) + '}'
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark + '*'):
@@ -278,10 +280,19 @@ class LogToTex:
                 continue
             if self.text[idx].startswith(self.mark):
                 # a plain line here
-                self.text[idx] = '\n' + recodeKw(self.text[idx][len(self.mark):]) + '\n'
+                self.text[idx] = '\n' + self.m_recode(self.text[idx][len(self.mark):]) + '\n'
                 idx += 1
                 continue
         return
+
+    def m_parseBib(self):
+        if not self.bib:
+            return
+        bib = '\\begin{thebibliography}{9}\n'
+        for k in self.bib.keys():
+            bib += '\\bibitem[%s]{%s}\n%s\n' % (k, k, self.bib[k])
+        bib += '\\end{thebibliography}'
+        self.text.append(bib)
 
     def get(self, code):
         if code and len(self.blocks['err']) > 0:

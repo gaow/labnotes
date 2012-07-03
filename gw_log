@@ -23,6 +23,10 @@ def getCompilerArguments(parser):
                         action='store_true',
                         default = '',
                         help='''Do not generate table of contents''')
+	parser.add_argument('-o', '--output',
+			metavar='name',
+                        type=str,
+                        help='''name of pdf file''')
 
 def pdflatex(fname, text):
 	tmp_dir = None
@@ -56,13 +60,23 @@ def pdflatex(fname, text):
 	return
 
 def lite(args):
-	fname = '-'.join([os.path.splitext(name)[0] for name in args.filename]) + '.' + 'lite'
+	if not args.output:
+		fname = '-'.join([os.path.splitext(name)[0] for name in args.filename]) + '.' + 'lite'
+	else:
+		fname = args.output
+	if fname.endswith('.pdf'):
+		fname = fname.replace('.pdf', '')
 	tex = LogToTex(args.title, args.author, args.notoc, args.filename)
 	pdflatex(fname, tex.get(1))
 	return
 
 def full(args):
-	fname = '-'.join([os.path.splitext(name)[0] for name in args.filename]) + '.' + 'full'
+	if not args.output:
+		fname = '-'.join([os.path.splitext(name)[0] for name in args.filename]) + '.' + 'full'
+	else:
+		fname = args.output
+	if fname.endswith('.pdf'):
+		fname = fname.replace('.pdf', '')
 	tex = LogToTex(args.title, args.author, args.notoc, args.filename)
 	pdflatex(fname, tex.get(0))
 	return
