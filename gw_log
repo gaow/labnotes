@@ -8,9 +8,7 @@ def getCompilerArguments(parser):
 	parser.add_argument('filename',
                         metavar = 'FN',
                         nargs = '+',
-                        help='''Name of the input log file(s).
-                        This will create a new file [FN.pdf] under the current directory
-                        (or [FN1-FN2-...-FNX.pdf] if there are multiple files).''')
+                        help='''Name of the input log file(s)''')
 	parser.add_argument('-a', '--author',
                         action='store',
                         default = '',
@@ -26,7 +24,7 @@ def getCompilerArguments(parser):
 	parser.add_argument('-o', '--output',
 			metavar='name',
                         type=str,
-                        help='''name of pdf file''')
+                        help='''Name of output pdf file''')
 
 def pdflatex(fname, text):
 	tmp_dir = None

@@ -27,4 +27,4 @@ Syntax
 #!   #			
 ###, ###, #*, #!, #!!, #!!!, #, 	#} ----------,  #}    , #}     , #}
 
-Emphasis: ``double quote'', `single quote',  "italics", ""bold"", """bold italics""", @@monospaced@@, @url@
+Emphasis: ``double quote'', `single quote',  "italics", ""bold"", """bold italics""", @@monospaced@@, @url@, [text|note]

@@ -172,7 +172,7 @@ class LogToTex:
         if len(self.blocks['out']) == 0:
             return
         for i in self.blocks['out']:
-            self.text[i] = '\\begin{Verbatim}[samepage=false, fontfamily=tt,\nfontsize=\\footnotesize, formatcom=\\color{MidnightBlue},\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{\\scriptsize OUTPUT}, labelposition=topline]\n%s\n\\end{Verbatim}' % wraptxt(self.text[i], '', 116)
+            self.text[i] = '\\begin{Verbatim}[samepage=false, fontfamily=tt,\nfontsize=\\footnotesize, formatcom=\\color{rblue},\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{\\scriptsize OUTPUT}, labelposition=topline]\n%s\n\\end{Verbatim}' % wraptxt(self.text[i], '', 116)
         return
 
     def m_blockizeList(self):
@@ -333,17 +333,23 @@ class LogToTex:
 \\setlength{\\parskip}{8pt plus 1pt minus 1pt}
 \\parindent 0ex
 \\geometry{left=0.8in,right=0.8in,top=0.8in,bottom=0.8in}
+\\renewcommand\\%s{References}
+\\makeatletter
+\\renewcommand\\@biblabel[1]{#1.}
+\\renewcommand\\@cite[1]{#1}
+\\makeatother
 \\definecolor{bg}{rgb}{0.95,0.95,0.95}
 \\definecolor{rblue}{rgb}{0,.14,.41}
+\\definecolor{rgray}{RGB}{94,96,98}
 \\definecolor{linkcolour}{rgb}{0,0.2,0.6}
 \\titleformat{\\subsubsection}
-{\\color{rblue}\\normalfont\\large\\bfseries}
-{\\color{rblue}\\thesection}{1em}{}
-\\hypersetup{colorlinks, breaklinks, urlcolor=linkcolour, linkcolor=linkcolour, citecolor=magenta}
+{\\color{rgray}\\normalfont\\large\\bfseries}
+{\\color{rgray}\\thesection}{1em}{}
+\\hypersetup{colorlinks, breaklinks, urlcolor=linkcolour, linkcolor=linkcolour, citecolor=MidnightBlue}
 \\title{%s}
 \\author{%s}
 \\date{Last updated: \\today}
 \\raggedbottom
 \\begin{document}
 %s\n%s\n\\bigskip\n%s
-\\end{document}''' % (self.doctype, '\\usepackage[Lenny]{fncychap}' if self.doctype == 'report' else '', self.title, self.author, '\\maketitle' if self.title else '', '' if self.notoc else '\\tableofcontents', '\n'.join(self.text))
+\\end{document}''' % (self.doctype, '\\usepackage[Lenny]{fncychap}' if self.doctype == 'report' else '', 'bibname' if self.doctype == 'report' else 'refname', self.title, self.author, '\\maketitle' if self.title else '', '' if self.notoc else '\\tableofcontents', '\n'.join(self.text))
