@@ -53,7 +53,7 @@ def pdflatex(fname, text):
 	sys.stderr.write('Still working ...\n')
 	os.system("pdflatex -shell-escape -halt-on-error -file-line-error {0} > /dev/null".format(fname + '.tex'))
 	os.system('mv {0} {1}'.format(fname + '.pdf', dest_dir))
-	os.system('rm *.out *.toc *.aux')
+	os.system('rm -f *.out *.toc *.aux')
 	sys.stderr.write('Done!\n')
 	return
 

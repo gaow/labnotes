@@ -334,8 +334,8 @@ class LogToTex:
 \\geometry{left=0.8in,right=0.8in,top=0.8in,bottom=0.8in}
 \\renewcommand\\%s{References}
 \\makeatletter
-\\renewcommand\\@biblabel[1]{#1.}
-\\renewcommand\\@cite[1]{\\underline{#1}}
+\\renewcommand\\@biblabel[1]{\\emph{#1:}}
+\\renewcommand\\@cite[1]{\\emph{#1}}
 \\makeatother
 \\definecolor{bg}{rgb}{0.95,0.95,0.95}
 \\definecolor{rblue}{rgb}{0,.14,.41}
