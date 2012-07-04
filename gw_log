@@ -8,23 +8,23 @@ def getCompilerArguments(parser):
 	parser.add_argument('filename',
                         metavar = 'FN',
                         nargs = '+',
-                        help='''Name of the input log file(s)''')
+                        help='''name of the input log file(s)''')
 	parser.add_argument('-a', '--author',
                         action='store',
                         default = '',
-                        help='''Author's name of the document''')
+                        help='''author's name of the document''')
 	parser.add_argument('-t', '--title',
                         action='store',
                         default = '',
-                        help='''Title of document''')
+                        help='''title of document''')
 	parser.add_argument('-c', '--notoc',
                         action='store_true',
                         default = '',
-                        help='''Do not generate table of contents''')
+                        help='''do not generate table of contents''')
 	parser.add_argument('-o', '--output',
 			metavar='name',
                         type=str,
-                        help='''Name of output pdf file''')
+                        help='''name of output pdf file''')
 
 def pdflatex(fname, text):
 	tmp_dir = None
