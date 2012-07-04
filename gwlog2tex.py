@@ -96,10 +96,9 @@ class LogToTex:
         line = re.sub(r'@(.*?)@', r'\\url{\1}', line)
         # citation
         pattern = re.compile('\[(?P<a>.+?)\|(?P<b>.+?)\]')
-        m = re.search(pattern, line)
-        if m:
+        for m in re.finditer(pattern, line):
             if m.group('a') in self.bib.keys():
-                sys.exit("Duplicated citation keyword {}.".format(self.bib[m.group('a')]))
+                sys.exit("Duplicated citation keyword {}.".format(m.group('a')))
             self.bib[m.group('a')] = m.group('b')
         line = re.sub(r'\[(.+?)\|(.+?)\]', r'\\cite{\1}', line)
         return line
@@ -294,7 +293,7 @@ class LogToTex:
         if not self.bib:
             return
         bib = '\\begin{thebibliography}{9}\n'
-        for k in self.bib.keys():
+        for k in sorted(self.bib.keys()):
             bib += '\\bibitem[%s]{%s}\n%s\n' % (k, k, self.bib[k])
         bib += '\\end{thebibliography}'
         self.text.append(bib)
