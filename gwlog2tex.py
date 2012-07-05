@@ -50,6 +50,7 @@ class LogToTex:
             self.mark = '//'
         self.text = []
         self.bib = {}
+        self.bibkeys = []
         self.ftype = []
         for fn in filename:
             try:
@@ -100,10 +101,11 @@ class LogToTex:
             k = re.sub('\W', '', m.group('a'))
             if not k:
                 sys.exit("Invalid citation keyword for reference item '{}'.".format(m.group('b')))
-            if k in self.bib.keys():
+            if k in self.bibkeys:
                 if self.bib[k] != m.group('b'):
-                    k += str(len(self.bib.keys()))
+                    k += str(len(self.bibkeys))
             self.bib[k] = m.group('b')
+            self.bibkeys.append(k)
             #line = line.replace(m.group(0), '\\cite[%s]{%s}' % (m.group('a'), k))
             line = line.replace(m.group(0), '{\\color{MidnightBlue}%s}~\\cite{%s}' % (m.group('a'), k))
         #line = re.sub(r'\[(.+?)\|(.+?)\]', r'\\cite{\1}', line)
@@ -299,7 +301,7 @@ class LogToTex:
         if not self.bib:
             return
         bib = '\\begin{thebibliography}{9}\n'
-        for k in sorted(self.bib.keys()):
+        for k in self.bibkeys:
             bib += '\\bibitem{%s}\n%s\n' % (k, self.bib[k])
         bib += '\\end{thebibliography}'
         self.text.append(bib)
