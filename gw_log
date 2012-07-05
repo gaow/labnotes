@@ -39,7 +39,7 @@ def pdflatex(fname, text, vanilla=False):
 			break
 	if tmp_dir and vanilla:
 		os.system('rm -rf {0}'.format(tmp_dir))
-		sys.stderr.write('INFO: cache folder {0} is removed'.format(tmp_dir))
+		sys.stderr.write('INFO: cache folder {0} is removed\n'.format(tmp_dir))
 		tmp_dir = tempfile.mkdtemp(prefix='gw_log_cache_')
 	if not tmp_dir:
 		tmp_dir = tempfile.mkdtemp(prefix='gw_log_cache_')
