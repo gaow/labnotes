@@ -25,14 +25,22 @@ def getCompilerArguments(parser):
 			metavar='name',
                         type=str,
                         help='''name of output pdf file''')
+	parser.add_argument('-v', '--vanilla',
+                        action='store_true',
+                        default = '',
+                        help='''remove problematic cache files and start the program afresh''')
 
-def pdflatex(fname, text):
+def pdflatex(fname, text, vanilla=False):
 	tmp_dir = None
 	pattern = re.compile(r'gw_log_cache_*(.*)')
 	for fn in os.listdir(tempfile.gettempdir()):
 		if pattern.match(fn):
 			tmp_dir = os.path.join(tempfile.gettempdir(), fn)
 			break
+	if tmp_dir and vanilla:
+		os.system('rm -rf {0}'.format(tmp_dir))
+		sys.stderr.write('INFO: cache folder {0} is removed'.format(tmp_dir))
+		tmp_dir = tempfile.mkdtemp(prefix='gw_log_cache_')
 	if not tmp_dir:
 		tmp_dir = tempfile.mkdtemp(prefix='gw_log_cache_')
 	dest_dir = os.getcwd()
@@ -44,16 +52,22 @@ def pdflatex(fname, text):
 	m = minted(tmp_dir)
 	m.put()
 	sys.stderr.write('Building document "{0}" ...\n'.format(fname + '.pdf'))
-	# too bad we cannot pipe tex to pdflatex with the output behavior under ctrl ... have to write the disk
-	tc = Popen(["pdflatex", "-shell-escape", "-halt-on-error", "-file-line-error", fname + '.tex'],
-		stdin = PIPE, stdout = PIPE, stderr = PIPE)
-	out, error = tc.communicate()
-	if (tc.returncode) or (not os.path.exists(fname + '.pdf')):
-		sys.exit('ERROR: pdflatex is not happy. Compilation aborted.\nPlease manually execute the following commands to see what is going on:\n\t$ cd {0}\n\t$ pdflatex -shell-escape -halt-on-error -file-line-error {1}\n'.format(tmp_dir, fname + '.tex'))
-	sys.stderr.write('Still working ...\n')
-	os.system("pdflatex -shell-escape -halt-on-error -file-line-error {0} > /dev/null".format(fname + '.tex'))
-	os.system('mv {0} {1}'.format(fname + '.pdf', dest_dir))
-	os.system('rm -f *.out *.toc *.aux')
+	for iter in [1,2]:
+		# too bad we cannot pipe tex to pdflatex with the output behavior under ctrl ... have to write the disk
+		tc = Popen(["pdflatex", "-shell-escape", "-halt-on-error", "-file-line-error", fname + '.tex'],
+			stdin = PIPE, stdout = PIPE, stderr = PIPE)
+		out, error = tc.communicate()
+		if (tc.returncode) or error.decode(sys.getdefaultencoding()) or (not os.path.exists(fname + '.pdf')):
+			sys.stderr.write('ERROR: pdflatex is not happy. Compilation aborted. This incidence is most likely due to an internal bug.\n')
+			#sys.stderr.write('DEBUG:\n\t$ cd {0}\n\t$ pdflatex -shell-escape -halt-on-error -file-line-error {1}\n'.format(tmp_dir, fname + '.tex'))
+			os.system('mv -f {0} {1}'.format(fname + '.log', os.path.join(dest_dir, '{0}-ERROR.txt'.format(fname))))
+			sys.exit('Please find file "{0}-ERROR.txt" and report it to Gao Wang.\n'.format(fname))
+		if iter == 1:
+			sys.stderr.write('Still working ...\n')
+			os.system('rm -f *.pdf')
+		else:
+			os.system('mv -f {0} {1}'.format(fname + '.pdf', dest_dir))
+			os.system('rm -f *.out *.toc *.aux *.log')
 	sys.stderr.write('Done!\n')
 	return
 
@@ -65,7 +79,7 @@ def lite(args):
 	if fname.endswith('.pdf'):
 		fname = fname.replace('.pdf', '')
 	tex = LogToTex(args.title, args.author, args.notoc, args.filename)
-	pdflatex(fname, tex.get(1))
+	pdflatex(fname, tex.get(1), vanilla=args.vanilla)
 	return
 
 def full(args):
@@ -76,7 +90,7 @@ def full(args):
 	if fname.endswith('.pdf'):
 		fname = fname.replace('.pdf', '')
 	tex = LogToTex(args.title, args.author, args.notoc, args.filename)
-	pdflatex(fname, tex.get(0))
+	pdflatex(fname, tex.get(0), vanilla=args.vanilla)
 	return
 
 if __name__ == '__main__':
