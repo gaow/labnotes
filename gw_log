@@ -60,7 +60,8 @@ def pdflatex(fname, text, vanilla=False):
 		if (tc.returncode) or error.decode(sys.getdefaultencoding()) or (not os.path.exists(fname + '.pdf')):
 			sys.stderr.write('ERROR: pdflatex is not happy. Compilation aborted. This incidence is most likely due to an internal bug.\n')
 			#sys.stderr.write('DEBUG:\n\t$ cd {0}\n\t$ pdflatex -shell-escape -halt-on-error -file-line-error {1}\n'.format(tmp_dir, fname + '.tex'))
-			os.system('mv -f {0} {1}'.format(fname + '.log', os.path.join(dest_dir, '{0}-ERROR.txt'.format(fname))))
+			with open(os.path.join(dest_dir, '{0}-ERROR.txt'.format(fname)), 'w') as f:
+				f.writelines(out.decode(sys.getdefaultencoding()) + error.decode(sys.getdefaultencoding()))
 			sys.exit('Please find file "{0}-ERROR.txt" and report it to Gao Wang.\n'.format(fname))
 		if iter == 1:
 			sys.stderr.write('Still working ...\n')
