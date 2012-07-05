@@ -97,10 +97,16 @@ class LogToTex:
         # citation
         pattern = re.compile('\[(?P<a>.+?)\|(?P<b>.+?)\]')
         for m in re.finditer(pattern, line):
-            if m.group('a') in self.bib.keys():
-                sys.exit("Duplicated citation keyword {}.".format(m.group('a')))
-            self.bib[m.group('a')] = m.group('b')
-        line = re.sub(r'\[(.+?)\|(.+?)\]', r'\\cite{\1}', line)
+            k = re.sub('\W', '', m.group('a'))
+            if not k:
+                sys.exit("Invalid citation keyword for reference item '{}'.".format(m.group('b')))
+            if k in self.bib.keys():
+                if self.bib[k] != m.group('b'):
+                    k += str(len(self.bib.keys()))
+            self.bib[k] = m.group('b')
+            #line = line.replace(m.group(0), '\\cite[%s]{%s}' % (m.group('a'), k))
+            line = line.replace(m.group(0), '{\\color{MidnightBlue}%s}~\\cite{%s}' % (m.group('a'), k))
+        #line = re.sub(r'\[(.+?)\|(.+?)\]', r'\\cite{\1}', line)
         return line
 
     def m_parseBlocks(self):
@@ -294,7 +300,7 @@ class LogToTex:
             return
         bib = '\\begin{thebibliography}{9}\n'
         for k in sorted(self.bib.keys()):
-            bib += '\\bibitem[%s]{%s}\n%s\n' % (k, k, self.bib[k])
+            bib += '\\bibitem{%s}\n%s\n' % (k, self.bib[k])
         bib += '\\end{thebibliography}'
         self.text.append(bib)
 
@@ -334,17 +340,17 @@ class LogToTex:
 \\geometry{left=0.8in,right=0.8in,top=0.8in,bottom=0.8in}
 \\renewcommand\\%s{References}
 \\makeatletter
-\\renewcommand\\@biblabel[1]{\\emph{#1:}}
-\\renewcommand\\@cite[1]{\\emph{#1}}
+\\renewcommand\\@biblabel[1]{#1.}
+\\renewcommand\\@cite[1]{\\textsuperscript{#1}}
 \\makeatother
 \\definecolor{bg}{rgb}{0.95,0.95,0.95}
 \\definecolor{rblue}{rgb}{0,.14,.41}
 \\definecolor{rgray}{RGB}{94,96,98}
-\\definecolor{linkcolour}{rgb}{0,0.2,0.6}
+\\definecolor{wwwcolor}{rgb}{0,0.2,0.6}
 \\titleformat{\\subsubsection}
 {\\color{rblue}\\normalfont\\large\\bfseries}
 {\\color{rblue}\\thesection}{1em}{}
-\\hypersetup{colorlinks, breaklinks, urlcolor=linkcolour, linkcolor=linkcolour, citecolor=MidnightBlue}
+\\hypersetup{colorlinks, breaklinks, urlcolor=wwwcolor, linkcolor=wwwcolor, citecolor=MidnightBlue}
 \\title{%s}
 \\author{%s}
 \\date{Last updated: \\today}
