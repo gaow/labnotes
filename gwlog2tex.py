@@ -105,9 +105,9 @@ class LogToTex:
             if not k:
                 sys.exit("Invalid citation keyword for reference item '{}'.".format(m.group('b')))
             if k in self.bibkeys:
-                if self.bib[k] != m.group('b'):
+                if self.bib[k] != [m.group('a'), m.group('b')]:
                     k += str(len(self.bibkeys))
-            self.bib[k] = m.group('b')
+            self.bib[k] = [m.group('a'), m.group('b')]
             self.bibkeys.append(k)
             #line = line.replace(m.group(0), '\\cite[%s]{%s}' % (m.group('a'), k))
             line = line.replace(m.group(0), '{\\color{MidnightBlue}%s}~\\cite{%s}' % (m.group('a'), k))
@@ -305,7 +305,7 @@ class LogToTex:
             return
         bib = '\\begin{thebibliography}{9}\n'
         for k in self.bibkeys:
-            bib += '\\bibitem{%s}\n%s\n' % (k, self.bib[k])
+            bib += '\\bibitem{%s}\n[%s]\\\\%s\n' % (k, self.bib[k][0], self.bib[k][1])
         bib += '\\end{thebibliography}'
         self.text.append(bib)
 
