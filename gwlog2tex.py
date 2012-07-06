@@ -68,12 +68,11 @@ class LogToTex:
                 sys.exit(e)
         self.blocks = {}
         self.syntax = list(set(SYNTAX.values()))
-        for item in self.syntax + ['err', 'out', 'list']:
+        self.bclogo = {'warning':'\\bcattention', 'tip':'\\bclampe', 'important':'\\bctakecare', 'note':'\\bccrayon'}
+        for item in self.syntax + self.bclogo.keys() + ['err', 'out', 'list']:
             self.blocks[item] = []
         self.m_parseBlocks()
-        self.m_blockizeIn()
-        self.m_blockizeOut()
-        self.m_blockizeList()
+        self.m_blockizeAll()
         self.m_parseText()
         self.m_parseBib()
 
@@ -124,7 +123,7 @@ class LogToTex:
             if self.text[idx].startswith(self.mark + '{') and '--' not in self.text[idx]:
                 # define block
                 bname = self.text[idx].split('{')[1].strip()
-                if bname not in self.syntax + ['out', 'list']:
+                if bname not in self.syntax + self.bclogo.keys() + ['out', 'list']:
                     sys.exit("ERROR: invalid block definition '%s{ %s'" % (self.mark, bname))
                 endidx = None
                 self.text[idx] = ''
@@ -146,7 +145,7 @@ class LogToTex:
                 for i in range(idx + 1, endidx):
                     self.text[idx] += self.text[i] + ('\n' if not i + 1 == endidx else '')
                 del self.text[(idx + 1) : (endidx + 1)]
-                    # keep block index
+                # keep block index
                 self.blocks[bname].append(idx)
             idx += 1
             continue
@@ -175,14 +174,14 @@ class LogToTex:
             if len(self.blocks[item]) == 0:
                 continue
             for i in self.blocks[item]:
-                self.text[i] = '\\begin{minted}[samepage=false, fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{%s}]{%s}\n%s\n\\end{minted}' % (item.upper(), item, wraptxt(self.text[i], '\\' if item == 'bash' else '', 131))
+                self.text[i] = '\\begin{minted}[samepage=false, fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{%s}]{%s}\n%s\n\\end{minted}\n' % (item.upper(), item, wraptxt(self.text[i], '\\' if item == 'bash' else '', 131))
         return
 
     def m_blockizeOut(self):
         if len(self.blocks['out']) == 0:
             return
         for i in self.blocks['out']:
-            self.text[i] = '\\begin{Verbatim}[samepage=false, fontfamily=tt,\nfontsize=\\footnotesize, formatcom=\\color{rgray},\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{\\scriptsize OUTPUT}, labelposition=topline]\n%s\n\\end{Verbatim}' % wraptxt(self.text[i], '', 116)
+            self.text[i] = '\\begin{Verbatim}[samepage=false, fontfamily=tt,\nfontsize=\\footnotesize, formatcom=\\color{rgray},\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{\\scriptsize OUTPUT}, labelposition=topline]\n%s\n\\end{Verbatim}\n' % wraptxt(self.text[i], '', 116)
         return
 
     def m_blockizeList(self):
@@ -191,8 +190,24 @@ class LogToTex:
         for i in self.blocks['list']:
             if not self.text[i].startswith(self.mark):
                 sys.exit('ERROR: items must start with "{0}" in list block. Problematic text is: \n {1}'.format(self.mark, self.text[i]))
-            self.text[i] = '\\begin{itemize}%s\n\\end{itemize}' % self.m_recode(re.sub(r'^{0}|\n{0}'.format(self.mark), '\\item ', self.text[i])).replace('$\\backslash$item', '\n\\item')
+            self.text[i] = '\\begin{itemize}%s\n\\end{itemize}\n' % self.m_recode(re.sub(r'^{0}|\n{0}'.format(self.mark), '\\item ', self.text[i])).replace('$\\backslash$item', '\n\\item')
         return
+
+    def m_blockizeBclogo(self):
+        for k in self.bclogo.keys():
+            if len(self.blocks[k]) == 0:
+                continue
+            for i in self.blocks[k]:
+                if not self.text[i].startswith(self.mark):
+                    sys.exit('ERROR: items must start with "{0}" in logo-ed blocks. Problematic text is: \n {1}'.format(self.mark, self.text[i]))
+                self.text[i] = '\\begin{bclogo}[logo=%s, couleurBarre=MidnightBlue, noborder=true, couleur=white]{~%s}%s\n\\end{bclogo}\n' % (self.bclogo[k], k.capitalize(), self.m_recode(re.sub(r'^{0}|\n{0}'.format(self.mark), '', self.text[i])))
+        return
+
+    def m_blockizeAll(self):
+        self.m_blockizeIn()
+        self.m_blockizeOut()
+        self.m_blockizeList()
+        self.m_blockizeBclogo()
 
     def m_parseText(self):
         skip = []
@@ -224,20 +239,20 @@ class LogToTex:
                 lan = list(set(self.ftype))
                 sep = '\\'
                 cnt = 114
-                sminted = '\\mint[bgcolor=bg, fontsize=\\footnotesize]{text}!'
+                sminted = '\\mint[bgcolor=bg, fontsize=\\footnotesize]{text}~'
                 lminted = '\\begin{minted}[bgcolor=bg, fontsize=\\footnotesize]{text}\n'
                 #
                 if (len(lan) == 1 and lan[0] in ['r','sh','py']) or self.mark == '//':
                     if lan[0] == 'h': lan[0] = 'cpp'
                     sep = '' if not lan[0] == 'sh' else '\\'
                     cnt = 131
-                    sminted = '\\mint[fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=0.5pt, framesep=2mm]{%s}!' % (SYNTAX[lan[0]])
+                    sminted = '\\mint[fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=0.5pt, framesep=2mm]{%s}~' % (SYNTAX[lan[0]])
                     lminted =  '\\begin{minted}[samepage=false, fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=0.5pt, framesep=2mm]{%s}\n' % (SYNTAX[lan[0]])
                 #
                 cmd = '\n'.join([wraptxt(x, sep, cnt) for x in self.text[idx:i]])
                 cmd = cmd.split('\n')
                 if len(cmd) == 1:
-                    self.text[idx] = sminted + cmd[0] + '!'
+                    self.text[idx] = sminted + cmd[0] + '~'
                 else:
                     self.text[idx] = lminted + '\n'.join(cmd) + '\n\\end{minted}'
                     for j in range(idx + 1, i):
@@ -356,6 +371,7 @@ class LogToTex:
 {\\color{rblue}\\normalfont\\large\\bfseries}
 {\\color{rblue}\\thesection}{1em}{}
 \\hypersetup{colorlinks, breaklinks, urlcolor=wwwcolor, linkcolor=wwwcolor, citecolor=MidnightBlue}
+\\usepackage[tikz]{bclogo}
 \\title{%s}
 \\author{%s}
 \\date{Last updated: \\today}

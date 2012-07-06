@@ -18,13 +18,13 @@ Example
 gw_log -h
 gw_log full -h
 gw_log lite -h
-gw_log lite demo.log --author "John Doe" --title "Example log documentation"
+gw_log lite demo.log --author "John Doe" --title "Example log documentation" -c --output demo.pdf
 gw_log full demo.log --author "John Doe" --title "Example log documentation"
 
 Syntax
 ------
-###  ###				#{ ----------	#{ out	#{ list, #{ xxx (where xxx can be one of : latex, bash, r, cpp, python, sql)
-#!   #			
-###, ###, #*, #!, #!!, #!!!, #, 	#} ----------,  #}    , #}     , #}
+###  ###				#{ ----------	#{ out	#{ xxx (xxx = list, warning, important, tip, note)  #{ xxx (xxx = latex, bash, r, cpp, python, sql)
+#!   #								#
+###, ###, #*, #!, #!!, #!!!, #, 	#} ----------,  #}    , #}     						  , #}
 
-Emphasis: ``double quote'', `single quote',  "italics", ""bold"", """bold italics""", @@monospaced@@, @url@, [text|note]
+Emphasis: ``double quote'', `single quote',  "italics", ""bold"", """bold italics""", @@monospaced@@, @url@, [keyword|footnote]
