@@ -87,14 +87,17 @@ class LogToTex:
             return ''
         line = line.strip()
         for item in [('\\', '!!\\backslash!!'),('$', '\$'),('!!\\backslash!!', '$\\backslash$'),
-                ('{', '\{'),('}', '\}'),('%', '\%'), ('_', '\_'),('&', '\&'),('<', '$<$'),
+                ('{', '\{'),('}', '\}'),('%', '\%'), ('_', '\-\_'),('&', '\&'),('<', '$<$'),
                 ('>', '$>$'),('~', '$\sim$'), ('^', '\^{}'), ('#', '\#')]:
             line = line.replace(item[0], item[1])
         line = re.sub(r'"""(.*?)"""', r'\\textbf{\\textit{\1}}', line)
         line = re.sub(r'""(.*?)""', r'\\textbf{\1}', line)
         line = re.sub(r'"(.*?)"', r'\\textit{\1}', line)
         line = re.sub(r'@@(.*?)@@', r'\\texttt{\1}', line)
-        line = re.sub(r'@(.*?)@', r'\\url{\1}', line)
+        # url
+        pattern = re.compile('@(.*?)@')
+        for m in re.finditer(pattern, line):
+            line = line.replace(m.group(0), '\\url{%s}' % m.group(1).replace('\-\_', '\_'))
         # citation
         pattern = re.compile('\[(?P<a>.+?)\|(?P<b>.+?)\]')
         for m in re.finditer(pattern, line):
