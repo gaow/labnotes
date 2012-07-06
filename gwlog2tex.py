@@ -239,20 +239,20 @@ class LogToTex:
                 lan = list(set(self.ftype))
                 sep = '\\'
                 cnt = 114
-                sminted = '\\mint[bgcolor=bg, fontsize=\\footnotesize]{text}~'
+                sminted = '\\mint[bgcolor=bg, fontsize=\\footnotesize]{text}?'
                 lminted = '\\begin{minted}[bgcolor=bg, fontsize=\\footnotesize]{text}\n'
                 #
                 if (len(lan) == 1 and lan[0] in ['r','sh','py']) or self.mark == '//':
                     if lan[0] == 'h': lan[0] = 'cpp'
                     sep = '' if not lan[0] == 'sh' else '\\'
                     cnt = 131
-                    sminted = '\\mint[fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=0.5pt, framesep=2mm]{%s}~' % (SYNTAX[lan[0]])
+                    sminted = '\\mint[fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=0.5pt, framesep=2mm]{%s}?' % (SYNTAX[lan[0]])
                     lminted =  '\\begin{minted}[samepage=false, fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=0.5pt, framesep=2mm]{%s}\n' % (SYNTAX[lan[0]])
                 #
                 cmd = '\n'.join([wraptxt(x, sep, cnt) for x in self.text[idx:i]])
                 cmd = cmd.split('\n')
                 if len(cmd) == 1:
-                    self.text[idx] = sminted + cmd[0] + '~'
+                    self.text[idx] = sminted + cmd[0] + '?'
                 else:
                     self.text[idx] = lminted + '\n'.join(cmd) + '\n\\end{minted}'
                     for j in range(idx + 1, i):
