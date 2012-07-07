@@ -40,7 +40,7 @@ SYNTAX = {'r':'r',
           }
 
 class LogToTex:
-    def __init__(self, title, author, notoc, filename):
+    def __init__(self, title, author, notoc, footnote, filename):
         self.title = ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(title).split()])
         self.author = self.m_recode(author)
         self.notoc = notoc
@@ -50,7 +50,7 @@ class LogToTex:
             self.mark = '//'
         self.text = []
         self.bib = {}
-        self.bibkeys = []
+        self.footnote = footnote
         self.ftype = []
         for fn in filename:
             try:
@@ -96,21 +96,23 @@ class LogToTex:
         # url
         pattern = re.compile('@(.*?)@')
         for m in re.finditer(pattern, line):
-            line = line.replace(m.group(0), '\\url{%s}' % m.group(1).replace('\-\_', '\_'))
+            line = line.replace(m.group(0), '\\url{%s}' % m.group(1).replace('\-\_', '\_').replace('$\sim$', '~'))
         # citation
         pattern = re.compile('\[(?P<a>.+?)\|(?P<b>.+?)\]')
+        # re.compile('\[(.+?)\|(.+?)\]')
         for m in re.finditer(pattern, line):
-            k = re.sub('\W', '', m.group('a'))
-            if not k:
-                sys.exit("Invalid citation keyword for reference item '{}'.".format(m.group('b')))
-            if k in self.bibkeys:
-                if self.bib[k] != [m.group('a'), m.group('b')]:
-                    k += str(len(self.bibkeys))
-            self.bib[k] = [m.group('a'), m.group('b')]
-            self.bibkeys.append(k)
-            #line = line.replace(m.group(0), '\\cite[%s]{%s}' % (m.group('a'), k))
-            line = line.replace(m.group(0), '{\\color{MidnightBlue}%s}~\\cite{%s}' % (m.group('a'), k))
-        #line = re.sub(r'\[(.+?)\|(.+?)\]', r'\\cite{\1}', line)
+            if not self.footnote:
+                k = re.sub('\W', '', m.group('a'))
+                if not k:
+                    sys.exit("Invalid citation keyword for reference item '{}'.".format(m.group('b')))
+                if k in self.bib.keys():
+                    if self.bib[k] != [m.group('a'), m.group('b')]:
+                        k += str(len(self.bib.keys()))
+                self.bib[k] = [m.group('a'), m.group('b')]
+                #line = line.replace(m.group(0), '\\cite[%s]{%s}' % (m.group('a'), k))
+                line = line.replace(m.group(0), '{\\color{MidnightBlue}%s}~\\cite{%s}' % (m.group('a'), k))
+            else:
+                line = line.replace(m.group(0), '{\\color{MidnightBlue}%s}~\\footnote{%s}' % (m.group('a'), '\\underline{' + m.group('a') + '} ' + m.group('b')))
         return line
 
     def m_parseBlocks(self):
@@ -319,7 +321,10 @@ class LogToTex:
         if not self.bib:
             return
         bib = '\\begin{thebibliography}{9}\n'
-        for k in self.bibkeys:
+        bibkeys = []
+        for line in self.text:
+            bibkeys.extend([m.group(1) for m in re.finditer(re.compile('\\cite{(.*?)}'), line)])
+        for k in bibkeys:
             bib += '\\bibitem{%s}\n[%s]\\\\%s\n' % (k, self.bib[k][0], self.bib[k][1])
         bib += '\\end{thebibliography}'
         self.text.append(bib)

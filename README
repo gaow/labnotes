@@ -18,7 +18,7 @@ Example
 gw_log -h
 gw_log full -h
 gw_log lite -h
-gw_log lite demo.log --author "John Doe" --title "Example log documentation" -c --output demo.pdf
+gw_log lite demo.log --author "John Doe" --title "Example log documentation" -c -f --output demo.pdf
 gw_log full demo.log --author "John Doe" --title "Example log documentation"
 
 Syntax

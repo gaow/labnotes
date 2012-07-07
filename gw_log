@@ -21,6 +21,10 @@ def getCompilerArguments(parser):
                         action='store_true',
                         default = '',
                         help='''do not generate table of contents''')
+	parser.add_argument('-f', '--footnote',
+                        action='store_true',
+                        default = '',
+                        help='''generate footnote instead of reference''')
 	parser.add_argument('-o', '--output',
 			metavar='name',
                         type=str,
@@ -80,7 +84,7 @@ def lite(args):
 		fname = args.output
 	if fname.endswith('.pdf'):
 		fname = fname.replace('.pdf', '')
-	tex = LogToTex(args.title, args.author, args.notoc, args.filename)
+	tex = LogToTex(args.title, args.author, args.notoc, args.footnote, args.filename)
 	pdflatex(fname, tex.get(1), vanilla=args.vanilla)
 	return
 
@@ -91,7 +95,7 @@ def full(args):
 		fname = args.output
 	if fname.endswith('.pdf'):
 		fname = fname.replace('.pdf', '')
-	tex = LogToTex(args.title, args.author, args.notoc, args.filename)
+	tex = LogToTex(args.title, args.author, args.notoc, args.footnote, args.filename)
 	pdflatex(fname, tex.get(0), vanilla=args.vanilla)
 	return
 
