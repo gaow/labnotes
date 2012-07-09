@@ -57,7 +57,7 @@ class LogToTex:
                 self.ftype.append(fn.split('.')[-1].lower())
                 lines = [l.rstrip() for l in open(fn).readlines() if l.rstrip()]
                 if fn.split('.')[-1].lower() in ['r','sh','py','c','cpp','h']:
-                    sys.stderr.write("WARNING: Treating input as {0} source code. Please use a different filename extension if this is not your intension.".format(SYNTAX[fn.split('.')[-1].lower()]))
+                    sys.stderr.write("WARNING: Treating input as {0} source code. Please use a different filename extension if this is not your intension.\n".format(SYNTAX[fn.split('.')[-1].lower()]))
                     if lines[0].startswith('#!/') and fn.split('.')[-1].lower() in lines[0].lower():
                         del lines[0]
                     lines.insert(0,self.mark*3)
@@ -383,4 +383,4 @@ class LogToTex:
 \\raggedbottom
 \\begin{document}
 %s\n%s\n\\bigskip\n%s
-\\end{document}''' % (self.doctype, '\\usepackage[Lenny]{fncychap}' if self.doctype == 'report' else '', 'bibname' if self.doctype == 'report' else 'refname', self.title, self.author, '\\maketitle' if self.title else '', '' if self.notoc else '\\tableofcontents', '\n'.join(self.text))
+\\end{document}''' % (self.doctype, '\\usepackage[Lenny]{fncychap}' if self.doctype == 'report' else '', 'bibname' if self.doctype == 'report' else 'refname', self.title, self.author, '\\maketitle' if self.title or self.author else '', '' if self.notoc else '\\tableofcontents', '\n'.join(self.text))
