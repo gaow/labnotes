@@ -322,9 +322,11 @@ class LogToTex:
             return
         bib = '\\begin{thebibliography}{9}\n'
         bibkeys = []
+        #unique, ordered reference list
         for line in self.text:
             bibkeys.extend([m.group(1) for m in re.finditer(re.compile('\\cite{(.*?)}'), line)])
-        for k in bibkeys:
+        seen = set()
+        for k in [x for x in bibkeys if x not in seen and not seen.add(x)]:
             bib += '\\bibitem{%s}\n[%s]\\\\%s\n' % (k, self.bib[k][0], self.bib[k][1])
         bib += '\\end{thebibliography}'
         self.text.append(bib)
