@@ -1,4 +1,5 @@
 import sys, re, os
+import codecs
 
 def wraptxt(line, sep, by):
     # will also remove blank lines, if any
@@ -55,7 +56,8 @@ class LogToTex:
         for fn in filename:
             try:
                 self.ftype.append(fn.split('.')[-1].lower())
-                lines = [l.rstrip() for l in open(fn).readlines() if l.rstrip()]
+                with codecs.open(fn, 'r', encoding='UTF-8', errors='ignore') as f:
+                    lines = [l.rstrip() for l in f.readlines() if l.rstrip()]
                 if fn.split('.')[-1].lower() in ['r','sh','py','c','cpp','h']:
                     sys.stderr.write("WARNING: Treating input as {0} source code. Please use a different filename extension if this is not your intension.\n".format(SYNTAX[fn.split('.')[-1].lower()]))
                     if lines[0].startswith('#!/') and fn.split('.')[-1].lower() in lines[0].lower():

@@ -50,7 +50,7 @@ def pdflatex(fname, text, vanilla=False):
 	dest_dir = os.getcwd()
 	os.chdir(tmp_dir)
 	# write tex file
-	with open(fname + '.tex', 'w') as f:
+	with open(fname + '.tex', 'w', encoding='utf-8') as f:
 		f.writelines(text)
 	# write sty file
 	m = minted(tmp_dir)
@@ -62,7 +62,7 @@ def pdflatex(fname, text, vanilla=False):
 			stdin = PIPE, stdout = PIPE, stderr = PIPE)
 		out, error = tc.communicate()
 		if (tc.returncode) or error.decode(sys.getdefaultencoding()) or (not os.path.exists(fname + '.pdf')):
-			with open(os.path.join(dest_dir, '{0}-ERROR.txt'.format(fname)), 'w') as f:
+			with open(os.path.join(dest_dir, '{0}-ERROR.txt'.format(fname)), 'w', encoding='utf-8') as f:
 				f.writelines(out.decode(sys.getdefaultencoding()) + error.decode(sys.getdefaultencoding()))
 			os.system('rm -f *.out *.toc *.aux *.log')
 			#sys.stderr.write('DEBUG:\n\t$ cd {0}\n\t$ pdflatex -shell-escape -halt-on-error -file-line-error {1}\n'.format(tmp_dir, fname + '.tex'))
