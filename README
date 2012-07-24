@@ -16,10 +16,10 @@ sudo python3 setup.py install
 Example
 -------
 gw_log -h
-gw_log full -h
-gw_log lite -h
-gw_log lite demo.log --author "John Doe" --title "Example log documentation" -c -f --output demo.pdf
-gw_log full demo.log --author "John Doe" --title "Example log documentation"
+gw_log doc -h
+gw_log slides -h
+gw_log doc demo.log --author "John Doe" --title "Example log documentation" --notoc -f --output demo.pdf
+gw_log doc demo.log --author "John Doe" --title "Example log documentation" --full --output demo_full.pdf
 
 Syntax
 ------

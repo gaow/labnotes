@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-import argparse, sys, os, re
-from subprocess import PIPE, Popen
-import tempfile
-from gwlog2tex import LogToTex
-from minted import minted
-def getCompilerArguments(parser):
+import argparse
+from gwlog.utils import getfname
+from gwlog.gwlog2tex import LogToTex, pdflatex
+
+def getCommonArguments(parser):
 	parser.add_argument('filename',
                         metavar = 'FN',
                         nargs = '+',
@@ -17,7 +16,11 @@ def getCompilerArguments(parser):
                         action='store',
                         default = '',
                         help='''title of document''')
-	parser.add_argument('-c', '--notoc',
+	parser.add_argument('--full',
+                        action='store_true',
+                        default = '',
+                        help='''make commented-out text visible in output file''')
+	parser.add_argument('--notoc',
                         action='store_true',
                         default = '',
                         help='''do not generate table of contents''')
@@ -34,70 +37,15 @@ def getCompilerArguments(parser):
                         default = '',
                         help='''build document from scratch without using cached data''')
 
-def pdflatex(fname, text, vanilla=False):
-	tmp_dir = None
-	pattern = re.compile(r'gw_log_cache_*(.*)')
-	for fn in os.listdir(tempfile.gettempdir()):
-		if pattern.match(fn):
-			tmp_dir = os.path.join(tempfile.gettempdir(), fn)
-			break
-	if tmp_dir and vanilla:
-		os.system('rm -rf {0}'.format(tmp_dir))
-		sys.stderr.write('INFO: cache folder {0} is removed\n'.format(tmp_dir))
-		tmp_dir = tempfile.mkdtemp(prefix='gw_log_cache_')
-	if not tmp_dir:
-		tmp_dir = tempfile.mkdtemp(prefix='gw_log_cache_')
-	dest_dir = os.getcwd()
-	os.chdir(tmp_dir)
-	# write tex file
-	with open(fname + '.tex', 'w', encoding='utf-8') as f:
-		f.writelines(text)
-	# write sty file
-	m = minted(tmp_dir)
-	m.put()
-	sys.stderr.write('Building document "{0}" ...\n'.format(fname + '.pdf'))
-	for iter in [1,2]:
-		# too bad we cannot pipe tex to pdflatex with the output behavior under ctrl ... have to write the disk
-		tc = Popen(["pdflatex", "-shell-escape", "-halt-on-error", "-file-line-error", fname + '.tex'],
-			stdin = PIPE, stdout = PIPE, stderr = PIPE)
-		out, error = tc.communicate()
-		if (tc.returncode) or error.decode(sys.getdefaultencoding()) or (not os.path.exists(fname + '.pdf')):
-			with open(os.path.join(dest_dir, '{0}-ERROR.txt'.format(fname)), 'w', encoding='utf-8') as f:
-				f.writelines(out.decode(sys.getdefaultencoding()) + error.decode(sys.getdefaultencoding()))
-			os.system('rm -f *.out *.toc *.aux *.log')
-			#sys.stderr.write('DEBUG:\n\t$ cd {0}\n\t$ pdflatex -shell-escape -halt-on-error -file-line-error {1}\n'.format(tmp_dir, fname + '.tex'))
-			sys.stderr.write('WARNING: Non-empty error message or non-zero return code captured. Please run the program again.\n')
-			sys.exit('If this message presists please find file "{0}-ERROR.txt" and report it to Gao Wang.\n'.format(fname))
-		if iter == 1:
-			sys.stderr.write('Still working ...\n')
-			os.system('rm -f *.pdf')
-		else:
-			os.system('mv -f {0} {1}'.format(fname + '.pdf', dest_dir))
-			os.system('rm -f *.out *.toc *.aux *.log')
-			os.system('rm -f {0}'.format(os.path.join(dest_dir, '{0}-ERROR.txt'.format(fname))))
-	sys.stderr.write('Done!\n')
+
+def slides(args):
 	return
 
-def lite(args):
-	if not args.output:
-		fname = '-'.join([os.path.splitext(name)[0] for name in args.filename]) + '.' + 'lite'
-	else:
-		fname = args.output
-	if fname.endswith('.pdf'):
-		fname = fname.replace('.pdf', '')
+def doc(args):
 	tex = LogToTex(args.title, args.author, args.notoc, args.footnote, args.filename)
-	pdflatex(fname, tex.get(1), vanilla=args.vanilla)
-	return
-
-def full(args):
-	if not args.output:
-		fname = '-'.join([os.path.splitext(name)[0] for name in args.filename]) + '.' + 'full'
-	else:
-		fname = args.output
-	if fname.endswith('.pdf'):
-		fname = fname.replace('.pdf', '')
-	tex = LogToTex(args.title, args.author, args.notoc, args.footnote, args.filename)
-	pdflatex(fname, tex.get(0), vanilla=args.vanilla)
+	lite = 0 if args.full else 1
+	fname = getfname(args.filename, args.output)
+	pdflatex(fname, tex.get(lite), vanilla=args.vanilla)
 	return
 
 if __name__ == '__main__':
@@ -109,14 +57,14 @@ if __name__ == '__main__':
 	Contact: Gao Wang <gaow@bcm.edu>''')
 	master_parser.add_argument('--version', action='version', version='%(prog)s 1.0alpha')
 	subparsers = master_parser.add_subparsers()
-	# compile a project log file
-	parser = subparsers.add_parser('lite', help='Generate main text from log file(s)')
-	getCompilerArguments(parser)
-	parser.set_defaults(func=lite)
-	# compile a project log file
-	parser = subparsers.add_parser('full', help='Generate main text + comments from log file(s)')
-	getCompilerArguments(parser)
-	parser.set_defaults(func=full)
+	# pdflatex commands
+	parser = subparsers.add_parser('doc', help='Generate text document from log file(s)')
+	getCommonArguments(parser)
+	parser.set_defaults(func=doc)
+	# beamer commands
+	parser = subparsers.add_parser('slides', help='Generate slides from log file(s)')
+	getCommonArguments(parser)
+	parser.set_defaults(func=slides)
 	# getting args
 	args = master_parser.parse_args()
 	# calling the associated functions

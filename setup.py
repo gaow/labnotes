@@ -4,6 +4,7 @@ try:
     from distutils.command.build_py import build_py_2to3 as build_py
 except ImportError:
     from distutils.command.build_py import build_py
+
 import sys, os
 try:
     import argparse
@@ -13,10 +14,15 @@ except ImportError:
 setup(name = 'gw_log',
     version = '1.0',
     py_modules = [
-        '__init__',
-        'minted',
-        'gwlog2tex'
+        'gwlog.__init__',
+        'gwlog.minted',
+        'gwlog.btheme',
+        'gwlog.gwlog2tex',
+        'gwlog.gwlog2beamer',
+        'gwlog.utils'
     ],
     scripts = ['gw_log'],
-    cmdclass = {'build_py': build_py }
+    cmdclass = {'build_py': build_py },
+    package_dir = {'gwlog': 'gwlog'},
+    packages = ['gwlog']
     )
