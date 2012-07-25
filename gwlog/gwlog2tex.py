@@ -1,9 +1,6 @@
 import sys, re, os
-import tempfile
 import codecs
-from subprocess import PIPE, Popen
 from utils import wraptxt
-from minted import minted
 
 SYNTAX = {'r':'r',
           'sh':'bash',
@@ -169,7 +166,40 @@ class LogToTex:
         for i in self.blocks['list']:
             if not self.text[i].startswith(self.mark):
                 sys.exit('ERROR: items must start with "{0}" in list block. Problematic text is: \n {1}'.format(self.mark, self.text[i]))
-            self.text[i] = '\\begin{itemize}%s\n\\end{itemize}\n' % self.m_recode(re.sub(r'^{0}|\n{0}'.format(self.mark), '\\item ', self.text[i])).replace('$\\backslash$item', '\n\\item')
+            # handle 2nd level indentation first
+            # in the mean time take care of recoding
+            text = self.text[i].split('\n')
+            idx = 0
+            while idx < len(text):
+                if text[idx].startswith(self.mark * 2):
+                    start = idx
+                    end = idx
+                    text[idx] = self.mark * 2 + self.m_recode(text[idx][2:])
+                    text[idx] = re.sub(r'^{0}'.format(self.mark * 2), '\\item ', text[idx])
+                    if idx + 1 < len(text):
+                        for j in range(idx + 1, len(text) + 1):
+                            try:
+                                if not text[j].startswith(self.mark * 2):
+                                    break
+                                else:
+                                    text[j] = self.mark * 2 + self.m_recode(text[j][2:])
+                                    text[j] = re.sub(r'^{0}'.format(self.mark * 2), '\\item ', text[j])
+                                    end = j
+                            except IndexError:
+                                pass
+                    #
+                    text[start] = '\\begin{itemize}\n' + text[start]
+                    text[end] = text[end] + '\n\\end{itemize}'
+                    idx = end + 1
+                elif text[idx].startswith(self.mark):
+                    text[idx] = self.mark + self.m_recode(text[idx][1:])
+                    idx += 1
+                else:
+                    text[idx] = self.m_recode(text[idx])
+                    idx += 1
+            # handle 1st level indentation
+            self.text[i] = '\n'.join(text)
+            self.text[i] = '\\begin{itemize}%s\n\\end{itemize}\n' % re.sub(r'^{0}|\n{0}'.format(self.mark), '\n\\item ', self.text[i])
         return
 
     def m_blockizeBclogo(self):
@@ -363,48 +393,3 @@ class LogToTex:
 \\begin{document}
 %s\n%s\n\\bigskip\n%s
 \\end{document}''' % (self.doctype, '\\usepackage[Lenny]{fncychap}' if self.doctype == 'report' else '', 'bibname' if self.doctype == 'report' else 'refname', self.title, self.author, '\\maketitle' if self.title or self.author else '', '' if self.notoc else '\\tableofcontents', '\n'.join(self.text))
-
-
-def pdflatex(fname, text, vanilla=False):
-	tmp_dir = None
-	pattern = re.compile(r'gw_log_cache_*(.*)')
-	for fn in os.listdir(tempfile.gettempdir()):
-		if pattern.match(fn):
-			tmp_dir = os.path.join(tempfile.gettempdir(), fn)
-			break
-	if tmp_dir and vanilla:
-		os.system('rm -rf {0}'.format(tmp_dir))
-		sys.stderr.write('INFO: cache folder {0} is removed\n'.format(tmp_dir))
-		tmp_dir = tempfile.mkdtemp(prefix='gw_log_cache_')
-	if not tmp_dir:
-		tmp_dir = tempfile.mkdtemp(prefix='gw_log_cache_')
-	dest_dir = os.getcwd()
-	os.chdir(tmp_dir)
-	# write tex file
-	with open(fname + '.tex', 'w', encoding='utf-8') as f:
-		f.writelines(text)
-	# write sty file
-	m = minted(tmp_dir)
-	m.put()
-	sys.stderr.write('Building document "{0}" ...\n'.format(fname + '.pdf'))
-	for iter in [1,2]:
-		# too bad we cannot pipe tex to pdflatex with the output behavior under ctrl ... have to write the disk
-		tc = Popen(["pdflatex", "-shell-escape", "-halt-on-error", "-file-line-error", fname + '.tex'],
-			stdin = PIPE, stdout = PIPE, stderr = PIPE)
-		out, error = tc.communicate()
-		if (tc.returncode) or error.decode(sys.getdefaultencoding()) or (not os.path.exists(fname + '.pdf')):
-			with open(os.path.join(dest_dir, '{0}-ERROR.txt'.format(fname)), 'w', encoding='utf-8') as f:
-				f.writelines(out.decode(sys.getdefaultencoding()) + error.decode(sys.getdefaultencoding()))
-			os.system('rm -f *.out *.toc *.aux *.log')
-			#sys.stderr.write('DEBUG:\n\t$ cd {0}\n\t$ pdflatex -shell-escape -halt-on-error -file-line-error {1}\n'.format(tmp_dir, fname + '.tex'))
-			sys.stderr.write('WARNING: Non-empty error message or non-zero return code captured. Please run the program again.\n')
-			sys.exit('If this message presists please find file "{0}-ERROR.txt" and report it to Gao Wang.\n'.format(fname))
-		if iter == 1:
-			sys.stderr.write('Still working ...\n')
-			os.system('rm -f *.pdf')
-		else:
-			os.system('mv -f {0} {1}'.format(fname + '.pdf', dest_dir))
-			os.system('rm -f *.out *.toc *.aux *.log')
-			os.system('rm -f {0}'.format(os.path.join(dest_dir, '{0}-ERROR.txt'.format(fname))))
-	sys.stderr.write('Done!\n')
-	return

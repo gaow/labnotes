@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import argparse
-from gwlog.utils import getfname
-from gwlog.gwlog2tex import LogToTex, pdflatex
+from gwlog.utils import getfname, pdflatex
+from gwlog.gwlog2tex import LogToTex
+from gwlog.gwlog2beamer import LogToBeamer
 
 def getCommonArguments(parser):
 	parser.add_argument('filename',

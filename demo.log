@@ -55,6 +55,9 @@ gw_log doc demo.log --author "John Doe" --title "Example log documentation" --fu
 #this
 #is
 #a list block
+## and you can indent it further
+### but not any further
+# until you are happy
 #}
 #{ warning
 # this is a warning block

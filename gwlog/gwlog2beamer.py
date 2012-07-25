@@ -2,7 +2,6 @@ import sys, re, os
 import codecs
 from utils import wraptxt
 
-
 class LogToBeamer:
     def __init__(self, title, author, notoc, footnote, filename):
         self.title = ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(title).split()])
