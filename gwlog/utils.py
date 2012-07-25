@@ -3,6 +3,7 @@ from subprocess import PIPE, Popen
 import tempfile
 from minted import minted
 
+# functions
 def getfname(innames, outname):
 	if not outname:
 		fname = '-'.join([os.path.splitext(name)[0] for name in innames])
@@ -40,7 +41,6 @@ def wraptxt(line, sep, by):
         if not i == 0:
             sline += item
     return sline
-
 
 def pdflatex(fname, text, vanilla=False):
 	tmp_dir = None
@@ -85,3 +85,174 @@ def pdflatex(fname, text, vanilla=False):
 			os.system('rm -f {0}'.format(os.path.join(dest_dir, '{0}-ERROR.txt'.format(fname))))
 	sys.stderr.write('Done!\n')
 	return
+
+
+# classes
+class TexParser:
+    def __init__(self, title, author):
+        self.title = ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(title).split()])
+        self.author = self.m_recode(author)
+        self.mark = '#'
+        self.text = []
+        self.blocks = {}
+        self.keywords = ['err', 'list']
+        for item in self.keywords:
+            self.blocks[item] = []
+        self.bib = {}
+        self.footnote = False
+
+    def m_recode(self, line):
+        # the use of ? is very important
+        #>>> re.sub(r'@@(.*)@@', r'\\texttt{\1}', line)
+        #'\\texttt{aa@@, @@aabb}'
+        #>>> re.sub(r'@@(.*?)@@', r'\\texttt{\1}', line)
+        #'\\texttt{aa}, \\texttt{aabb}'
+        if not line:
+            return ''
+        line = line.strip()
+        for item in [('\\', '!!\\backslash!!'),('$', '\$'),('!!\\backslash!!', '$\\backslash$'),
+                ('{', '\{'),('}', '\}'),('%', '\%'), ('_', '\-\_'),('&', '\&'),('<', '$<$'),
+                ('>', '$>$'),('~', '$\sim$'), ('^', '\^{}'), ('#', '\#')]:
+            line = line.replace(item[0], item[1])
+        line = re.sub(r'"""(.*?)"""', r'\\textbf{\\textit{\1}}', line)
+        line = re.sub(r'""(.*?)""', r'\\textbf{\1}', line)
+        line = re.sub(r'"(.*?)"', r'\\textit{\1}', line)
+        line = re.sub(r'@@(.*?)@@', r'\\texttt{\1}', line)
+        # url
+        pattern = re.compile('@(.*?)@')
+        for m in re.finditer(pattern, line):
+            line = line.replace(m.group(0), '\\url{%s}' % m.group(1).replace('\-\_', '\_').replace('$\sim$', '~'))
+        # citation
+        pattern = re.compile('\[(?P<a>.+?)\|(?P<b>.+?)\]')
+        # re.compile('\[(.+?)\|(.+?)\]')
+        for m in re.finditer(pattern, line):
+            if not self.footnote:
+                k = re.sub('\W', '', m.group('a'))
+                if not k:
+                    sys.exit("Invalid citation keyword for reference item '{}'.".format(m.group('b')))
+                if k in self.bib.keys():
+                    if self.bib[k] != [m.group('a'), m.group('b')]:
+                        k += str(len(self.bib.keys()))
+                self.bib[k] = [m.group('a'), m.group('b')]
+                #line = line.replace(m.group(0), '\\cite[%s]{%s}' % (m.group('a'), k))
+                line = line.replace(m.group(0), '{\\color{MidnightBlue}%s}~\\cite{%s}' % (m.group('a'), k))
+            else:
+                line = line.replace(m.group(0), '{\\color{MidnightBlue}%s}~\\footnote{%s}' % (m.group('a'), '\\underline{' + m.group('a') + '} ' + m.group('b')))
+        return line
+
+    def m_parseBlocks(self):
+        idx = 0
+        while True:
+            if idx >= len(self.text):
+                break
+            if self.text[idx].startswith(self.mark + '}') and '--' not in self.text[idx]:
+                sys.exit("ERROR: invalid use of '%s' without previous %s{, near %s" % (self.text[idx], self.mark, self.text[idx+1] if idx + 1 < len(self.text) else "end of document"))
+            if self.text[idx].startswith(self.mark + '{') and '--' not in self.text[idx]:
+                # define block
+                bname = self.text[idx].split('{')[1].strip()
+                if bname not in [x for x in self.keywords if x != 'err']:
+                    sys.exit("ERROR: invalid block definition '%s{ %s'" % (self.mark, bname))
+                endidx = None
+                self.text[idx] = ''
+                # find end of block
+                for i in range(idx+1, len(self.text)):
+                    # do not allow nested blocks
+                    if self.text[i].startswith(self.mark + '{'):
+                        sys.exit("ERROR: nested use of blocks is disallowed: '{0}', near {1}".format(self.text[i], self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
+                    # find end of block
+                    if self.text[i].startswith(self.mark + '}'):
+                        if self.text[i].rstrip() == self.mark + '}':
+                            endidx = i
+                            break
+                        else:
+                            sys.exit("ERROR: invalid %s '%s', near %s" % ('nested use of' if '--' in self.text[i] else 'symbol', self.text[i], self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
+                if not endidx:
+                    sys.exit("ERROR: '%s{ %s' and '%s}' must appear in pairs, near %s" % (self.mark, bname, self.mark, self.text[idx+1] if idx + 1 < len(self.text) else "end of document"))
+                # combine block values
+                for i in range(idx + 1, endidx):
+                    self.text[idx] += self.text[i] + ('\n' if not i + 1 == endidx else '')
+                del self.text[(idx + 1) : (endidx + 1)]
+                # keep block index
+                self.blocks[bname].append(idx)
+            idx += 1
+            continue
+        #
+        for idx, item in enumerate(self.text):
+            # define err block
+            if self.text[idx].startswith(self.mark + '}') and '--' in self.text[idx]:
+                sys.exit("ERROR: invalid use of '%s}----' without previous '%s{----', near %s" % (self.mark, self.mark, self.text[idx+1] if idx + 1 < len(self.text) else "end of document") )
+            if item.startswith(self.mark + '{') and '--' in item:
+                endidx = None
+                for i in range(idx+1, len(self.text)):
+                    if self.text[i].startswith(self.mark + '{') and '--' in self.text[i]:
+                        sys.exit("ERROR: nested use of blocks is disallowed: '{0}', near {1}".format(self.text[i], self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
+                    if self.text[i].startswith(self.mark + '}') and '--' in self.text[i]:
+                        endidx = i
+                        break
+                if not endidx:
+                    sys.exit('ERROR: comment blocks must appear in pairs, near {0}'.format(self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
+                self.blocks['err'].append([idx, endidx])
+                self.text[idx] = ''
+                self.text[endidx] = ''
+        return
+
+    def m_blockizeList(self):
+        if len(self.blocks['list']) == 0:
+            return
+        for i in self.blocks['list']:
+            if i >= len(self.text):
+                sys.exit('BUG: block specification does not match text')
+            if not self.text[i].startswith(self.mark):
+                sys.exit('ERROR: items must start with "{0}" in list block. Problematic text is: \n {1}'.format(self.mark, self.text[i]))
+            # handle 2nd level indentation first
+            # in the mean time take care of recoding
+            text = self.text[i].split('\n')
+            idx = 0
+            while idx < len(text):
+                if text[idx].startswith(self.mark * 2):
+                    start = idx
+                    end = idx
+                    text[idx] = self.mark * 2 + self.m_recode(text[idx][2:])
+                    text[idx] = re.sub(r'^{0}'.format(self.mark * 2), '\\item ', text[idx])
+                    if idx + 1 < len(text):
+                        for j in range(idx + 1, len(text) + 1):
+                            try:
+                                if not text[j].startswith(self.mark * 2):
+                                    break
+                                else:
+                                    text[j] = self.mark * 2 + self.m_recode(text[j][2:])
+                                    text[j] = re.sub(r'^{0}'.format(self.mark * 2), '\\item ', text[j])
+                                    end = j
+                            except IndexError:
+                                pass
+                    #
+                    text[start] = '\\begin{itemize}\n' + text[start]
+                    text[end] = text[end] + '\n\\end{itemize}'
+                    idx = end + 1
+                elif text[idx].startswith(self.mark):
+                    text[idx] = self.mark + self.m_recode(text[idx][1:])
+                    idx += 1
+                else:
+                    text[idx] = self.m_recode(text[idx])
+                    idx += 1
+            # handle 1st level indentation
+            self.text[i] = '\n'.join(text)
+            self.text[i] = '\\begin{itemize}%s\n\\end{itemize}\n' % re.sub(r'^{0}|\n{0}'.format(self.mark), '\n\\item ', self.text[i])
+        return
+
+    def m_parseBib(self):
+        if not self.bib:
+            return
+        bib = '\\begin{thebibliography}{9}\n'
+        bibkeys = []
+        #unique, ordered reference list
+        for line in self.text:
+            bibkeys.extend([m.group(1) for m in re.finditer(re.compile('\\cite{(.*?)}'), line)])
+        seen = set()
+        for k in [x for x in bibkeys if x not in seen and not seen.add(x)]:
+            bib += '\\bibitem{%s}\n[%s]\\\\%s\n' % (k, self.bib[k][0], self.bib[k][1])
+        bib += '\\end{thebibliography}'
+        self.text.append(bib)
+
+    def get(self, include_comment):
+        return 'None'
