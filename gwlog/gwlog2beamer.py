@@ -19,9 +19,12 @@ class LogToBeamer(TexParser):
         self.toc = toc
         self.handout = handout
         self.theme = theme
-        self.wrap_adjust = 0
-        if self.theme == 'heavy':
-            self.wrap_adjust = -7
+        self.wrap_adjust = 1
+        if self.handout:
+            self.wrap_adjust = 1.38
+        else:
+            if self.theme == 'heavy':
+                self.wrap_adjust = 0.92
         self.thank = thank
         self.alertbox = ['warning', 'tip', 'important', 'note']
         self.keywords = list(set(SYNTAX.values())) + self.alertbox + ['err', 'out', 'list']
@@ -38,7 +41,7 @@ class LogToBeamer(TexParser):
                 continue
             for i in self.blocks[item]:
                 self.text[i] = '\\begin{block}{%s}\\scriptsize\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{block}\n' % \
-                        (item.capitalize(), wraptxt(self.text[i], '', 78 + self.wrap_adjust, rmblank = False))
+                        (item.capitalize(), wraptxt(self.text[i], '', int(78 * self.wrap_adjust), rmblank = False))
         return
 
     def m_blockizeOut(self):
@@ -46,7 +49,7 @@ class LogToBeamer(TexParser):
             return
         for i in self.blocks['out']:
             self.text[i] = '\\begin{exampleblock}{}\\tiny\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{exampleblock}\n' % \
-                    wraptxt(self.text[i], '', 105 + int(self.wrap_adjust * 1.4), rmblank = False)
+                    wraptxt(self.text[i], '', int(105 * self.wrap_adjust), rmblank = False)
         return
 
     def m_blockizeAlert(self):
@@ -93,7 +96,7 @@ class LogToBeamer(TexParser):
                 else:
                     i = idx + 1
                 sep = ''
-                cnt = 62 + self.wrap_adjust
+                cnt = int(62 * self.wrap_adjust)
                 sminted = '\\Verb?'
                 lminted = '\\begin{Verbatim}[fontsize=\\footnotesize]\n'
                 #
@@ -172,7 +175,7 @@ class LogToBeamer(TexParser):
                     sys.exit("ERROR: Input file format '%s' not supported. Valid extensions are 'pdf', 'png' and 'jpg'" % fig.split('.')[1])
                 if not os.path.exists(fig):
                     sys.exit("ERROR: Cannot find file %s" % fig)
-                self.text[idx] = '\\begin{figure}\\includegraphics[width=%s\\textwidth]{%s}\\end{figure}' % (width, os.path.abspath(fig))
+                self.text[idx] = '\\begin{figure}\\centering\\includegraphics[width=%s\\textwidth]{%s}\\end{figure}' % (width, os.path.abspath(fig))
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark):
@@ -185,6 +188,8 @@ class LogToBeamer(TexParser):
         return
 
     def get(self, include_comment):
+        titlepage = '\\frame{\\titlepage}\n' if not self.handout else '\\maketitle\n'
+        tocpage = '\\frame{\\tableofcontents}\n' if not self.handout else '\\tableofcontents\n'
         if include_comment and len(self.blocks['err']) > 0:
             for idx in range(len(self.text)):
                 for item in self.blocks['err']:
@@ -201,8 +206,7 @@ class LogToBeamer(TexParser):
         if self.institute:
             otext += '\\institute[%s]{%s}\n' % (self.institute, self.institute)
         otext += '\\date{\\today}\n\\begin{document}\n%s\n%s' % \
-                ('\\frame{\\titlepage}\n\\maketitle' if self.title or self.author else '',
-                '\\frame{\\tableofcontents}\n\\tableofcontents\n' if self.toc else '')
+                (titlepage if self.title or self.author else '', tocpage if self.toc else '')
         otext += '\n'.join(self.text) + '\n\\end{document}'
         if self.thank:
             otext += THANK

@@ -640,11 +640,12 @@ class btheme:
 SLIDES = '''
 \\documentclass[ignorenonframetext,mathserif,12pt]{beamer}
 \\mode<presentation>
+\\setbeamertemplate{blocks}[rounded][shadow=true]
 '''
 HOUT = '''
 \\documentclass[letterpaper,11pt]{extarticle}
 \\usepackage[noamsthm]{beamerarticle}
-\\mode<handout>
+\\mode<article>
 '''
 THEME = {'heavy': '\\usetheme[numbers]{Rice}\n\\usecolortheme{riceowl}\n',
         'compact': '\\usetheme{Boadilla}\n\\usecolortheme{riceowl}\n\\useinnertheme{rectangles}\n\\useoutertheme{infolines}\n',
@@ -751,7 +752,7 @@ CONFIG = '''
 %%\\usecolortheme{seagull}
 
     %% Four basic color themes:
-    %% - Default and special purpose themes: default, structure 
+    %% - Default and special purpose themes: default, structure
     %% - Complete color themes: albatross, beetle, crane, dove, fly, seagull
     %% - Inner color themes: lily, orchid
     %% - Outer color themes: whale, seahorse
@@ -771,7 +772,7 @@ CONFIG = '''
 %%%%%%%%%%%%%%%%%%
 
 \\setbeamercovered{transparent}
-\\setbeamertemplate{blocks}[rounded][shadow=true] %% format blocks
+%%\\setbeamertemplate{blocks}[rounded][shadow=true] %% format blocks
 %%\\setbeamertemplate{footline}[frame number]
 %% ----------- It is possible to customize Beamer color as follows
 %%\\setbeamercolor{frametitle}{fg=black,bg=blue!6}
@@ -816,13 +817,15 @@ CONFIG = '''
   \\usepackage{fancyhdr}
   \\usepackage{fancyvrb}
 
-  \\pagestyle{fancy} %% fancy page: with header and footer
-  \\setlength\\headheight{14pt}
-  \\lhead{\\texttt{\\title, \\author}}
-  \\rhead{\\texttt{\\today}}
-  \\cfoot{\\thepage}
-  \\renewcommand{\\headrulewidth}{0pt}
-  \\renewcommand{\\footrulewidth}{0pt}
+  \\renewcommand\\rmdefault{bch}
+%%  \\pagestyle{fancy} %% fancy page: with header and footer
+%%  \\setlength\\headheight{14pt}
+%%  \\lhead{\\texttt{\\title, \\author}}
+%%  \\rhead{\\texttt{\\today}}
+%%  \\cfoot{\\thepage}
+%%  \\renewcommand{\\headrulewidth}{0pt}
+%%  \\renewcommand{\\footrulewidth}{0pt}
+  \\pagestyle{plain}
 }
 
 \\setbeamertemplate{frame end}{
