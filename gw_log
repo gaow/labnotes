@@ -53,7 +53,7 @@ def getSlidesArguments(parser):
 			help='''slides style theme''')
 	parser.add_argument('--thank',
 			action='store_true',
-                        help='''generate last page of slides''')
+                        help='''generate last 'thank you' page''')
 	parser.add_argument('--handout',
                         action='store_true',
                         help='''generate handout instead of slides''')

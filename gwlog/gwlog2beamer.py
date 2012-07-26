@@ -207,7 +207,7 @@ class LogToBeamer(TexParser):
             otext += '\\institute[%s]{%s}\n' % (self.institute, self.institute)
         otext += '\\date{\\today}\n\\begin{document}\n%s\n%s' % \
                 (titlepage if self.title or self.author else '', tocpage if self.toc else '')
-        otext += '\n'.join(self.text) + '\n\\end{document}'
+        otext += '\n'.join(self.text)
         if self.thank:
             otext += THANK
-        return otext
+        return otext + '\n\\end{document}'
