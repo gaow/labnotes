@@ -637,9 +637,9 @@ class btheme:
             f.write(self.beamerthemeRice)
         return
 
-MODE = {'presentation':'\\documentclass[ignorenonframetext,mathserif,12pt]{beamer}\n\\mode<presentation>\n\\setbeamertemplate{blocks}[rounded][shadow=true]\n',
-        'notes':'\\documentclass[letterpaper,10pt]{extarticle}\n\\usepackage[noamsthm]{beamerarticle}\n\\mode<article>\n',
-        'handout':'\\documentclass[ignorenonframetext,mathserif,handout,12pt]{beamer}\n\\mode<handout>\n\\setbeamertemplate{blocks}[rounded][shadow=true]\n'
+MODE = {'presentation':'\\documentclass[ignorenonframetext,mathserif,12pt,dvipsnames]{beamer}\n\\mode<presentation>\n\\setbeamertemplate{blocks}[rounded][shadow=true]\n',
+        'notes':'\\documentclass[letterpaper,10pt,dvipsnames]{extarticle}\n\\usepackage[noamsthm]{beamerarticle}\n\\mode<article>\n',
+        'handout':'\\documentclass[ignorenonframetext,mathserif,handout,12pt,dvipsnames]{beamer}\n\\mode<handout>\n\\setbeamertemplate{blocks}[rounded][shadow=true]\n'
         }
 THEME = {'heavy': '\\usetheme[numbers]{Rice}\n\\usecolortheme{riceowl}\n',
         'compact': '\\usetheme{Boadilla}\n\\usecolortheme{riceowl}\n\\useinnertheme{rectangles}\n\\useoutertheme{infolines}\n',
@@ -715,6 +715,10 @@ CONFIG = '''
 %%{\\endsemiverbatim\\endexampleblock}
 
 \\setbeamertemplate{bibliography item}[text]
+\\makeatletter
+\\renewcommand\\@biblabel[1]{#1.}
+\\renewcommand\\@cite[1]{\\textsuperscript{#1}}
+\\makeatother
 
 %%%%%%%%%%%%%%%%%%
 %% Slide -- Rice color theme
@@ -824,9 +828,6 @@ CONFIG = '''
 %%  \\renewcommand{\\headrulewidth}{0pt}
 %%  \\renewcommand{\\footrulewidth}{0pt}
   \\pagestyle{plain}
-}
-
-
 
 %% frame split
 \\usepackage{tikz}
@@ -851,7 +852,7 @@ CONFIG = '''
 %%\\def\\@startsection#1#2#3#4#5#6{%%
 %%  \\origstartsection{#1}{#2}{#3}{#4}{#5}{#6\\normalfont\\sffamily\\color{blue!50!black}\\selectfont}}
 %%\\makeatother
-
+}
 \\mode
 <all>
 '''

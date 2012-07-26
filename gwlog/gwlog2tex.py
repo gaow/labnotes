@@ -18,6 +18,8 @@ class LogToTex(TexParser):
         if sum([x.split('.')[-1].lower() in ['c','cpp','h'] for x in filename]) == len(filename):
             self.mark = '//'
         self.ftype = []
+        self.text = []
+        self.textbib = None
         for fn in filename:
             try:
                 self.ftype.append(fn.split('.')[-1].lower())
@@ -44,6 +46,7 @@ class LogToTex(TexParser):
         self.m_blockizeAll()
         self.m_parseText()
         self.m_parseBib()
+        self.text.append(self.textbib)
 
     def m_blockizeIn(self):
         for item in list(set(SYNTAX.values())):

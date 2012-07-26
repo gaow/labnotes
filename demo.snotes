@@ -88,7 +88,7 @@ print('hello world')
 ###
 # subsection 2-1
 ###
-#! highlight box and figure
+#! highlight box, reference link and figure
 #!!!this is BCM logo
-#@www.bcm.edu@
+#[Baylor College of Medicine | @www.bcm.edu@]
 #* bcm.png 0.5

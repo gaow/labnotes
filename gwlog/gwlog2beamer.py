@@ -7,6 +7,8 @@ from btheme import MODE, CONFIG, TITLE, THANK, THEME
 class LogToBeamer(TexParser):
     def __init__(self, title, author, institute, toc, mode, theme, thank, filename):
         TexParser.__init__(self, title, author)
+        self.text = []
+        self.textbib = None
         for fn in filename:
             try:
                 with codecs.open(fn, 'r', encoding='UTF-8', errors='ignore') as f:
@@ -34,6 +36,11 @@ class LogToBeamer(TexParser):
         self.m_blockizeAll()
         self.m_parseText()
         self.m_parseBib()
+        if self.thank:
+            self.text.append(THANK)
+        if self.textbib:
+            self.text.append('\\appendix\n\\begin{frame}[allowframebreaks]\n\\tiny\n' + \
+                self.textbib + '\n\\end{frame}')
 
     def m_blockizeIn(self):
         for item in list(set(SYNTAX.values())):
@@ -207,7 +214,5 @@ class LogToBeamer(TexParser):
             otext += '\\institute[%s]{%s}\n' % (self.institute, self.institute)
         otext += '\\date{\\today}\n\\begin{document}\n%s\n%s' % \
                 (titlepage if self.title or self.author else '', tocpage if self.toc else '')
-        otext += '\n'.join(self.text)
-        if self.thank:
-            otext += THANK
-        return otext + '\n\\end{document}'
+        otext += '\n'.join(self.text) + '\n\\end{document}'
+        return otext
