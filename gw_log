@@ -4,7 +4,7 @@ from gwlog.utils import getfname, pdflatex
 from gwlog.gwlog2tex import LogToTex
 from gwlog.gwlog2beamer import LogToBeamer
 
-def getCommonArguments(parser):
+def getTexArguments(parser):
 	parser.add_argument('filename',
                         metavar = 'FN',
                         nargs = '+',
@@ -21,14 +21,11 @@ def getCommonArguments(parser):
                         action='store_true',
                         default = '',
                         help='''make commented-out text visible in output file''')
-	parser.add_argument('--notoc',
+	parser.add_argument('--toc',
                         action='store_true',
                         default = '',
-                        help='''do not generate table of contents''')
-	parser.add_argument('-f', '--footnote',
-                        action='store_true',
-                        default = '',
-                        help='''generate footnote instead of reference''')
+                        help='''generate table of contents''')
+
 	parser.add_argument('-o', '--output',
 			metavar='name',
                         type=str,
@@ -38,12 +35,39 @@ def getCommonArguments(parser):
                         default = '',
                         help='''build document from scratch without using cached data''')
 
+def getDocArguments(parser):
+	parser.add_argument('-f', '--footnote',
+                        action='store_true',
+                        default = '',
+                        help='''generate footnote instead of reference''')
+
+def getSlidesArguments(parser):
+	parser.add_argument('-i', '--institute',
+			action='store',
+                        default = '',
+                        help='''institute of author''')
+	parser.add_argument('--theme',
+			type = str,
+			choices = ['heavy', 'compact', 'plain'],
+			default = 'compact',
+			help='''slides style theme''')
+	parser.add_argument('--thank',
+			action='store_true',
+                        help='''generate last page of slides''')
+	parser.add_argument('--handout',
+                        action='store_true',
+                        help='''generate handout instead of slides''')
+
 
 def slides(args):
+	tex = LogToBeamer(args.title, args.author, args.institute, args.toc, args.handout, args.theme, args.thank, args.filename)
+	lite = 0 if args.full else 1
+	fname = getfname(args.filename, args.output)
+	pdflatex(fname, tex.get(lite), vanilla=args.vanilla, beamer = True)
 	return
 
 def doc(args):
-	tex = LogToTex(args.title, args.author, args.notoc, args.footnote, args.filename)
+	tex = LogToTex(args.title, args.author, args.toc, args.footnote, args.filename)
 	lite = 0 if args.full else 1
 	fname = getfname(args.filename, args.output)
 	pdflatex(fname, tex.get(lite), vanilla=args.vanilla)
@@ -60,11 +84,13 @@ if __name__ == '__main__':
 	subparsers = master_parser.add_subparsers()
 	# pdflatex commands
 	parser = subparsers.add_parser('doc', help='Generate text document from log file(s)')
-	getCommonArguments(parser)
+	getTexArguments(parser)
+	getDocArguments(parser)
 	parser.set_defaults(func=doc)
 	# beamer commands
 	parser = subparsers.add_parser('slides', help='Generate slides from log file(s)')
-	getCommonArguments(parser)
+	getTexArguments(parser)
+	getSlidesArguments(parser)
 	parser.set_defaults(func=slides)
 	# getting args
 	args = master_parser.parse_args()

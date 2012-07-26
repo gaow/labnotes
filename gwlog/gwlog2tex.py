@@ -13,7 +13,7 @@ SYNTAX = {'r':'r',
           }
 
 class LogToTex(TexParser):
-    def __init__(self, title, author, notoc, footnote, filename):
+    def __init__(self, title, author, toc, footnote, filename):
         TexParser.__init__(self, title, author)
         if sum([x.split('.')[-1].lower() in ['c','cpp','h'] for x in filename]) == len(filename):
             self.mark = '//'
@@ -33,7 +33,7 @@ class LogToTex(TexParser):
                 self.text.extend(lines)
             except IOError as e:
                 sys.exit(e)
-        self.notoc = notoc
+        self.toc = toc
         self.doctype = 'article'
         self.footnote = footnote
         self.bclogo = {'warning':'\\bcattention', 'tip':'\\bclampe', 'important':'\\bctakecare', 'note':'\\bccrayon'}
@@ -236,4 +236,4 @@ class LogToTex(TexParser):
 \\raggedbottom
 \\begin{document}
 %s\n%s\n\\bigskip\n%s
-\\end{document}''' % (self.doctype, '\\usepackage[Lenny]{fncychap}' if self.doctype == 'report' else '', 'bibname' if self.doctype == 'report' else 'refname', self.title, self.author, '\\maketitle' if self.title or self.author else '', '' if self.notoc else '\\tableofcontents', '\n'.join(self.text))
+\\end{document}''' % (self.doctype, '\\usepackage[Lenny]{fncychap}' if self.doctype == 'report' else '', 'bibname' if self.doctype == 'report' else 'refname', self.title, self.author, '\\maketitle' if self.title or self.author else '', '\\tableofcontents' if self.toc else '', '\n'.join(self.text))

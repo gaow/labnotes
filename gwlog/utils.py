@@ -2,6 +2,7 @@ import os, sys, re
 from subprocess import PIPE, Popen
 import tempfile
 from minted import minted
+from btheme import btheme
 
 # functions
 def getfname(innames, outname):
@@ -42,7 +43,8 @@ def wraptxt(line, sep, by):
             sline += item
     return sline
 
-def pdflatex(fname, text, vanilla=False):
+def pdflatex(fname, text, vanilla=False, beamer = False):
+    # setup temp dir
 	tmp_dir = None
 	pattern = re.compile(r'gw_log_cache_*(.*)')
 	for fn in os.listdir(tempfile.gettempdir()):
@@ -61,10 +63,15 @@ def pdflatex(fname, text, vanilla=False):
 	with open(fname + '.tex', 'w', encoding='utf-8') as f:
 		f.writelines(text)
 	# write sty file
-	m = minted(tmp_dir)
-	m.put()
+	if not beamer:
+		m = minted(tmp_dir)
+		m.put()
+	else:
+		m = btheme(tmp_dir)
+		m.put()
+	# compile
 	sys.stderr.write('Building document "{0}" ...\n'.format(fname + '.pdf'))
-	for iter in [1,2]:
+	for visit in [1,2]:
 		# too bad we cannot pipe tex to pdflatex with the output behavior under ctrl ... have to write the disk
 		tc = Popen(["pdflatex", "-shell-escape", "-halt-on-error", "-file-line-error", fname + '.tex'],
 			stdin = PIPE, stdout = PIPE, stderr = PIPE)
@@ -76,7 +83,7 @@ def pdflatex(fname, text, vanilla=False):
 			#sys.stderr.write('DEBUG:\n\t$ cd {0}\n\t$ pdflatex -shell-escape -halt-on-error -file-line-error {1}\n'.format(tmp_dir, fname + '.tex'))
 			sys.stderr.write('WARNING: Non-empty error message or non-zero return code captured. Please run the program again.\n')
 			sys.exit('If this message presists please find file "{0}-ERROR.txt" and report it to Gao Wang.\n'.format(fname))
-		if iter == 1:
+		if visit == 1:
 			sys.stderr.write('Still working ...\n')
 			os.system('rm -f *.pdf')
 		else:
@@ -196,7 +203,7 @@ class TexParser:
                 self.text[endidx] = ''
         return
 
-    def m_blockizeList(self):
+    def m_blockizeList(self, pause = False):
         if len(self.blocks['list']) == 0:
             return
         for i in self.blocks['list']:
@@ -238,6 +245,9 @@ class TexParser:
             # handle 1st level indentation
             self.text[i] = '\n'.join(text)
             self.text[i] = '\\begin{itemize}%s\n\\end{itemize}\n' % re.sub(r'^{0}|\n{0}'.format(self.mark), '\n\\item ', self.text[i])
+            # this is for beamer \pause option
+            if pause:
+                self.text[i] = self.text[i].replace('\\item -', '\\pause \\item ')
         return
 
     def m_parseBib(self):
