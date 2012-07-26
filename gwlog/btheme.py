@@ -643,7 +643,7 @@ SLIDES = '''
 \\setbeamertemplate{blocks}[rounded][shadow=true]
 '''
 HOUT = '''
-\\documentclass[letterpaper,11pt]{extarticle}
+\\documentclass[letterpaper,10pt]{extarticle}
 \\usepackage[noamsthm]{beamerarticle}
 \\mode<article>
 '''
@@ -828,9 +828,23 @@ CONFIG = '''
   \\pagestyle{plain}
 }
 
+
+
+%% frame split
+\\usepackage{tikz}
+\\defbeamertemplate<article>{frame begin}{lined}{\\par\\noindent\\rule{\\textwidth}{1pt}\\par}
+\\defbeamertemplate<article>{frame end}{lined}{\\par\\noindent\\rule{\\textwidth}{1pt}\\par}
+\\newcounter{framebox}
+\\defbeamertemplate<article>{frame begin}{tikzed}{\\par\\noindent\\stepcounter{framebox}\\tikz[remember picture,overlay] \\path (-1ex,0) coordinate (frame top \\the\\value{framebox});}
+\\defbeamertemplate<article>{frame end}{tikzed}{\\hspace*{\\fill}\\tikz[remember picture,overlay] \\draw (frame top \\the\\value{framebox}) rectangle (1ex,0);\\par}
+\\setbeamertemplate{frame begin}[lined]
+%%\\setbeamertemplate{frame end}[lined]
+%%\\setbeamertemplate{frame begin}[tikzed]
+%%\\setbeamertemplate{frame end}[tikzed]
 \\setbeamertemplate{frame end}{
     \\marginpar{\\scriptsize\\hbox to .2in{\\sffamily \\hfill\\strut\\insertframenumber}\\hrule height .2pt}
 }
+
 \\setlength{\\marginparwidth}{.2in}
 \\setlength{\\marginparsep}{.5in}
 
