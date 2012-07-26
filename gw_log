@@ -54,13 +54,15 @@ def getSlidesArguments(parser):
 	parser.add_argument('--thank',
 			action='store_true',
                         help='''generate last 'thank you' page''')
-	parser.add_argument('--handout',
-                        action='store_true',
-                        help='''generate handout instead of slides''')
+	parser.add_argument('--mode',
+			type = str,
+			choices = ['presentation', 'notes', 'handout'],
+			default = 'presentation',
+                        help='''output document mode (default set to 'presentation')''')
 
 
 def slides(args):
-	tex = LogToBeamer(args.title, args.author, args.institute, args.toc, args.handout, args.theme, args.thank, args.filename)
+	tex = LogToBeamer(args.title, args.author, args.institute, args.toc, args.mode, args.theme, args.thank, args.filename)
 	lite = 1 if args.lite else 0
 	fname = getfname(args.filename, args.output)
 	pdflatex(fname, tex.get(lite), vanilla=args.vanilla, beamer = True)

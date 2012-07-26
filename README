@@ -30,7 +30,8 @@ gw_log slides demo.snotes -o d3
 gw_log slides demo.snotes --theme plain -o d4
 gw_log slides demo.snotes -a "John Doe" -t "Example log slides" -i "McDonald's" --toc -o d5
 gw_log slides demo.snotes -a "John Doe" -t "Example log slides" -i "McDonald's" --toc --theme heavy -o d6
-gw_log slides demo.snotes -a "John Doe" -t "Example log slides" -i "McDonald's" --toc --handout -o d7
+gw_log slides demo.snotes -a "John Doe" -t "Example log slides" --toc --mode handout -o d7
+gw_log slides demo.snotes -a "John Doe" -t "Example log slides" --toc --mode notes -o d8
 
 Syntax
 ------

@@ -2,10 +2,10 @@ import sys, re, os
 import codecs
 from utils import wraptxt, TexParser
 from gwlog2tex import SYNTAX
-from btheme import SLIDES, HOUT, CONFIG, TITLE, THANK, THEME
+from btheme import MODE, CONFIG, TITLE, THANK, THEME
 
 class LogToBeamer(TexParser):
-    def __init__(self, title, author, institute, toc, handout, theme, thank, filename):
+    def __init__(self, title, author, institute, toc, mode, theme, thank, filename):
         TexParser.__init__(self, title, author)
         for fn in filename:
             try:
@@ -17,10 +17,10 @@ class LogToBeamer(TexParser):
                 sys.exit(e)
         self.institute = institute
         self.toc = toc
-        self.handout = handout
+        self.mode = mode
         self.theme = theme
         self.wrap_adjust = 1
-        if self.handout:
+        if self.mode == 'notes':
             self.wrap_adjust = 1.38
         else:
             if self.theme == 'heavy':
@@ -188,8 +188,8 @@ class LogToBeamer(TexParser):
         return
 
     def get(self, include_comment):
-        titlepage = '\\frame{\\titlepage}\n' if not self.handout else '\\maketitle\n'
-        tocpage = '\\frame{\\tableofcontents}\n' if not self.handout else '\\tableofcontents\n'
+        titlepage = '\\frame{\\titlepage}\n' if not self.mode == 'notes' else '\\maketitle\n'
+        tocpage = '\\frame{\\tableofcontents}\n' if not self.mode == 'notes' else '\\tableofcontents\n'
         if include_comment and len(self.blocks['err']) > 0:
             for idx in range(len(self.text)):
                 for item in self.blocks['err']:
@@ -197,7 +197,7 @@ class LogToBeamer(TexParser):
                         self.text[idx] = ''
                         break
         self.text = filter(None, self.text)
-        otext = '{}'.format(HOUT if self.handout else SLIDES) + \
+        otext = '{}'.format(MODE[self.mode]) + \
                 CONFIG + '{}'.format(THEME[self.theme.lower()]) + TITLE
         if self.title or self.author:
             otext += '\n\\title[%s]{%s}\n%% \\subtitle\n\\author{%s}\n' % \

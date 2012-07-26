@@ -637,16 +637,10 @@ class btheme:
             f.write(self.beamerthemeRice)
         return
 
-SLIDES = '''
-\\documentclass[ignorenonframetext,mathserif,12pt]{beamer}
-\\mode<presentation>
-\\setbeamertemplate{blocks}[rounded][shadow=true]
-'''
-HOUT = '''
-\\documentclass[letterpaper,10pt]{extarticle}
-\\usepackage[noamsthm]{beamerarticle}
-\\mode<article>
-'''
+MODE = {'presentation':'\\documentclass[ignorenonframetext,mathserif,12pt]{beamer}\n\\mode<presentation>\n\\setbeamertemplate{blocks}[rounded][shadow=true]\n',
+        'notes':'\\documentclass[letterpaper,10pt]{extarticle}\n\\usepackage[noamsthm]{beamerarticle}\n\\mode<article>\n',
+        'handout':'\\documentclass[ignorenonframetext,mathserif,handout,12pt]{beamer}\n\\mode<handout>\n\\setbeamertemplate{blocks}[rounded][shadow=true]\n'
+        }
 THEME = {'heavy': '\\usetheme[numbers]{Rice}\n\\usecolortheme{riceowl}\n',
         'compact': '\\usetheme{Boadilla}\n\\usecolortheme{riceowl}\n\\useinnertheme{rectangles}\n\\useoutertheme{infolines}\n',
         'plain': '\\usetheme{Boadilla}\n\\usecolortheme{dove}\n\\useinnertheme{rectangles}\n\\useoutertheme{infolines}\n'
@@ -674,6 +668,7 @@ CONFIG = '''
 \\usepackage{lastpage}
 \\usepackage{ulem}
 \\usepackage{pdfpages}
+\\usepackage{pgfpages}
 
 %%%%%%%%%%%%%%%%%%
 %%%% 自定义命令
@@ -703,8 +698,8 @@ CONFIG = '''
 \\newcommand{\\myref}[1]{\\tiny \\textit{#1}}
 \\newcommand{\\itm}[1]{\\begin{itemize} \\item #1 \\end{itemize}}
 \\hypersetup{
-	pdftitle={Beamer Present},
-	pdfsubject={Beamer Present},
+	pdftitle={Beamer Presentation},
+	pdfsubject={Beamer Presentation},
 	pdfauthor={gw_log},
 %%	pdfpagemode={FullScreen},
 	pdfkeywords={acrobat, Beamer}%%,
@@ -807,6 +802,9 @@ CONFIG = '''
 %%%%%%%%%%%%%%%%%%
 %% Notes (article version) layout settings
 %%%%%%%%%%%%%%%%%%
+\\mode<handout>{
+  \\pgfpagesuselayout{4 on 1}[letterpaper,landscape,border shrink=2.5mm]
+}
 
 \\mode<article>
 {
