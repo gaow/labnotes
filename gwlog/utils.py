@@ -71,7 +71,7 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
 		m = btheme(tmp_dir)
 		m.put()
 	# compile
-	sys.stderr.write('Building document "{0}" ...\n'.format(fname + '.pdf'))
+	sys.stderr.write('Building {0} "{1}" ...\n'.format('document' if not beamer else 'slides', fname + '.pdf'))
 	for visit in [1,2]:
 		# too bad we cannot pipe tex to pdflatex with the output behavior under ctrl ... have to write the disk
 		tc = Popen(["pdflatex", "-shell-escape", "-halt-on-error", "-file-line-error", fname + '.tex'],
