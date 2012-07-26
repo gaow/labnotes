@@ -14,14 +14,15 @@ def getfname(innames, outname):
 		fname = fname.replace('.pdf', '')
 	return fname
 
-def wraptxt(line, sep, by):
+def wraptxt(line, sep, by, rmblank = True):
     # will also remove blank lines, if any
     sline = ''
     i = 0
     for item in list(line):
         if item == '\n' and i == 0:
-            # unnecessary wrap
-            continue
+            if rmblank:
+                # unnecessary wrap
+                continue
         if item == '\n':
             # natural wrap
             sline += item

@@ -1,0 +1,94 @@
+###
+#! Section 1
+###
+
+###
+# Subsection 1-1
+###
+
+#!Use of ``out'' block
+#!!good for command line output
+#@@gw_qsub@@ Interface
+#{out
+[gaow@csg]$ gw_qsub 
+
+	USAGE: gw_qsub mode split_by 'jobname' 'nodes' 'ppn' 'walltime' '[queue]' < stdin > stdout
+
+	EXAMPLE: echo $vtools_associate_cmds | gw_qsub seq 0 jobname 1 15 240:00:00 high > jobs.log
+	EXAMPLE: gw_qsub para 12 jobname 1 12 48:00:00 < gpow.sh > jobs.log
+	EXAMPLE: gw_qsub seq 1 jobname 1 1 48:00:00 < gpow.sh > jobs.log
+
+	NOTE: the 'para' mode is supported by 'GNU parallel' program
+	NOTE: use 'split_by=0' to submit all commands as one job rather than splitting them into multiple jobs
+
+	TIP: use 'showq' to view the queue before job submission
+	TIP: use 'qstat' to view jobs status after submission
+	TIP: use 'qdel' to delete a job
+	TIP: use this to delete all jobs: jobs=`cat jobs.log`; for i in $jobs; do qdel $i; done
+#}
+#! Use of ``list''
+#{list
+#Pipe the @@vtools@@ command into @@gw_qsub@@ program
+#- Define the @@gw_qsub@@ options, particularly ``jobname'' and job priority (high, low, or write nothing for default)
+#- Use @@vtools admin@@ to set a random @@temp_dir@@
+##- this is to make sure temporary directory is inside ``/tmp'', not elsewhere, because we know that in our cluster ``/tmp'' is mounted to a high performance disk
+#- write the @@vtools associate@@ command
+#}
+#{important
+#make sure #CPUs match! (@@-j15@@ matches 15 in @@gw_qsub@@)
+#}
+
+
+
+###
+# subsection 2
+###
+
+#! Use of ``script block''
+#{bash
+vtools associate variant trait --covariates covar1 covar2 -m "GroupStat --name stat" "BurdenQt --alternative 2" --discard_samples "%(NA)>0.1" --discard_variants "%(NA)>0.1" -g name2 --to_db trait -j15 > output.txt
+
+vtools associate variant trait --covariates covar1 covar2 -m "GroupStat --name stat" "BurdenQt --alternative 2" --discard_samples "%(NA)>0.1" --discard_variants "%(NA)>0.1" -g name2 --to_db trait -j15 > output.txt
+#}
+#Pipe and run
+#{out
+echo "vtools admin --set_runtime_option temp_dir=/tmp/vtools_$RANDOM; vtools associate ..." | gw_qsub seq 0 jobname 1 15 240:00:00 high
+
+echo "vtools admin --set_runtime_option temp_dir=/tmp/vtools_$RANDOM; vtools associate ..." | gw_qsub seq 0 jobname 1 15 240:00:00 high
+#}
+
+#{------
+#! commented out material
+#{warning
+#this is a warning
+#}
+#{important
+#this is important
+#}
+#{note
+#this is a note
+#}
+#{tip
+#this is a tip
+#}
+#}------
+
+#! Plain commandline & script box
+vtools associate variant trait --covariates covar1 covar2 -m "GroupStat --name stat" "BurdenQt --alternative 2" --discard_samples "%(NA)>0.1" --discard_variants "%(NA)>0.1" -g name2 --to_db trait -j15 > output.txt
+#{python
+print('hello world')
+#}
+#{r
+print('hello world')
+#}
+
+###
+#! Section 2
+###
+###
+# subsection 2-1
+###
+#! highlight box and figure
+#!!!this is BCM logo
+#@www.bcm.edu@
+#* bcm.png 0.5

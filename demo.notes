@@ -32,8 +32,8 @@ sudo python3 setup.py install
 gw_log -h
 gw_log doc -h
 gw_log slides -h
-gw_log doc demo.log --author "John Doe" --title "Example log documentation" --notoc -f --output demo.pdf
-gw_log doc demo.log --author "John Doe" --title "Example log documentation" --full --output demo_full.pdf
+gw_log doc demo.notes --author "John Doe" --title "Example log documentation" -f --lite --output d1.pdf
+gw_log doc demo.notes --author "John Doe" --title "Example log documentation" --toc --output d2.pdf
 #}
 
 ###

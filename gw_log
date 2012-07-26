@@ -17,10 +17,10 @@ def getTexArguments(parser):
                         action='store',
                         default = '',
                         help='''title of document''')
-	parser.add_argument('--full',
+	parser.add_argument('--lite',
                         action='store_true',
                         default = '',
-                        help='''make commented-out text visible in output file''')
+                        help='''mask commented-out text from output''')
 	parser.add_argument('--toc',
                         action='store_true',
                         default = '',
@@ -61,14 +61,14 @@ def getSlidesArguments(parser):
 
 def slides(args):
 	tex = LogToBeamer(args.title, args.author, args.institute, args.toc, args.handout, args.theme, args.thank, args.filename)
-	lite = 0 if args.full else 1
+	lite = 1 if args.lite else 0
 	fname = getfname(args.filename, args.output)
 	pdflatex(fname, tex.get(lite), vanilla=args.vanilla, beamer = True)
 	return
 
 def doc(args):
 	tex = LogToTex(args.title, args.author, args.toc, args.footnote, args.filename)
-	lite = 0 if args.full else 1
+	lite = 1 if args.lite else 0
 	fname = getfname(args.filename, args.output)
 	pdflatex(fname, tex.get(lite), vanilla=args.vanilla)
 	return

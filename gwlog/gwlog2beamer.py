@@ -10,7 +10,8 @@ class LogToBeamer(TexParser):
         for fn in filename:
             try:
                 with codecs.open(fn, 'r', encoding='UTF-8', errors='ignore') as f:
-                    lines = [l.rstrip() for l in f.readlines() if l.rstrip()]
+                    #lines = [l.rstrip() for l in f.readlines() if l.rstrip()]
+                    lines = [l.rstrip() for l in f.readlines()]
                 self.text.extend(lines)
             except IOError as e:
                 sys.exit(e)
@@ -18,6 +19,9 @@ class LogToBeamer(TexParser):
         self.toc = toc
         self.handout = handout
         self.theme = theme
+        self.wrap_adjust = 0
+        if self.theme == 'heavy':
+            self.wrap_adjust = -7
         self.thank = thank
         self.alertbox = ['warning', 'tip', 'important', 'note']
         self.keywords = list(set(SYNTAX.values())) + self.alertbox + ['err', 'out', 'list']
@@ -33,14 +37,16 @@ class LogToBeamer(TexParser):
             if len(self.blocks[item]) == 0:
                 continue
             for i in self.blocks[item]:
-                self.text[i] = '\\begin{block}{%s}\\footnotesize\\semiverbatim\n%s\n\\endsemiverbatim\\end{block}\n' % (item.capitalize(), wraptxt(self.text[i], '', 131))
+                self.text[i] = '\\begin{block}{%s}\\scriptsize\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{block}\n' % \
+                        (item.capitalize(), wraptxt(self.text[i], '', 78 + self.wrap_adjust, rmblank = False))
         return
 
     def m_blockizeOut(self):
         if len(self.blocks['out']) == 0:
             return
         for i in self.blocks['out']:
-            self.text[i] = '\\begin{exampleblock}{}\\tiny\\semiverbatim\n%s\n\\endsemiverbatim\\end{exampleblock}\n' % wraptxt(self.text[i], '', 116)
+            self.text[i] = '\\begin{exampleblock}{}\\tiny\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{exampleblock}\n' % \
+                    wraptxt(self.text[i], '', 105 + int(self.wrap_adjust * 1.4), rmblank = False)
         return
 
     def m_blockizeAlert(self):
@@ -50,7 +56,7 @@ class LogToBeamer(TexParser):
             for i in self.blocks[k]:
                 if not self.text[i].startswith(self.mark):
                     sys.exit('ERROR: items must start with "{0}" in alert blocks. Problematic text is: \n {1}'.format(self.mark, self.text[i]))
-                self.text[i] = '\\begin{Alertblock}{%s}\n%s\n\\end{Alertblock}\n' % (k.capitalize(), self.m_recode(re.sub(r'^{0}|\n{0}'.format(self.mark), '', self.text[i])))
+                self.text[i] = '\\begin{alertblock}{%s}\n%s\n\\end{alertblock}\n' % (k.capitalize(), self.m_recode(re.sub(r'^{0}|\n{0}'.format(self.mark), '', self.text[i])))
         return
 
     def m_blockizeAll(self):
@@ -68,7 +74,8 @@ class LogToBeamer(TexParser):
                 except:
                     skip.append(i)
         idx = 0
-        first_frame = True
+        framestart = 0
+        frameend = 0
         while idx < len(self.text):
             if idx in skip or self.text[idx] == '':
                 # no need to process
@@ -86,7 +93,7 @@ class LogToBeamer(TexParser):
                 else:
                     i = idx + 1
                 sep = ''
-                cnt = 114
+                cnt = 62 + self.wrap_adjust
                 sminted = '\\Verb?'
                 lminted = '\\begin{Verbatim}[fontsize=\\footnotesize]\n'
                 #
@@ -102,15 +109,23 @@ class LogToBeamer(TexParser):
                 continue
             if self.text[idx].startswith(self.mark * 3) and self.text[idx+1].startswith(self.mark + '!') and self.text[idx+2].startswith(self.mark * 3):
                 # section
+                prefix = '\\section{'
+                if framestart > frameend:
+                    prefix = '\\end{frame}\n\n' + prefix
+                    frameend += 1
                 self.text[idx] = ''
-                self.text[idx + 1] = '\\section{' + ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(self.text[idx + 1][len(self.mark)+1:]).split()]) + '}'
+                self.text[idx + 1] = prefix + ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(self.text[idx + 1][len(self.mark)+1:]).split()]) + '}'
                 self.text[idx + 2] = ''
                 idx += 3
                 continue
             if self.text[idx].startswith(self.mark * 3) and self.text[idx+1].startswith(self.mark) and (not self.text[idx+1].startswith(self.mark * 2)) and self.text[idx+2].startswith(self.mark * 3):
                 # sub-section
+                prefix = '\\subsection{'
+                if framestart > frameend:
+                    prefix = '\\end{frame}\n\n' + prefix
+                    frameend += 1
                 self.text[idx] = ''
-                self.text[idx + 1] = '\\subsection{' + ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(self.text[idx + 1][len(self.mark):]).split()]) + '}'
+                self.text[idx + 1] = prefix + ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(self.text[idx + 1][len(self.mark):]).split()]) + '}'
                 self.text[idx + 2] = ''
                 idx += 3
                 continue
@@ -119,7 +134,7 @@ class LogToBeamer(TexParser):
                 sys.exit("You have so many urgly '{0}' symbols in a regular line. Please clear them up in this line: '{1}'".format(self.mark, self.text[idx]))
             if self.text[idx].startswith(self.mark + '!!!'):
                 # box
-                self.text[idx] = '\\shabox{' + self.m_recode(self.text[idx][len(self.mark)+3:]) + '}'
+                self.text[idx] = '\\colorbox{yellow}{\\textcolor{red}{\\textbf{' + self.m_recode(self.text[idx][len(self.mark)+3:]) + '}}}'
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark + '!!'):
@@ -137,10 +152,10 @@ class LogToBeamer(TexParser):
             if self.text[idx].startswith(self.mark + '!'):
                 # frame
                 prefix = '\\begin{frame}[fragile, shrink]\n\\frametitle{'
-                if first_frame:
-                    first_frame = False
-                else:
-                    prefix = '\n\\end{frame}\n' + prefix
+                if framestart > frameend:
+                    prefix = '\\end{frame}\n\n' + prefix
+                    frameend += 1
+                framestart += 1
                 self.text[idx] = prefix + self.m_recode(self.text[idx][len(self.mark)+1:]) + '}'
                 idx += 1
                 continue
@@ -165,6 +180,8 @@ class LogToBeamer(TexParser):
                 self.text[idx] = '\n' + self.m_recode(self.text[idx][len(self.mark):]) + '\n'
                 idx += 1
                 continue
+        if framestart > frameend:
+            self.text.append('\\end{frame}\n')
         return
 
     def get(self, include_comment):
@@ -185,9 +202,8 @@ class LogToBeamer(TexParser):
             otext += '\\institute[%s]{%s}\n' % (self.institute, self.institute)
         otext += '\\date{\\today}\n\\begin{document}\n%s\n%s' % \
                 ('\\frame{\\titlepage}\n\\maketitle' if self.title or self.author else '',
-                '\\frame{\\tableofcontents}\n\\tableofcontents' if self.toc else '')
-        otext += '\n'.join(self.text)
-        otext += '\n\\end{frame}\n\\end{document}'
+                '\\frame{\\tableofcontents}\n\\tableofcontents\n' if self.toc else '')
+        otext += '\n'.join(self.text) + '\n\\end{document}'
         if self.thank:
             otext += THANK
         return otext

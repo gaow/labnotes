@@ -150,6 +150,477 @@ class btheme:
 \\mode
 <all>
         '''
+        self.beamerouterthemerice = '''
+% Outer Theme for Rice Beamer Style ver. 0.01 (2008/10/10)
+% Copyright 2003      by Till Tantau   <tantau@users.sourceforge.net>
+%       and 2008 by Daina Chiba <d.chiba@rice.edu>
+%
+% This program can be redistributed and/or modified under the terms
+% of the GNU Public License, version 2.
+
+\\ProvidesPackage{beamerouterthemerice}[2008/10/10]
+
+\\mode<presentation>
+
+%=========================================================%
+% Logo
+%=========================================================%
+%\\pgfdeclareimage[height=2em,interpolate=true]{ricelogotext}{rice/rice-logo}
+
+%\\ifbeamer@nologo
+% \\titlegraphic{\\pgfuseimage{ricelogotext}}
+%\\fi
+
+%=========================================================%
+% Colors and Shades
+%=========================================================%
+
+\\setbeamercolor{section in head/foot}{parent=palette primary}
+\\setbeamercolor{subsection in head/foot}{parent=palette secondary}
+
+\\setbeamercolor{author in head/foot}{parent=section in head/foot}
+\\setbeamercolor{title in head/foot}{parent=subsection in head/foot}
+\\setbeamercolor{date in head/foot}{parent=palette tertiary}
+
+\\setbeamercolor{frametitle}{parent=subsection in head/foot}
+\\setbeamercolor{frametitle right}{parent=section in head/foot}
+
+\\usesectionheadtemplate
+  {\\hfill\\insertsectionhead}
+  {\\hfill\\color{fg!50!bg}\\insertsectionhead}
+
+\\pgfdeclarehorizontalshading[frametitle.bg,frametitle right.bg]{beamer@frametitleshade}{\\paperheight}{%
+  color(0pt)=(frametitle.bg);
+  color(\\paperwidth)=(frametitle right.bg)}
+
+\\AtBeginDocument{
+  \\pgfdeclareverticalshading{beamer@topshade}{\\paperwidth}{%
+    color(0pt)=(bg);
+    color(4pt)=(black!50!bg)}
+}
+
+
+
+
+%=========================================================%
+% Header
+%=========================================================%
+
+\\ifbeamer@compress
+  \\defbeamertemplate*{headline}{rice theme}
+  {%
+    \\leavevmode%
+    \\begin{beamercolorbox}[wd=.5\\paperwidth,ht=2.5ex,dp=1.125ex,right]{section in head/foot}%
+      \\usebeamerfont{section in head/foot}\\insertsectionhead\\hspace*{2ex}
+    \\end{beamercolorbox}%
+    \\begin{beamercolorbox}[wd=.5\\paperwidth,ht=2.5ex,dp=1.125ex,left]{subsection in head/foot}%
+      \\usebeamerfont{subsection in head/foot}\\hspace*{2ex}\\insertsubsectionhead
+    \\end{beamercolorbox}%
+  }
+
+\\else
+
+  \\ifbeamer@minimal
+    \\defbeamertemplate*{headline}{rice theme}{}
+
+  \\else
+    \\defbeamertemplate*{headline}{rice theme}
+    {%
+      \\leavevmode%
+      \\@tempdimb=2.4375ex%
+      \\ifnum\\beamer@subsectionmax<\\beamer@sectionmax%
+        \\multiply\\@tempdimb by\\beamer@sectionmax%
+      \\else%
+        \\multiply\\@tempdimb by\\beamer@subsectionmax%
+      \\fi%
+      \\ifdim\\@tempdimb>0pt%
+        \\advance\\@tempdimb by 1.125ex%
+        \\begin{beamercolorbox}[wd=.5\\paperwidth,ht=\\@tempdimb]{section in head/foot}%
+          \\vbox to\\@tempdimb{\\vfil\\insertsectionnavigation{.5\\paperwidth}\\vfil}%
+        \\end{beamercolorbox}%
+        \\begin{beamercolorbox}[wd=.5\\paperwidth,ht=\\@tempdimb]{subsection in head/foot}%
+          \\vbox to\\@tempdimb{\\vfil\\insertsubsectionnavigation{.5\\paperwidth}\\vfil}%
+        \\end{beamercolorbox}%
+      \\fi%
+    }
+
+  \\fi
+
+\\fi
+
+\\ifbeamer@shadow
+  \\addtobeamertemplate{headline}
+  {}
+  {%
+    \\vskip-0.2pt
+    \\pgfuseshading{beamer@topshade}
+    \\vskip-2pt
+  }
+\\fi
+
+
+%=========================================================%
+% Footer
+%=========================================================%
+
+\\ifbeamer@smoothb
+	\\useoutertheme[subsection=false]{smoothbars}
+\\else
+
+\\ifbeamer@numbers
+\\defbeamertemplate*{footline}{rice theme}
+{%
+  \\leavevmode%
+  \\hbox{\\begin{beamercolorbox}[wd=.5\\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm]{author in head/foot}%
+   \\ifbeamer@riceb {\\footnotesize \\trjnfamily RICE} \\fi \\hfill 
+    \\usebeamerfont{author in head/foot} \\hfill\\insertshortauthor
+  \\end{beamercolorbox}%
+  \\begin{beamercolorbox}[wd=.5\\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm plus1fil]{title in head/foot}%
+    \\usebeamerfont{title in head/foot}\\insertshorttitle \\hfill \\insertframenumber{}
+  \\end{beamercolorbox}}%
+  \\vskip0pt%
+}
+
+\\else
+
+\\defbeamertemplate*{footline}{rice theme}
+{%
+  \\leavevmode%
+%  \\hbox{\\begin{beamercolorbox}[wd=.5\\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm plus1fill,rightskip=.3cm]{author in head/foot}%
+  \\hbox{\\begin{beamercolorbox}[wd=.5\\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm]{author in head/foot}   \\ifbeamer@riceb {\\footnotesize \\trjnfamily RICE} \\fi \\hfill 
+    \\usebeamerfont{author in head/foot}\\insertshortauthor
+  \\end{beamercolorbox}%
+  \\begin{beamercolorbox}[wd=.5\\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm plus1fil]{title in head/foot}%
+    \\usebeamerfont{title in head/foot}\\insertshorttitle
+  \\end{beamercolorbox}}%
+  \\vskip0pt%
+}
+\\fi
+\\fi
+
+%=========================================================%
+% Frame Title
+%=========================================================%
+
+\\defbeamertemplate*{frametitle}{rice theme}
+{%
+  \\nointerlineskip%
+  \\ifbeamer@shadow
+    \\vskip-2pt%
+  \\fi
+  \\hbox{\\leavevmode
+    \\advance\\beamer@leftmargin by -12bp%
+    \\advance\\beamer@rightmargin by -12bp%
+    \\beamer@tempdim=\\textwidth%
+    \\advance\\beamer@tempdim by \\beamer@leftmargin%
+    \\advance\\beamer@tempdim by \\beamer@rightmargin%
+    \\hskip-\\Gm@lmargin\\hbox{%
+      \\setbox\\beamer@tempbox=\\hbox{\\begin{minipage}[b]{\\paperwidth}%
+          \\vbox{}\\vskip-.75ex%
+          \\leftskip0.3cm%
+          \\rightskip0.3cm plus1fil\\leavevmode
+            \\insertframetitle 
+            \\ifbeamer@ricet \\hfill {\\Large \\trjnfamily RICE} 
+            \\else \\ifbeamer@ricetm \\hfill {\\large \\trjnfamily RICE} 
+            \\else \\ifbeamer@ricets \\hfill {\\small \\trjnfamily RICE} \\fi \\fi
+            \\fi%
+          \\ifx\\insertframesubtitle\\@empty%
+            \\strut\\par%
+          \\else
+            \\par{\\usebeamerfont*{framesubtitle}{\\usebeamercolor[fg]{framesubtitle}\\insertframesubtitle}\\strut\\par}%
+          \\fi%
+          \\nointerlineskip
+          \\vbox{}%
+          \\end{minipage}}%
+      \\beamer@tempdim=\\ht\\beamer@tempbox%
+      \\advance\\beamer@tempdim by 2pt%
+      \\begin{pgfpicture}{0pt}{0pt}{\\paperwidth}{\\beamer@tempdim}
+        \\usebeamercolor{frametitle right}
+        \\pgfpathrectangle{\\pgfpointorigin}{\\pgfpoint{\\paperwidth}{\\beamer@tempdim}}
+        \\pgfusepath{clip}
+        \\pgftext[left,base]{\\pgfuseshading{beamer@frametitleshade}}
+      \\end{pgfpicture}
+      \\hskip-\\paperwidth%
+      \\box\\beamer@tempbox%
+    }%
+    \\hskip-\\Gm@rmargin%
+  }%
+  \\nointerlineskip
+  \\ifbeamer@shadow
+    \\vskip-0.2pt
+    \\hbox to\\textwidth{\\hskip-\\Gm@lmargin\\pgfuseshading{beamer@topshade}\\hskip-\\Gm@rmargin}
+    \\vskip-2pt
+  \\fi
+}
+
+%=========================================================%
+% Compressed title page
+%=========================================================%
+
+\\newcommand{\\compressedtitle}{%
+  {
+  \\setbeamertemplate{headline}
+  {
+    \\leavevmode%
+    \\begin{beamercolorbox}[wd=.5\\paperwidth,ht=2.5ex,dp=1.125ex,right]{section in head/foot}%
+    \\end{beamercolorbox}%
+    \\begin{beamercolorbox}[wd=.5\\paperwidth,ht=2.5ex,dp=1.125ex,left]{subsection in head/foot}%
+    \\end{beamercolorbox}%
+    \\ifbeamer@shadow
+      \\vskip-0.2pt
+      \\pgfuseshading{beamer@topshade}
+      \\vskip-2pt
+    \\fi
+  }
+  \\beamer@calculateheadfoot
+
+  \\begin{frame}
+  \\titlepage
+  \\end{frame}
+  }
+
+  \\setbeamertemplate{headline}[rice theme]
+  \\ifbeamer@shadow
+    \\addtobeamertemplate{headline}
+    {}
+    {%
+      \\vskip-0.2pt
+      \\pgfuseshading{beamer@topshade}
+      \\vskip-2pt
+    }
+  \\fi
+  \\beamer@calculateheadfoot
+}
+
+\\mode
+<all>
+        '''
+        self.beamerouterthemerice2 = '''
+% Outer Theme for Rice Beamer Style ver. 0.01 (2008/10/10)
+% Copyright 2003      by Till Tantau   <tantau@users.sourceforge.net>
+%       and 2008 by Daina Chiba <d.chiba@rice.edu>
+%
+% This program can be redistributed and/or modified under the terms
+% of the GNU Public License, version 2.
+
+\\ProvidesPackage{beamerouterthemerice2}[2008/11/22]
+
+\\newif\\ifbeamer@sb@subsection
+
+\\DeclareOptionBeamer{subsection}[true]{\\csname beamer@sb@subsection#1\\endcsname}
+\\ExecuteOptionsBeamer{subsection=true}
+\\ProcessOptionsBeamer
+
+\\mode<presentation>
+
+%=========================================================%
+% Logo
+%=========================================================%
+%\\pgfdeclareimage[height=2em,interpolate=true]{ricelogotext}{rice/rice-logo}
+
+%\\ifbeamer@nologo
+% \\titlegraphic{\\pgfuseimage{ricelogotext}}
+%\\fi
+
+\\setbeamercolor{frametitle}{parent=palette primary}
+\\setbeamercolor{subsection in head/foot}{parent=palette secondary}
+\\setbeamercolor{section in head/foot}{parent=palette quaternary}
+
+
+\\beamer@compresstrue
+
+\\AtBeginDocument{
+  {
+    \\usebeamerfont*{headline}
+    \\colorlet{global.bg}{bg}
+    \\usebeamercolor{subsection in head/foot}
+    \\usebeamercolor{section in head/foot}
+    \\usebeamercolor{frametitle}
+
+    \\ifbeamer@sb@subsection
+      \\pgfdeclareverticalshading{beamer@barshade}{\\the\\paperwidth}{%
+         color(0ex)=(global.bg);%
+         color(1ex)=(subsection in head/foot.bg);%
+         color(3.25ex)=(subsection in head/foot.bg);%
+         color(4.25ex)=(section in head/foot.bg);%
+         color(9.75ex)=(section in head/foot.bg)%
+       }
+       \\pgfdeclareverticalshading{beamer@aboveframetitle}{\\the\\paperwidth}{%
+         color(0ex)=(frametitle.bg);%
+         color(1ex)=(frametitle.bg);%
+         color(2ex)=(subsection in head/foot.bg)
+       }
+    \\else
+      \\pgfdeclareverticalshading{beamer@barshade}{\\the\\paperwidth}{%
+         color(0ex)=(global.bg);%
+         color(1ex)=(section in head/foot.bg);%
+         color(7ex)=(section in head/foot.bg)%
+       }
+     \\pgfdeclareverticalshading{beamer@aboveframetitle}{\\the\\paperwidth}{%
+         color(0ex)=(frametitle.bg);%
+         color(1ex)=(frametitle.bg);%
+         color(2ex)=(section in head/foot.bg)
+       }
+    \\fi  
+
+    \\pgfdeclareverticalshading{beamer@belowframetitle}{\\the\\paperwidth}{%
+      color(0ex)=(global.bg);%
+      color(1ex)=(frametitle.bg)
+    }
+  }
+}
+
+                                % Head
+\\defbeamertemplate*{headline}{smoothbars theme}
+{%
+  \\pgfuseshading{beamer@barshade}%
+  \\ifbeamer@sb@subsection%
+    \\vskip-9.75ex%
+  \\else%
+    \\vskip-7ex%
+  \\fi%
+  \\begin{beamercolorbox}[ignorebg,ht=2.25ex,dp=3.75ex]{section in head/foot}
+    \\insertnavigation{\\paperwidth}
+  \\end{beamercolorbox}%
+  \\ifbeamer@sb@subsection%
+    \\begin{beamercolorbox}[ignorebg,ht=2.125ex,dp=1.125ex,%
+      leftskip=.3cm,rightskip=.3cm plus1fil]{subsection in head/foot}
+      \\usebeamerfont{subsection in head/foot}\\insertsubsectionhead
+    \\end{beamercolorbox}%
+  \\fi%
+}%
+
+
+\\defbeamertemplate*{frametitle}{smoothbars theme}
+{%
+  \\nointerlineskip%
+  \\usebeamerfont{headline}%
+  \\begin{beamercolorbox}[wd=\\paperwidth,ht=1.5ex,dp=0ex,vmode]{empty}
+    \\pgfuseshading{beamer@aboveframetitle}%
+  \\end{beamercolorbox}%
+  \\vskip-.5ex%
+  \\nointerlineskip%
+  \\begin{beamercolorbox}[wd=\\paperwidth,leftskip=.3cm,rightskip=.3cm plus1fil,vmode]{frametitle}
+    \\usebeamerfont*{frametitle}\\insertframetitle
+                \\ifbeamer@ricet \\hfill {\\Large \\trjnfamily RICE} 
+            \\else \\ifbeamer@ricetm \\hfill {\\large \\trjnfamily RICE} 
+            \\else \\ifbeamer@ricets \\hfill {\\small \\trjnfamily RICE} \\fi \\fi
+            \\fi%
+      \\ifx\\insertframesubtitle\\@empty%
+        \\strut\\par%
+      \\else
+        \\par{\\usebeamerfont*{framesubtitle}{\\usebeamercolor[fg]{framesubtitle}\\insertframesubtitle}\\strut\\par}%
+      \\fi%%
+    \\usebeamerfont{headline}%
+    \\vskip.5ex  
+  \\end{beamercolorbox}%
+  \\nointerlineskip
+  \\begin{beamercolorbox}[wd=\\paperwidth,ht=.5ex,dp=0ex]{empty}
+    \\pgfuseshading{beamer@belowframetitle}%
+  \\end{beamercolorbox}%
+}
+\\mode
+<all>
+        '''
+        self.beamerthemeRice = '''
+\\ProvidesPackage{beamerthemeRice}[2008/10/10]
+\\def\\beamerRice@version{0.01}
+
+% Copyright 2003      by Till Tantau  <tantau@users.sourceforge.net>
+%       and 2008 by Daina Chiba <d.chiba@rice.edu>
+%
+% This program can be redistributed and/or modified under the terms
+% of the GNU Public License, version 2.
+
+
+\\mode<presentation>
+
+\\newif\\ifbeamer@minimal
+\\newif\\ifbeamer@nonav
+\\newif\\ifbeamer@bggray
+\\newif\\ifbeamer@bgricegray
+\\newif\\ifbeamer@ricegray
+\\newif\\ifbeamer@numbers
+\\newif\\ifbeamer@shadow
+\\newif\\ifbeamer@ricet
+\\newif\\ifbeamer@ricetm
+\\newif\\ifbeamer@ricets
+\\newif\\ifbeamer@riceb
+\\newif\\ifbeamer@nologo
+\\newif\\ifbeamer@smoothb
+
+\\beamer@minimalfalse
+\\beamer@nonavfalse
+\\beamer@bggrayfalse
+\\beamer@bgricegrayfalse
+\\beamer@ricegrayfalse
+\\beamer@numbersfalse
+\\beamer@shadowtrue
+\\beamer@ricetfalse
+\\beamer@ricetmfalse
+\\beamer@ricetsfalse
+\\beamer@ricebfalse
+\\beamer@nologotrue
+\\beamer@smoothbfalse
+
+\\DeclareOptionBeamer{compress}{\\beamer@compresstrue}
+\\DeclareOptionBeamer{minimal}{\\beamer@minimaltrue}
+\\DeclareOptionBeamer{nonav}{\\beamer@nonavtrue}
+\\DeclareOptionBeamer{bggray}{\\beamer@bggraytrue}
+\\DeclareOptionBeamer{bgricegray}{\\beamer@bgricegraytrue}
+\\DeclareOptionBeamer{ricegray}{\\beamer@ricegraytrue}
+\\DeclareOptionBeamer{numbers}{\\beamer@numberstrue}
+\\DeclareOptionBeamer{noshadow}{\\beamer@shadowfalse}
+\\DeclareOptionBeamer{ricet}{\\beamer@ricettrue}
+\\DeclareOptionBeamer{ricetm}{\\beamer@ricetmtrue}
+\\DeclareOptionBeamer{ricets}{\\beamer@ricetstrue}
+\\DeclareOptionBeamer{riceb}{\\beamer@ricebtrue}
+\\DeclareOptionBeamer{nologo}{\\beamer@nologofalse}
+\\DeclareOptionBeamer{smoothb}{\\beamer@smoothbtrue}
+
+\\ProcessOptionsBeamer
+
+\\usecolortheme{riceowl}
+
+%\\ifbeamer@shadow
+%  \\useinnertheme[shadow=true]{round}
+%\\else
+  \\useinnertheme{rectangles}
+%\\fi
+
+\\ifbeamer@bgricegray
+  \\setbeamercolor{normal text}{fg=white,bg=ricegray}
+  \\setbeamercolor{alerted text}{fg=yellow}
+  \\setbeamercolor{block body}{parent=normal text,use=block title,bg=block title.bg!15!bg}
+\\fi
+
+\\ifbeamer@ricegray
+  \\setbeamercolor{block title}{fg=white,bg=ricegray}
+  \\setbeamercolor*{palette primary}{fg=white,bg=riceblue}
+\\setbeamercolor*{palette secondary}{fg=white,bg=black}
+  \\setbeamercolor*{palette tertiary}{fg=white,bg=ricegray!110}
+\\setbeamercolor*{palette quaternary}{fg=white,bg=riceblue}
+  \\setbeamercolor{titlelike}{fg=white, bg=ricegray}
+  \\setbeamercolor{frametitle}{fg=white, bg=ricegray}
+  \\setbeamercolor{frametitle right}{fg=white, bg=ricegray}
+  \\setbeamercolor{sidebar}{bg=riceblue}
+\\fi
+
+\\ifbeamer@nonav
+  \\setbeamertemplate{navigation symbols}{}  % Removes navigation symbols.
+\\fi
+
+\\ifbeamer@smoothb
+    \\useoutertheme[subsection=false]{rice2}
+  \\else
+    \\useoutertheme{rice}
+\\fi
+
+\\setbeamerfont{block title}{size={}}
+
+\\mode
+<all>
+        '''
 
     def put(self):
         with open(os.path.join(self.outdir, 'beamercolorthemericeowl.sty'), 'w', encoding='UTF-8') as f:
@@ -158,18 +629,26 @@ class btheme:
             f.write(self.beamerouterthemeinfolines)
         with open(os.path.join(self.outdir, 'beamerthemeBoadilla.sty'), 'w', encoding='UTF-8') as f:
             f.write(self.beamerthemeBoadilla)
+        with open(os.path.join(self.outdir, 'beamerouterthemerice.sty'), 'w', encoding='UTF-8') as f:
+            f.write(self.beamerouterthemerice)
+        with open(os.path.join(self.outdir, 'beamerouterthemerice2.sty'), 'w', encoding='UTF-8') as f:
+            f.write(self.beamerouterthemerice2)
+        with open(os.path.join(self.outdir, 'beamerthemeRice.sty'), 'w', encoding='UTF-8') as f:
+            f.write(self.beamerthemeRice)
         return
 
 SLIDES = '''
 \\documentclass[ignorenonframetext,mathserif,12pt]{beamer}
+\\mode<presentation>
 '''
 HOUT = '''
 \\documentclass[letterpaper,11pt]{extarticle}
 \\usepackage[noamsthm]{beamerarticle}
+\\mode<handout>
 '''
 THEME = {'heavy': '\\usetheme[numbers]{Rice}\n\\usecolortheme{riceowl}\n',
-        'compact': '\\usetheme{Boadilla}\n\\usecolortheme{riceowl}\n',
-        'plain': '\\usetheme{Boadilla}\n\\usecolortheme{dove}\n'
+        'compact': '\\usetheme{Boadilla}\n\\usecolortheme{riceowl}\n\\useinnertheme{rectangles}\n\\useoutertheme{infolines}\n',
+        'plain': '\\usetheme{Boadilla}\n\\usecolortheme{dove}\n\\useinnertheme{rectangles}\n\\useoutertheme{infolines}\n'
         }
 CONFIG = '''
 %%%%%%%%%%%%%%%%%%
@@ -178,10 +657,10 @@ CONFIG = '''
 \\usepackage{amsmath}
 \\usepackage{amssymb}
 \\usepackage{url}
-\\usepackage{verbatim}
 \\usepackage{mathpazo}
 \\usepackage{mathptmx}
 \\usepackage{latexsym}
+\\usepackage{fancyvrb}
 \\usepackage{graphicx}
 \\usepackage{color}
 \\usepackage{hyperref}
@@ -192,7 +671,6 @@ CONFIG = '''
 \\usepackage{upgreek}    %% 直立体希腊字母（主要使用 \\uppi）
 \\urlstyle{tt}
 \\usepackage{lastpage}
-\\usepackage{verbatim}
 \\usepackage{ulem}
 \\usepackage{pdfpages}
 
@@ -228,9 +706,9 @@ CONFIG = '''
 	pdfsubject={Beamer Present},
 	pdfauthor={gw_log},
 %%	pdfpagemode={FullScreen},
-	pdfkeywords={acrobat, Beamer},
-	colorlinks={true},
-	linkcolor={purple},
+	pdfkeywords={acrobat, Beamer}%%,
+%%	colorlinks={true},
+%%	linkcolor={purple}
 %% Predefined colors: red, green, blue, cyan, magenta, yellow, black, darkgray, gray, lightgray, orange, violet, purple, and brown
 }
 %%\\newenvironment{script}[1]
@@ -239,6 +717,8 @@ CONFIG = '''
 %%\\newenvironment{out}
 %%{\\exampleblock{}\\tiny\\semiverbatim}
 %%{\\endsemiverbatim\\endexampleblock}
+
+\\setbeamertemplate{bibliography item}[text]
 
 %%%%%%%%%%%%%%%%%%
 %% Slide -- Rice color theme
@@ -283,16 +763,15 @@ CONFIG = '''
 %%\\usetheme{Boadilla}
 %%\\usecolortheme{riceowl}
 %%\\useinnertheme[shadow]{rounded}
-\\useinnertheme{rectangles}
-\\useoutertheme{infolines}
-\\setbeamertemplate{bibliography item}[text]
+%%\\useinnertheme{rectangles}
+%%\\useoutertheme{infolines}
 
 %%%%%%%%%%%%%%%%%%
 %% Inner theme settings
 %%%%%%%%%%%%%%%%%%
 
 \\setbeamercovered{transparent}
-\\setbeamertemplate{blocks}[rounded]%%[shadow=true] %% format blocks
+\\setbeamertemplate{blocks}[rounded][shadow=true] %% format blocks
 %%\\setbeamertemplate{footline}[frame number]
 %% ----------- It is possible to customize Beamer color as follows
 %%\\setbeamercolor{frametitle}{fg=black,bg=blue!6}
