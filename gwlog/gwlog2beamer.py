@@ -194,6 +194,16 @@ class LogToBeamer(TexParser):
             self.text.append('\\end{frame}\n')
         return
 
+    def m_stitle(self, length):
+        stitle = self.title
+        # length ok
+        if len(stitle.replace('\\text', '')) < length:
+            return stitle
+        # have to chop
+        if '\\' in self.title:
+            stitle = self.title[:self.title.index('\\')]
+        return stitle[:min(length, len(stitle))] + '...'
+
     def get(self, include_comment):
         titlepage = '\\frame{\\titlepage}\n' if not self.mode == 'notes' else '\\maketitle\n'
         tocpage = '\\frame{\\tableofcontents}\n' if not self.mode == 'notes' else '\\tableofcontents\n'
@@ -208,8 +218,7 @@ class LogToBeamer(TexParser):
                 CONFIG + '{}'.format(THEME[self.theme.lower()]) + TITLE
         if self.title or self.author:
             otext += '\n\\title[%s]{%s}\n%% \\subtitle\n\\author{%s}\n' % \
-                (self.title[:min(15, len(self.title))] + '...' if len(self.title) > 15 else '',
-                self.title, self.author)
+                (self.m_stitle(30), self.title, self.author)
         if self.institute:
             otext += '\\institute[%s]{%s}\n' % (self.institute, self.institute)
         otext += '\\date{\\today}\n\\begin{document}\n%s\n%s' % \
