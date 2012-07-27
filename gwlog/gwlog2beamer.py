@@ -47,7 +47,7 @@ class LogToBeamer(TexParser):
             if len(self.blocks[item]) == 0:
                 continue
             for i in self.blocks[item]:
-                self.text[i] = '\\begin{block}{%s}\\scriptsize\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{block}\n' % \
+                self.text[i] = '\\begin{block}{\\texttt{%s}}\\scriptsize\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{block}\n' % \
                         (item.capitalize(), wraptxt(self.text[i], '', int(78 * self.wrap_adjust), rmblank = False))
         return
 

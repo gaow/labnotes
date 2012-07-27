@@ -26,24 +26,6 @@
 	TIP: use 'qdel' to delete a job
 	TIP: use this to delete all jobs: jobs=`cat jobs.log`; for i in $jobs; do qdel $i; done
 #}
-#! Use of ``list''
-#{list
-#Pipe the @@vtools@@ command into @@gw_qsub@@ program
-#- Define the @@gw_qsub@@ options, particularly ``jobname'' and job priority (high, low, or write nothing for default)
-#- Use @@vtools admin@@ to set a random @@temp_dir@@
-##- this is to make sure temporary directory is inside ``/tmp'', not elsewhere, because we know that in our cluster ``/tmp'' is mounted to a high performance disk
-#- write the @@vtools associate@@ command
-#}
-#{important
-#make sure #CPUs match! (@@-j15@@ matches 15 in @@gw_qsub@@)
-#}
-
-
-
-###
-# subsection 2
-###
-
 #! Use of ``script block''
 #{bash
 vtools associate variant trait --covariates covar1 covar2 -m "GroupStat --name stat" "BurdenQt --alternative 2" --discard_samples "%(NA)>0.1" --discard_variants "%(NA)>0.1" -g name2 --to_db trait -j15 > output.txt
@@ -57,8 +39,23 @@ echo "vtools admin --set_runtime_option temp_dir=/tmp/vtools_$RANDOM; vtools ass
 echo "vtools admin --set_runtime_option temp_dir=/tmp/vtools_$RANDOM; vtools associate ..." | gw_qsub seq 0 jobname 1 15 240:00:00 high
 #}
 
+###
+# subsection 2
+###
+#! Use of ``list''
+#{list
+# Define the @@gw_qsub@@ options, particularly ``jobname'' and job priority (high, low, or write nothing for default)
+#- Use @@vtools admin@@ to set a random @@temp_dir@@
+##- this is to make sure temporary directory is inside ``/tmp'', not elsewhere, because we know that in our cluster ``/tmp'' is mounted to a high performance disk
+#- Write the @@vtools associate@@ command
+#- Pipe the @@vtools@@ command into @@gw_qsub@@ program
+#}
+#{important
+#make sure #CPUs match! (@@-j15@@ matches 15 in @@gw_qsub@@)
+#}
+
 #{------
-#! commented out material
+#! Commented out material
 #{warning
 #this is a warning
 #}

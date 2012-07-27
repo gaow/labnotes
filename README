@@ -35,8 +35,8 @@ gw_log slides demo.snotes -a "John Doe" -t "Example log slides" --toc --mode not
 
 Syntax
 ------
-###  ###				#{ ----------	#{ out	#{ xxx (xxx = list, warning, important, tip, note)  #{ xxx (xxx = latex, bash, r, cpp, python, sql)
-#!   #								#
-###, ###, #*, #!, #!!, #!!!, #, 	#} ----------,  #}    , #}     						  , #}
+###  ###				#{ ----------	#{ out	#{ xxx (xxx = warning, important, tip, note)	#{ list		#{ xxx (xxx = latex, bash, r, cpp, python, sql)
+#!   #								#						#(or ##)
+###, ###, #*, #!, #!!, #!!!, #, 	#} ----------,  #}	#}     						#} 		#}
 
 Emphasis: ``double quote'', `single quote',  "italics", ""bold"", """bold italics""", @@monospaced@@, @url@, [keyword|footnote]
