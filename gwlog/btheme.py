@@ -21,7 +21,7 @@ class btheme:
 
 \\setbeamercolor*{normal text}{fg=black,bg=white}
 \\setbeamercolor*{alerted text}{fg=red}
-\\setbeamercolor*{example text}{fg=black}
+%\\setbeamercolor*{example text}{fg=ricegray}
 \\setbeamercolor*{structure}{fg=riceblue, bg=white}
 
 \\setbeamerfont{alerted text}{series=\\bfseries}
