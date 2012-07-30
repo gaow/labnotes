@@ -47,7 +47,7 @@ class LogToBeamer(TexParser):
             if len(self.blocks[item]) == 0:
                 continue
             for i in self.blocks[item]:
-                self.text[i] = '\\begin{block}{\\texttt{%s}}\\scriptsize\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{block}\n' % \
+                self.text[i] = '\\begin{exampleblock}{\\texttt{%s}}\\scriptsize\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{exampleblock}\n' % \
                         (item.capitalize(), wraptxt(self.text[i], '', int(78 * self.wrap_adjust), rmblank = False))
         return
 
@@ -65,8 +65,9 @@ class LogToBeamer(TexParser):
                 continue
             for i in self.blocks[k]:
                 if not self.text[i].startswith(self.mark):
-                    sys.exit('ERROR: items must start with "{0}" in alert blocks. Problematic text is: \n {1}'.format(self.mark, self.text[i]))
-                self.text[i] = '\\begin{alertblock}{%s}\n%s\n\\end{alertblock}\n' % (k.capitalize(), self.m_recode(re.sub(r'^{0}|\n{0}'.format(self.mark), '', self.text[i])))
+                    sys.exit('ERROR: items must start with "{0}" in blocks. Problematic text is: \n {1}'.format(self.mark, self.text[i]))
+                self.text[i] = '\\begin{{{0}block}}{{{1}}}\n{2}\n\\end{{{0}block}}\n'.\
+                        format('alert' if k in ['important', 'warning'] else '', k.capitalize(), self.m_recode(re.sub(r'^{0}|\n{0}'.format(self.mark), '', self.text[i])))
         return
 
     def m_blockizeAll(self):

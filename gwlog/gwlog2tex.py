@@ -220,6 +220,7 @@ class LogToTex(TexParser):
 \\parindent 0ex
 \\geometry{left=0.8in,right=0.8in,top=0.8in,bottom=0.8in}
 \\renewcommand\\%s{References}
+\\renewcommand{\\labelitemii}{$\\triangleright$}
 \\makeatletter
 \\renewcommand\\@biblabel[1]{#1.}
 \\renewcommand\\@cite[1]{\\textsuperscript{#1}}
