@@ -74,7 +74,7 @@ class LogToBeamer(TexParser):
         self.m_blockizeIn()
         self.m_blockizeOut()
         self.m_blockizeList(pause=True)
-        self.m_blockizeTable()
+        self.m_blockizeTable(fsize='tiny')
         self.m_blockizeAlert()
 
     def m_parseText(self):
