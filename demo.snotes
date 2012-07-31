@@ -70,6 +70,19 @@ echo "vtools admin --set_runtime_option temp_dir=/tmp/vtools_$RANDOM; vtools ass
 #}
 #}------
 
+#! Use of table
+#{table
+chr	pos	sample_size_SNV	beta_x_SNV	pvalue_SNV
+1	1138931	268	0.417457	0.643625
+1	1179385	268	0.0731516	0.878491
+1	1418004	268	-0.272227	0.464371
+1	1454412	268	0.771052	0.372779
+1	1670537	268	0.0178782	0.976594
+1	2160304	268	0.429178	0.449485
+1	2445748	268	-0.425785	0.546444
+1	2461373	268	0.599755	0.490808
+1	6530254	268	0.115223	0.825298
+#}
 #! Plain commandline & script box
 vtools associate variant trait --covariates covar1 covar2 -m "GroupStat --name stat" "BurdenQt --alternative 2" --discard_samples "%(NA)>0.1" --discard_variants "%(NA)>0.1" -g name2 --to_db trait -j15 > output.txt
 #{python

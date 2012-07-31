@@ -103,7 +103,7 @@ class TexParser:
         self.mark = '#'
         self.text = []
         self.blocks = {}
-        self.keywords = ['err', 'list']
+        self.keywords = ['err', 'list', 'table']
         for item in self.keywords:
             self.blocks[item] = []
         self.bib = {}
@@ -249,6 +249,21 @@ class TexParser:
             # this is for beamer \pause option
             if pause:
                 self.text[i] = self.text[i].replace('\\item -', '\\pause \\item ')
+        return
+
+    def m_blockizeTable(self):
+        if len(self.blocks['table']) == 0:
+            return
+        for i in self.blocks['table']:
+            table = [[self.m_recode(iitem) for iitem in item.split('\t')] for item in self.text[i].split('\n')]
+            ncols = list(set([len(x) for x in table]))
+            if len(ncols) > 1:
+                sys.exit("ERROR: number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(self.text[i]))
+            cols = 'c' * ncols[0]
+            head = '\\begin{center}\n{\\footnotesize\\begin{longtable}{%s}\n\\hline\n' % cols
+            body = '&'.join(table[0]) + '\\\\\n' + '\\hline\n' + '\\\\\n'.join(['&'.join(item) for item in table[1:]]) + '\\\\\n'
+            tail = '\\hline\n\\end{longtable}}\n\\end{center}\n'
+            self.text[i] = head + body + tail
         return
 
     def m_parseBib(self):

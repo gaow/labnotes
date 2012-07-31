@@ -39,7 +39,7 @@ class LogToTex(TexParser):
         self.doctype = 'article'
         self.footnote = footnote
         self.bclogo = {'warning':'\\bcattention', 'tip':'\\bclampe', 'important':'\\bctakecare', 'note':'\\bccrayon'}
-        self.keywords = list(set(SYNTAX.values())) + self.bclogo.keys() + ['err', 'out', 'list']
+        self.keywords = list(set(SYNTAX.values())) + self.bclogo.keys() + ['err', 'out', 'list', 'table']
         for item in self.keywords:
             self.blocks[item] = []
         self.m_parseBlocks()
@@ -77,6 +77,7 @@ class LogToTex(TexParser):
         self.m_blockizeIn()
         self.m_blockizeOut()
         self.m_blockizeList()
+        self.m_blockizeTable()
         self.m_blockizeBclogo()
 
     def m_parseText(self):
@@ -210,6 +211,7 @@ class LogToTex(TexParser):
 \\usepackage{minted}
 \\usepackage{upquote}
 \\usepackage{titlesec}
+\\usepackage{longtable}
 %s
 \\renewcommand\\rmdefault{bch}
 \\newcommand{\\ie}{\\textit{i.e.}}

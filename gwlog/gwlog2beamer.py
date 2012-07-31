@@ -29,7 +29,7 @@ class LogToBeamer(TexParser):
                 self.wrap_adjust = 0.92
         self.thank = thank
         self.alertbox = ['warning', 'tip', 'important', 'note']
-        self.keywords = list(set(SYNTAX.values())) + self.alertbox + ['err', 'out', 'list']
+        self.keywords = list(set(SYNTAX.values())) + self.alertbox + ['err', 'out', 'list', 'table']
         for item in self.keywords:
             self.blocks[item] = []
         self.m_parseBlocks()
@@ -74,6 +74,7 @@ class LogToBeamer(TexParser):
         self.m_blockizeIn()
         self.m_blockizeOut()
         self.m_blockizeList(pause=True)
+        self.m_blockizeTable()
         self.m_blockizeAlert()
 
     def m_parseText(self):

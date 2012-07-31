@@ -669,6 +669,7 @@ CONFIG = '''
 \\usepackage{ulem}
 \\usepackage{pdfpages}
 \\usepackage{pgfpages}
+\\usepackage{longtable}
 
 %%%%%%%%%%%%%%%%%%
 %%%% 自定义命令
