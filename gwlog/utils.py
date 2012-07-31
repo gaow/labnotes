@@ -260,7 +260,7 @@ class TexParser:
             if len(ncols) > 1:
                 sys.exit("ERROR: number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(self.text[i]))
             cols = 'c' * ncols[0]
-            head = '\\begin{center}\n{\\footnotesize\\begin{longtable}{%s}\n\\hline\n' % cols
+            head = '\\begin{center}\n{\\tiny\\begin{longtable}{%s}\n\\hline\n' % cols
             body = '&'.join(table[0]) + '\\\\\n' + '\\hline\n' + '\\\\\n'.join(['&'.join(item) for item in table[1:]]) + '\\\\\n'
             tail = '\\hline\n\\end{longtable}}\n\\end{center}\n'
             self.text[i] = head + body + tail
