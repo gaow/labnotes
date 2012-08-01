@@ -720,6 +720,7 @@ CONFIG = '''
 \\renewcommand\\@biblabel[1]{#1.}
 \\renewcommand\\@cite[1]{\\textsuperscript{#1}}
 \\makeatother
+\\setbeamertemplate{frametitle continuation}[from second]
 
 %%%%%%%%%%%%%%%%%%
 %% Slide -- Rice color theme

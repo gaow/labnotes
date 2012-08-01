@@ -184,7 +184,7 @@ class LogToBeamer(TexParser):
                     sys.exit("ERROR: Input file format '%s' not supported. Valid extensions are 'pdf', 'png' and 'jpg'" % fig.split('.')[1])
                 if not os.path.exists(fig):
                     sys.exit("ERROR: Cannot find file %s" % fig)
-                self.text[idx] = '\\begin{figure}\\centering\\includegraphics[width=%s\\textwidth]{%s}\\end{figure}' % (width, os.path.abspath(fig))
+                self.text[idx] = '\\centering\\includegraphics[width=%s\\textwidth]{%s}\n' % (width, os.path.abspath(fig))
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark):
@@ -208,7 +208,8 @@ class LogToBeamer(TexParser):
 
     def get(self, include_comment):
         titlepage = '\\frame{\\titlepage}\n' if not self.mode == 'notes' else '\\maketitle\n'
-        tocpage = '\\frame{\\tableofcontents}\n' if not self.mode == 'notes' else '\\tableofcontents\n'
+        tocpage = '\\begin{frame}[allowframebreaks]\n\\frametitle{Contents}\n\\tableofcontents\n\\end{frame}\n' if not self.mode == 'notes' else '\\tableofcontents\n'
+        sectiontoc = '\\AtBeginSection[]\n{\n\\begin{frame}<beamer>\n\\tableofcontents[currentsection, currentsubsection, sectionstyle=show/hide, subsectionstyle=show/show/hide]\n\\end{frame}\n}\n'
         if include_comment and len(self.blocks['err']) > 0:
             for idx in range(len(self.text)):
                 for item in self.blocks['err']:
@@ -223,7 +224,10 @@ class LogToBeamer(TexParser):
                 (self.m_stitle(30), self.title, self.author)
         if self.institute:
             otext += '\\institute[%s]{%s}\n' % (self.institute, self.institute)
-        otext += '\\date{\\today}\n\\begin{document}\n%s\n%s' % \
-                (titlepage if self.title or self.author else '', tocpage if self.toc else '')
+        otext += '\\date{\\today}\n%s\\begin{document}\n%s\n%s' % (
+                sectiontoc if self.toc else '',
+                titlepage if self.title or self.author else '',
+                tocpage if self.toc else ''
+                )
         otext += '\n'.join(self.text) + '\n\\end{document}'
         return otext
