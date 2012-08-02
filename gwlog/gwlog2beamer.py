@@ -163,6 +163,10 @@ class LogToBeamer(TexParser):
                 continue
             if self.text[idx].startswith(self.mark + '!'):
                 # frame
+                if idx + 1 >= len(self.text):
+                    sys.exit("ERROR: empty slide not allowed, near '{0}'".format(self.text[idx]))
+                if self.text[idx+1].startswith(self.mark + '!') and not self.text[idx+1].replace(self.mark + '!', '').startswith('!'):
+                    sys.exit("ERROR: empty slide not allowed, near '{0}'".format(self.text[idx]))
                 prefix = '\\begin{frame}[fragile, shrink]\n\\frametitle{'
                 if framestart > frameend:
                     prefix = '\\end{frame}\n\n' + prefix

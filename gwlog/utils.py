@@ -80,7 +80,7 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
 		if (tc.returncode) or error.decode(sys.getdefaultencoding()) or (not os.path.exists(fname + '.pdf')):
 			with open(os.path.join(dest_dir, '{0}-ERROR.txt'.format(fname)), 'w', encoding='utf-8') as f:
 				f.writelines(out.decode(sys.getdefaultencoding()) + error.decode(sys.getdefaultencoding()))
-			os.system('rm -f *.out *.toc *.aux *.log *.nav *.snm *.vrb')
+			os.system('rm -f {0}.out {0}.toc {0}.aux {0}.log {0}.nav {0}.snm {0}.vrb'.format(fname))
 			#sys.stderr.write('DEBUG:\n\t$ cd {0}\n\t$ pdflatex -shell-escape -halt-on-error -file-line-error {1}\n'.format(tmp_dir, fname + '.tex'))
 			sys.stderr.write('WARNING: Non-empty error message or non-zero return code captured. Please run the program again.\n')
 			sys.exit('If this message presists please find file "{0}-ERROR.txt" and report it to Gao Wang.\n'.format(fname))
@@ -89,7 +89,7 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
 			os.system('rm -f *.pdf')
 		else:
 			os.system('mv -f {0} {1}'.format(fname + '.pdf', dest_dir))
-			os.system('rm -f *.out *.toc *.aux *.log *.nav *.snm *.vrb')
+			os.system('rm -f {0}.out {0}.toc {0}.aux {0}.log {0}.nav {0}.snm {0}.vrb'.format(fname))
 			os.system('rm -f {0}'.format(os.path.join(dest_dir, '{0}-ERROR.txt'.format(fname))))
 	sys.stderr.write('Done!\n')
 	return
