@@ -163,10 +163,6 @@ class LogToBeamer(TexParser):
                 continue
             if self.text[idx].startswith(self.mark + '!'):
                 # frame
-                if idx + 1 >= len(self.text):
-                    sys.exit("ERROR: empty slide not allowed, near '{0}'".format(self.text[idx]))
-                if self.text[idx+1].startswith(self.mark + '!') and not self.text[idx+1].replace(self.mark + '!', '').startswith('!'):
-                    sys.exit("ERROR: empty slide not allowed, near '{0}'".format(self.text[idx]))
                 prefix = '\\begin{frame}[fragile, shrink]\n\\frametitle{'
                 if framestart > frameend:
                     prefix = '\\end{frame}\n\n' + prefix
@@ -198,6 +194,7 @@ class LogToBeamer(TexParser):
                 continue
         if framestart > frameend:
             self.text.append('\\end{frame}\n')
+        self.m_checkEmptySlides(self.text)
         return
 
     def m_stitle(self, length):
@@ -209,6 +206,18 @@ class LogToBeamer(TexParser):
         if '\\' in self.title:
             stitle = self.title[:self.title.index('\\')]
         return stitle[:min(length, len(stitle))] + '...'
+
+    def m_checkEmptySlides(self, ltext):
+        text = ''.join(ltext)
+        pattern = re.compile(r'\\\\begin{frame}\[fragile, shrink\](.*?)\\\\end{frame}')
+        for m in re.finditer(pattern, '%r' % text):
+            frame = m.group(1)
+            frametitle = re.search(r'\\\\frametitle{(.*?)}', frame).group(1).encode().decode('unicode_escape')
+            frame = re.sub(r'\\\\frametitle{(.*?)}', '', frame)
+            frame = re.sub(r'\\\\framesubtitle{(.*?)}', '', frame)
+            if len(re.sub(r'\s', '', frame.encode().decode('unicode_escape'))) == 0:
+                sys.exit("ERROR: empty slides not allowed, near '{}'".format(frametitle))
+        return
 
     def get(self, include_comment):
         titlepage = '\\frame{\\titlepage}\n' if not self.mode == 'notes' else '\\maketitle\n'
