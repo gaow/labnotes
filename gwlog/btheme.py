@@ -658,7 +658,6 @@ CONFIG = '''
 \\usepackage{fancyvrb}
 \\usepackage{graphicx}
 \\usepackage{color}
-\\usepackage{hyperref}
 \\usepackage{beamerthemesplit}
 \\usepackage{pgf,pgfarrows,pgfnodes,pgfautomata,pgfheaps,pgfshade}
 \\usepackage{marvosym}
@@ -670,6 +669,9 @@ CONFIG = '''
 \\usepackage{pdfpages}
 \\usepackage{pgfpages}
 \\usepackage{longtable}
+\\usepackage[numhered]{bookmark}
+%%Make sure it comes last of your loaded packages
+\\usepackage{hyperref}
 
 %%%%%%%%%%%%%%%%%%
 %%%% 自定义命令
