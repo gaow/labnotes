@@ -97,9 +97,10 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
 
 # classes
 class TexParser:
-    def __init__(self, title, author):
+    def __init__(self, title, author, fname):
         self.title = ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(title).split()])
         self.author = self.m_recode(author)
+        self.fn = '-'.join(fname)
         self.mark = '#'
         self.text = []
         self.blocks = {}
@@ -139,7 +140,7 @@ class TexParser:
             if not self.footnote:
                 k = re.sub('\W', '', m.group('a'))
                 if not k:
-                    sys.exit("Invalid citation keyword for reference item '{}'.".format(m.group('b')))
+                    self.quit("Invalid citation keyword for reference item '{}'.".format(m.group('b')))
                 if k in self.bib.keys():
                     if self.bib[k] != [m.group('a'), m.group('b')]:
                         k += str(len(self.bib.keys()))
@@ -156,28 +157,28 @@ class TexParser:
             if idx >= len(self.text):
                 break
             if self.text[idx].startswith(self.mark + '}') and '--' not in self.text[idx]:
-                sys.exit("ERROR: invalid use of '%s' without previous %s{, near %s" % (self.text[idx], self.mark, self.text[idx+1] if idx + 1 < len(self.text) else "end of document"))
+                self.quit("Invalid use of '%s' without previous %s{, near %s" % (self.text[idx], self.mark, self.text[idx+1] if idx + 1 < len(self.text) else "end of document"))
             if self.text[idx].startswith(self.mark + '{') and '--' not in self.text[idx]:
                 # define block
                 bname = self.text[idx].split('{')[1].strip()
                 if bname not in [x for x in self.keywords if x != 'err']:
-                    sys.exit("ERROR: invalid block definition '%s{ %s'" % (self.mark, bname))
+                    self.quit("Invalid block definition '%s{ %s'" % (self.mark, bname))
                 endidx = None
                 self.text[idx] = ''
                 # find end of block
                 for i in range(idx+1, len(self.text)):
                     # do not allow nested blocks
                     if self.text[i].startswith(self.mark + '{'):
-                        sys.exit("ERROR: nested use of blocks is disallowed: '{0}', near {1}".format(self.text[i], self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
+                        self.quit("Nested use of blocks is disallowed: '{0}', near {1}".format(self.text[i], self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
                     # find end of block
                     if self.text[i].startswith(self.mark + '}'):
                         if self.text[i].rstrip() == self.mark + '}':
                             endidx = i
                             break
                         else:
-                            sys.exit("ERROR: invalid %s '%s', near %s" % ('nested use of' if '--' in self.text[i] else 'symbol', self.text[i], self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
+                            self.quit("Invalid %s '%s', near %s" % ('nested use of' if '--' in self.text[i] else 'symbol', self.text[i], self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
                 if not endidx:
-                    sys.exit("ERROR: '%s{ %s' and '%s}' must appear in pairs, near %s" % (self.mark, bname, self.mark, self.text[idx+1] if idx + 1 < len(self.text) else "end of document"))
+                    self.quit("'%s{ %s' and '%s}' must appear in pairs, near %s" % (self.mark, bname, self.mark, self.text[idx+1] if idx + 1 < len(self.text) else "end of document"))
                 # combine block values
                 for i in range(idx + 1, endidx):
                     self.text[idx] += self.text[i] + ('\n' if not i + 1 == endidx else '')
@@ -190,17 +191,17 @@ class TexParser:
         for idx, item in enumerate(self.text):
             # define err block
             if self.text[idx].startswith(self.mark + '}') and '--' in self.text[idx]:
-                sys.exit("ERROR: invalid use of '%s}----' without previous '%s{----', near %s" % (self.mark, self.mark, self.text[idx+1] if idx + 1 < len(self.text) else "end of document") )
+                self.quit("Invalid use of '%s}----' without previous '%s{----', near %s" % (self.mark, self.mark, self.text[idx+1] if idx + 1 < len(self.text) else "end of document") )
             if item.startswith(self.mark + '{') and '--' in item:
                 endidx = None
                 for i in range(idx+1, len(self.text)):
                     if self.text[i].startswith(self.mark + '{') and '--' in self.text[i]:
-                        sys.exit("ERROR: nested use of blocks is disallowed: '{0}', near {1}".format(self.text[i], self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
+                        self.quit("Nested use of blocks is disallowed: '{0}', near {1}".format(self.text[i], self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
                     if self.text[i].startswith(self.mark + '}') and '--' in self.text[i]:
                         endidx = i
                         break
                 if not endidx:
-                    sys.exit('ERROR: comment blocks must appear in pairs, near {0}'.format(self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
+                    self.quit('Comment blocks must appear in pairs, near {0}'.format(self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
                 self.blocks['err'].append([idx, endidx])
                 self.text[idx] = ''
                 self.text[endidx] = ''
@@ -211,9 +212,9 @@ class TexParser:
             return
         for i in self.blocks['list']:
             if i >= len(self.text):
-                sys.exit('BUG: block specification does not match text')
+                self.quit('BUG: block specification does not match text')
             if not self.text[i].startswith(self.mark):
-                sys.exit('ERROR: items must start with "{0}" in list block. Problematic text is: \n {1}'.format(self.mark, self.text[i]))
+                self.quit('Items must start with "{0}" in list block. Problematic text is: \n {1}'.format(self.mark, self.text[i]))
             # handle 2nd level indentation first
             # in the mean time take care of recoding
             text = self.text[i].split('\n')
@@ -260,7 +261,7 @@ class TexParser:
             table = [[self.m_recode(iitem) for iitem in item.split('\t')] for item in self.text[i].split('\n')]
             ncols = list(set([len(x) for x in table]))
             if len(ncols) > 1:
-                sys.exit("ERROR: number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(self.text[i]))
+                self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(self.text[i]))
             cols = 'c' * ncols[0]
             head = '\\begin{center}\n{\\%s\\begin{longtable}{%s}\n\\hline\n' % (fsize, cols)
             body = '&'.join(table[0]) + '\\\\\n' + '\\hline\n' + '\\\\\n'.join(['&'.join(item) for item in table[1:]]) + '\\\\\n'
@@ -283,3 +284,6 @@ class TexParser:
 
     def get(self, include_comment):
         return 'None'
+
+    def quit(self, msg):
+        sys.exit('An ERROR has occured while processing input text "{}":\n\t '.format(self.fn) + msg)

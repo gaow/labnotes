@@ -672,7 +672,6 @@ CONFIG = '''
 \\usepackage[numbered]{bookmark}
 %%Make sure it comes last of your loaded packages
 \\usepackage{hyperref}
-%%\\usepackage[bookmarks=true,bookmarksnumbered=true]{hyperref}
 %%%%%%%%%%%%%%%%%%
 %%%% 自定义命令
 %%%%%%%%%%%%%%%%%%

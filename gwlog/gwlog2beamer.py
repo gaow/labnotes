@@ -6,7 +6,7 @@ from btheme import MODE, CONFIG, TITLE, THANK, THEME
 
 class LogToBeamer(TexParser):
     def __init__(self, title, author, institute, toc, mode, theme, thank, filename):
-        TexParser.__init__(self, title, author)
+        TexParser.__init__(self, title, author, filename)
         self.text = []
         self.textbib = None
         for fn in filename:
@@ -65,7 +65,7 @@ class LogToBeamer(TexParser):
                 continue
             for i in self.blocks[k]:
                 if not self.text[i].startswith(self.mark):
-                    sys.exit('ERROR: items must start with "{0}" in blocks. Problematic text is: \n {1}'.format(self.mark, self.text[i]))
+                    self.quit('Items must start with "{0}" in blocks. Problematic text is: \n {1}'.format(self.mark, self.text[i]))
                 self.text[i] = '\\begin{{{0}block}}{{{1}}}\n{2}\n\\end{{{0}block}}\n'.\
                         format('alert' if k in ['important', 'warning'] else '', k.capitalize(), self.m_recode(re.sub(r'^{0}|\n{0}'.format(self.mark), '', self.text[i])))
         return
@@ -143,7 +143,7 @@ class LogToBeamer(TexParser):
                 continue
             if self.text[idx].startswith(self.mark * 2):
                 # too many #'s
-                sys.exit("You have so many urgly '{0}' symbols in a regular line. Please clear them up in this line: '{1}'".format(self.mark, self.text[idx]))
+                self.quit("You have so many urgly '{0}' symbols in a regular line. Please clear them up in this line: '{1}'".format(self.mark, self.text[idx]))
             if self.text[idx].startswith(self.mark + '!!!'):
                 # box
                 self.text[idx] = '\\colorbox{yellow}{\\textcolor{red}{\\textbf{' + self.m_recode(self.text[idx][len(self.mark)+3:]) + '}}}'
@@ -157,7 +157,7 @@ class LogToBeamer(TexParser):
                 except Exception as e:
                     pass
                 if not hastitle:
-                    sys.exit("'{0}!!' has to be preceded by a line starting with '{0}!', near '{1}'".format(self.mark, self.text[idx]))
+                    self.quit("'{0}!!' has to be preceded by a line starting with '{0}!', near '{1}'".format(self.mark, self.text[idx]))
                 self.text[idx] = '\\framesubtitle{' + self.m_recode(self.text[idx][len(self.mark)+2:]) + '}'
                 idx += 1
                 continue
@@ -179,11 +179,11 @@ class LogToBeamer(TexParser):
                     fig = self.text[idx][len(self.mark)+1:].split()[0]
                     width = 0.9
                 if not '.' in fig:
-                    sys.exit("ERROR: Cannot determine graphic file format for '%s'. Valid extensions are 'pdf', 'png' and 'jpg'" % fig)
+                    self.quit("Cannot determine graphic file format for '%s'. Valid extensions are 'pdf', 'png' and 'jpg'" % fig)
                 if fig.split('.')[1] not in ['jpg','pdf','png']:
-                    sys.exit("ERROR: Input file format '%s' not supported. Valid extensions are 'pdf', 'png' and 'jpg'" % fig.split('.')[1])
+                    self.quit("Input file format '%s' not supported. Valid extensions are 'pdf', 'png' and 'jpg'" % fig.split('.')[1])
                 if not os.path.exists(fig):
-                    sys.exit("ERROR: Cannot find file %s" % fig)
+                    self.quit("Cannot find file %s" % fig)
                 self.text[idx] = '\\centering\\includegraphics[width=%s\\textwidth]{%s}\n' % (width, os.path.abspath(fig))
                 idx += 1
                 continue
@@ -216,7 +216,7 @@ class LogToBeamer(TexParser):
             frame = re.sub(r'\\\\frametitle{(.*?)}', '', frame)
             frame = re.sub(r'\\\\framesubtitle{(.*?)}', '', frame)
             if len(re.sub(r'\s', '', frame.encode().decode('unicode_escape'))) == 0:
-                sys.exit("ERROR: empty slides not allowed, near '{}'".format(frametitle))
+                self.quit("Empty slides not allowed, near '{}'".format(frametitle))
         return
 
     def get(self, include_comment):

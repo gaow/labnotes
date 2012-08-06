@@ -14,7 +14,7 @@ SYNTAX = {'r':'r',
 
 class LogToTex(TexParser):
     def __init__(self, title, author, toc, footnote, filename):
-        TexParser.__init__(self, title, author)
+        TexParser.__init__(self, title, author, filename)
         if sum([x.split('.')[-1].lower() in ['c','cpp','h'] for x in filename]) == len(filename):
             self.mark = '//'
         self.ftype = []
@@ -69,7 +69,7 @@ class LogToTex(TexParser):
                 continue
             for i in self.blocks[k]:
                 if not self.text[i].startswith(self.mark):
-                    sys.exit('ERROR: items must start with "{0}" in logo-ed blocks. Problematic text is: \n {1}'.format(self.mark, self.text[i]))
+                    self.quit('Items must start with "{0}" in logo-ed blocks. Problematic text is: \n {1}'.format(self.mark, self.text[i]))
                 self.text[i] = '\\begin{bclogo}[logo=%s, couleurBarre=MidnightBlue, noborder=true, couleur=white]{~%s}%s\n\\end{bclogo}\n' % (self.bclogo[k], k.capitalize(), self.m_recode(re.sub(r'^{0}|\n{0}'.format(self.mark), '', self.text[i])))
         return
 
@@ -147,7 +147,7 @@ class LogToTex(TexParser):
                 continue
             if self.text[idx].startswith(self.mark * 2):
                 # too many #'s
-                sys.exit("You have so many urgly '{0}' symbols in a regular line. Please clear them up in this line: '{1}'".format(self.mark, self.text[idx]))
+                self.quit("You have so many urgly '{0}' symbols in a regular line. Please clear them up in this line: '{1}'".format(self.mark, self.text[idx]))
             if self.text[idx].startswith(self.mark + '!!!'):
                 # box
                 self.text[idx] = '\\shabox{' + self.m_recode(self.text[idx][len(self.mark)+3:]) + '}'
@@ -171,11 +171,11 @@ class LogToTex(TexParser):
                     fig = self.text[idx][len(self.mark)+1:].split()[0]
                     width = 0.9
                 if not '.' in fig:
-                    sys.exit("ERROR: Cannot determine graphic file format for '%s'. Valid extensions are 'pdf', 'png' and 'jpg'" % fig)
+                    self.quit("Cannot determine graphic file format for '%s'. Valid extensions are 'pdf', 'png' and 'jpg'" % fig)
                 if fig.split('.')[1] not in ['jpg','pdf','png']:
-                    sys.exit("ERROR: Input file format '%s' not supported. Valid extensions are 'pdf', 'png' and 'jpg'" % fig.split('.')[1])
+                    self.quit("Input file format '%s' not supported. Valid extensions are 'pdf', 'png' and 'jpg'" % fig.split('.')[1])
                 if not os.path.exists(fig):
-                    sys.exit("ERROR: Cannot find file %s" % fig)
+                    self.quit("Cannot find file %s" % fig)
                 self.text[idx] = '\\begin{center}\\includegraphics[width=%s\\textwidth]{%s}\\end{center}' % (width, os.path.abspath(fig))
                 idx += 1
                 continue
