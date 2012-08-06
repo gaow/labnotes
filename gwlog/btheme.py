@@ -669,10 +669,10 @@ CONFIG = '''
 \\usepackage{pdfpages}
 \\usepackage{pgfpages}
 \\usepackage{longtable}
-\\usepackage[numhered]{bookmark}
+\\usepackage[numbered]{bookmark}
 %%Make sure it comes last of your loaded packages
 \\usepackage{hyperref}
-
+%%\\usepackage[bookmarks=true,bookmarksnumbered=true]{hyperref}
 %%%%%%%%%%%%%%%%%%
 %%%% 自定义命令
 %%%%%%%%%%%%%%%%%%

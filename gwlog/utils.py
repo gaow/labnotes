@@ -131,7 +131,9 @@ class TexParser:
         for m in re.finditer(pattern, line):
             line = line.replace(m.group(0), '\\url{%s}' % m.group(1).replace('\-\_', '\_').replace('$\sim$', '~'))
         # citation
-        pattern = re.compile('\[(?P<a>.+?)\|(?P<b>.+?)\]')
+        # [note|reference] defines the pattern for citation.
+        # Will have to use [note$|$reference] here since '|' was previously replaced by $|$
+        pattern = re.compile('\[(?P<a>.+?)\$\|\$(?P<b>.+?)\]')
         # re.compile('\[(.+?)\|(.+?)\]')
         for m in re.finditer(pattern, line):
             if not self.footnote:
