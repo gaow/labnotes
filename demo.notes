@@ -47,6 +47,8 @@ gw_log doc demo.notes --author "John Doe" --title "Example log documentation" --
 #! Basic formatting
 #!! Emphasis symbols 
 # ``double quote'', `single quote',  "italics", ""bold"", """bold italics""", @@monospaced@@, @www.google.com@
+#!! Raw @@@\LaTeXe@@@ syntax
+#@@@\[\hat{\beta} = (\frac{1}{n}\sum_i^n \mathbf{x}_i\mathbf{x}_i^T)^{-1} (\frac{1}{n}\sum_i^n\mathbf{x}_iy_i)\]@@@
 #!! Reference note
 # I visit the [BCM website|Baylor College of Medicine, @www.bcm.edu@] daily
 #!! Blocks

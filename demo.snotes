@@ -83,7 +83,7 @@ chr	pos	sample_size_SNV	beta_x_SNV	pvalue_SNV
 1	2461373	268	0.599755	0.490808
 1	6530254	268	0.115223	0.825298
 #}
-#! Plain commandline & script box
+#! Commandline, scripts and raw LaTeX
 vtools associate variant trait --covariates covar1 covar2 -m "GroupStat --name stat" "BurdenQt --alternative 2" --discard_samples "%(NA)>0.1" --discard_variants "%(NA)>0.1" -g name2 --to_db trait -j15 > output.txt
 #{python
 print('hello world')
@@ -91,6 +91,7 @@ print('hello world')
 #{r
 print('hello world')
 #}
+# Yes you can type some math: @@@\[\hat{\beta} = (\frac{1}{n}\sum_i^n \mathbf{x}_i\mathbf{x}_i^T)^{-1} (\frac{1}{n}\sum_i^n\mathbf{x}_iy_i)\]@@@
 
 ###
 #! Section 2

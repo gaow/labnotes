@@ -119,6 +119,14 @@ class TexParser:
         if not line:
             return ''
         line = line.strip()
+        raw = []
+        ph = 'LATEXRAWPATTERNPLACEHOLDER'
+        # support for raw latex syntax
+        pattern = re.compile(r'@@@(.*?)@@@')
+        for m in re.finditer(pattern, line):
+            line = line.replace(m.group(0), ph + str(len(raw)))
+            raw.append(m.group(1))
+        # latex keywords
         for item in [('\\', '!!\\backslash!!'),('$', '\$'),('!!\\backslash!!', '$\\backslash$'),
                 ('{', '\{'),('}', '\}'),('%', '\%'), ('_', '\-\_'),('|', '$|$'),('&', '\&'),('<', '$<$'),
                 ('>', '$>$'),('~', '$\sim$'), ('^', '\^{}'), ('#', '\#')]:
@@ -149,6 +157,9 @@ class TexParser:
                 line = line.replace(m.group(0), '{\\color{MidnightBlue}%s}~\\cite{%s}' % (m.group('a'), k))
             else:
                 line = line.replace(m.group(0), '{\\color{MidnightBlue}%s}~\\footnote{%s}' % (m.group('a'), '\\underline{' + m.group('a') + '} ' + m.group('b')))
+        # recover raw latex syntax
+        for i in range(len(raw)):
+            line = line.replace(ph + str(i), raw[i])
         return line
 
     def m_parseBlocks(self):

@@ -39,4 +39,4 @@ Syntax
 #!   #									#						#(or ##)
 ###, ###, #!, #!!, #!!!, #, #*, 	#} ----------,  #}	#}	#}     						#} 		#}
 
-Emphasis: ``double quote'', `single quote',  "italics", ""bold"", """bold italics""", @@monospaced@@, @url@, [keyword|footnote]
+Emphasis: ``double quote'', `single quote',  "italics", ""bold"", """bold italics""", @@@raw \LaTeXe syntax@@@, @@monospaced@@, @url@, [keyword|footnote],
