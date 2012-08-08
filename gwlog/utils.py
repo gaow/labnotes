@@ -12,7 +12,7 @@ def getfname(innames, outname):
 		fname = outname
 	if fname.endswith('.pdf'):
 		fname = fname.replace('.pdf', '')
-	return fname
+	return os.path.split(fname)[-1]
 
 def wraptxt(line, sep, by, rmblank = True):
     # will also remove blank lines, if any
