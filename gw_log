@@ -3,6 +3,7 @@ import argparse
 from gwlog.utils import getfname, pdflatex
 from gwlog.gwlog2tex import LogToTex
 from gwlog.gwlog2beamer import LogToBeamer
+from gwlog.gwlog2html import LogToHtml
 
 def getTexArguments(parser):
 	parser.add_argument('filename',
@@ -25,21 +26,21 @@ def getTexArguments(parser):
                         action='store_true',
                         default = '',
                         help='''generate table of contents''')
-
 	parser.add_argument('-o', '--output',
 			metavar='name',
                         type=str,
-                        help='''name of output pdf file''')
-	parser.add_argument('-v', '--vanilla',
-                        action='store_true',
-                        default = '',
-                        help='''build document from scratch without using cached data''')
+                        help='''name of output file''')
+
 
 def getDocArguments(parser):
 	parser.add_argument('-f', '--footnote',
                         action='store_true',
                         default = '',
                         help='''generate footnote instead of reference''')
+	parser.add_argument('-v', '--vanilla',
+                        action='store_true',
+                        default = '',
+                        help='''build document from scratch without using cached data''')
 
 def getSlidesArguments(parser):
 	parser.add_argument('-i', '--institute',
@@ -59,7 +60,17 @@ def getSlidesArguments(parser):
 			choices = ['presentation', 'notes', 'handout'],
 			default = 'presentation',
                         help='''output document mode (default set to 'presentation')''')
+	parser.add_argument('-v', '--vanilla',
+                        action='store_true',
+                        default = '',
+                        help='''build document from scratch without using cached data''')
 
+def doc(args):
+	tex = LogToTex(args.title, args.author, args.toc, args.footnote, args.filename)
+	lite = 1 if args.lite else 0
+	fname = getfname(args.filename, args.output)
+	pdflatex(fname, tex.get(lite), vanilla=args.vanilla)
+	return
 
 def slides(args):
 	tex = LogToBeamer(args.title, args.author, args.institute, args.toc, args.mode, args.theme, args.thank, args.filename)
@@ -68,11 +79,12 @@ def slides(args):
 	pdflatex(fname, tex.get(lite), vanilla=args.vanilla, beamer = True)
 	return
 
-def doc(args):
-	tex = LogToTex(args.title, args.author, args.toc, args.footnote, args.filename)
+def html(args):
+	htm = LogToHtml(args.title, args.author, args.toc, args.filename)
 	lite = 1 if args.lite else 0
-	fname = getfname(args.filename, args.output)
-	pdflatex(fname, tex.get(lite), vanilla=args.vanilla)
+	fname = getfname(args.filename, args.output, suffix='.html')
+	with open(fname + '.html', 'w') as f:
+		f.writelines(htm.get(lite))
 	return
 
 if __name__ == '__main__':
@@ -84,16 +96,20 @@ if __name__ == '__main__':
 	Contact: Gao Wang <gaow@bcm.edu>''')
 	master_parser.add_argument('--version', action='version', version='%(prog)s 1.0alpha')
 	subparsers = master_parser.add_subparsers()
-	# pdflatex commands
+	# latex
 	parser = subparsers.add_parser('doc', help='Generate text document from log file(s)')
 	getTexArguments(parser)
 	getDocArguments(parser)
 	parser.set_defaults(func=doc)
-	# beamer commands
+	# beamer
 	parser = subparsers.add_parser('slides', help='Generate slides from log file(s)')
 	getTexArguments(parser)
 	getSlidesArguments(parser)
 	parser.set_defaults(func=slides)
+	# html
+	parser = subparsers.add_parser('html', help='Generate HTML page from log file(s)')
+	getTexArguments(parser)
+	parser.set_defaults(func=html)
 	# getting args
 	args = master_parser.parse_args()
 	# calling the associated functions

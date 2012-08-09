@@ -1,133 +1,6 @@
-HTML_SyntaxHighlighter = '''
-/**
- * SyntaxHighlighter
- * http://alexgorbatchev.com/SyntaxHighlighter
- *
- * SyntaxHighlighter is donationware. If you are using it, please donate.
- * http://alexgorbatchev.com/SyntaxHighlighter/donate.html
- *
- * @version
- * 3.0.83 (July 02 2010)
- *
- * @copyright
- * Copyright (C) 2004-2010 Alex Gorbatchev.
- *
- * @license
- * Dual licensed under the MIT and GPL licenses.
- */
-.syntaxhighlighter {
-  background-color: white !important;
-}
-.syntaxhighlighter .line.alt1 {
-  background-color: white !important;
-}
-.syntaxhighlighter .line.alt2 {
-  background-color: white !important;
-}
-.syntaxhighlighter .line.highlighted.alt1, .syntaxhighlighter .line.highlighted.alt2 {
-  background-color: #c3defe !important;
-}
-.syntaxhighlighter .line.highlighted.number {
-  color: white !important;
-}
-.syntaxhighlighter table caption {
-  color: black !important;
-}
-.syntaxhighlighter .gutter {
-  color: #787878 !important;
-}
-.syntaxhighlighter .gutter .line {
-  border-right: 3px solid #d4d0c8 !important;
-}
-.syntaxhighlighter .gutter .line.highlighted {
-  background-color: #d4d0c8 !important;
-  color: white !important;
-}
-.syntaxhighlighter.printing .line .content {
-  border: none !important;
-}
-.syntaxhighlighter.collapsed {
-  overflow: visible !important;
-}
-.syntaxhighlighter.collapsed .toolbar {
-  color: #3f5fbf !important;
-  background: white !important;
-  border: 1px solid #d4d0c8 !important;
-}
-.syntaxhighlighter.collapsed .toolbar a {
-  color: #3f5fbf !important;
-}
-.syntaxhighlighter.collapsed .toolbar a:hover {
-  color: #aa7700 !important;
-}
-.syntaxhighlighter .toolbar {
-  color: #a0a0a0 !important;
-  background: #d4d0c8 !important;
-  border: none !important;
-}
-.syntaxhighlighter .toolbar a {
-  color: #a0a0a0 !important;
-}
-.syntaxhighlighter .toolbar a:hover {
-  color: red !important;
-}
-.syntaxhighlighter .plain, .syntaxhighlighter .plain a {
-  color: black !important;
-}
-.syntaxhighlighter .comments, .syntaxhighlighter .comments a {
-  color: #3f5fbf !important;
-}
-.syntaxhighlighter .string, .syntaxhighlighter .string a {
-  color: #2a00ff !important;
-}
-.syntaxhighlighter .keyword {
-  color: #7f0055 !important;
-}
-.syntaxhighlighter .preprocessor {
-  color: #646464 !important;
-}
-.syntaxhighlighter .variable {
-  color: #aa7700 !important;
-}
-.syntaxhighlighter .value {
-  color: #009900 !important;
-}
-.syntaxhighlighter .functions {
-  color: #ff1493 !important;
-}
-.syntaxhighlighter .constants {
-  color: #0066cc !important;
-}
-.syntaxhighlighter .script {
-  font-weight: bold !important;
-  color: #7f0055 !important;
-  background-color: none !important;
-}
-.syntaxhighlighter .color1, .syntaxhighlighter .color1 a {
-  color: gray !important;
-}
-.syntaxhighlighter .color2, .syntaxhighlighter .color2 a {
-  color: #ff1493 !important;
-}
-.syntaxhighlighter .color3, .syntaxhighlighter .color3 a {
-  color: red !important;
-}
-
-.syntaxhighlighter .keyword {
-  font-weight: bold !important;
-}
-.syntaxhighlighter .xml .keyword {
-  color: #3f7f7f !important;
-  font-weight: normal !important;
-}
-.syntaxhighlighter .xml .color1, .syntaxhighlighter .xml .color1 a {
-  color: #7f007f !important;
-}
-.syntaxhighlighter .xml .string {
-  font-style: italic !important;
-  color: #2a00ff !important;
-}
-'''
+import sys, re, os
+import codecs
+from utils import wraptxt, TexParser
 
 HTML_STYLE = '''
 <link rel="stylesheet" type="text/css">
@@ -225,21 +98,36 @@ a:hover
 {
 	font-variant: small-caps;
 	margin:0;
-	color:#304860;
 	padding:0;
 	font-family: Georgia, Times, serif;
 	font-size:20pt;
+	color:rgb(220, 20, 60);
+}
+
+.superheading
+{
+	margin-top: 40px;
+	font-size: 16pt;
+	color: #666;
 }
 
 .heading
 {
-	margin-top: 40px;
+	margin-top: 30px;
 	font-size: 14pt;
 	color:rgb(220, 20, 60);
 }
 
 .subheading
 {
+	margin-top: 20px;
+	font-size: 12pt;
+	color:#304860;
+}
+
+.subsubheading
+{
+	margin-top: 15px;
 	font-size: 12pt;
 	font-weight:normal;
 	color: #666;
@@ -302,6 +190,7 @@ a:hover
 }
 </style>
 '''
+
 class LogToHtml(TexParser):
     def __init__(self, title, author, toc, filename):
         TexParser.__init__(self, title, author, filename)
@@ -315,7 +204,7 @@ class LogToHtml(TexParser):
             except IOError as e:
                 sys.exit(e)
         self.toc = toc
-        self.keywords = ['err', 'list', 'table']
+        self.keywords = ['err', 'list', 'table', 'out']
         for item in self.keywords:
             self.blocks[item] = []
         self.m_parseBlocks()
@@ -323,56 +212,15 @@ class LogToHtml(TexParser):
         self.m_parseText()
 
     def m_blockizeAll(self):
+#FIXME
 #        self.m_blockizeIn()
-#        self.m_blockizeOut()
+        self.m_blockizeOut()
         self.m_blockizeList()
         self.m_blockizeTable(fsize='small')
+#FIXME
 #        self.m_blockizeAlert()
 
-    def get(self, include_comment):
-        if include_comment and len(self.blocks['err']) > 0:
-            for idx in range(len(self.text)):
-                for item in self.blocks['err']:
-                    if idx in range(item[0], item[1]):
-                        self.text[idx] = ''
-                        break
-        self.text = filter(None, self.text)
-        otext = '<br>\n'.join(self.text)
-        return '''
-        <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-        <html><head>
-        <title>{}</title>
-        {}</head><body>
-        <a name="top"></a>
-        <div class="frame">
-        {}<div class="content">{}</div></div></body></html>
-        '''.format(HTML_STYLE, self.title, otext)
-        return otext
-
-    def m_title(title, subtitle):
-        return '''
-        <div class="top">
-        <h1 class="title">{}</h1>
-        <h3 class="subheading"><i>{}</i></h3>
-        </div>
-        '''.format(title, subtitle)
-
-    def m_section(text):
-        return '''
-        <h2 class="heading">{}</h2>
-        '''.format(text)
-
-    def m_ssection(text):
-        return '''
-        <h3 class="subheading"><i>{}</i></h3>
-        '''.format(text)
-
-    def m_sssection(text):
-        return '''
-        <h3 class="subheading">{}</h3>
-        '''.format(text)
-
-    def m_recode(line):
+    def m_recode(self, line):
         if not line:
             return ''
         line = line.strip()
@@ -384,18 +232,21 @@ class LogToHtml(TexParser):
             line = line.replace(m.group(0), ph + str(len(raw)))
             raw.append(m.group(1))
         # html keywords
-        for item in [('\\', '&#92;'),('$', '&#36;'),
-                ('{', '&#123;'),('}', '&#125;'),
-                ('%', '&#37;'),('--', '&mdash;'),
-                ('-', '&ndash;'),('&', '&amp;'),
-                ('<', '&lt;'),('>', '&gt;'),
-                ('~', '&tilde;'),('^', '&circ;'),
-                ('``', '&ldquo;'),('`', '&lsquo;'),
-                ('#', '&#35;')]:
-            line = line.replace(item[0], item[1])
-        line = re.sub(r'"""(.*?)"""', r'<b><i>\1</i></b>', line)
-        line = re.sub(r'""(.*?)""', r'<b>\1</b>', line)
-        line = re.sub(r'"(.*?)"', r'<i>\1</i>', line)
+        # no need to convert any
+#        for item in [
+#                ('\\', '&#92;'),('$', '&#36;'),
+#                ('{', '&#123;'),('}', '&#125;'),
+#                ('%', '&#37;'),('--', '&mdash;'),
+#                ('-', '&ndash;'),('&', '&amp;'),
+#                ('<', '&lt;'),('>', '&gt;'),
+#                ('~', '&tilde;'),('^', '&circ;'),
+#                ('``', '&ldquo;'),('`', '&lsquo;'),
+#                ('#', '&#35;')
+#                ]:
+#            line = line.replace(item[0], item[1])
+        line = re.sub(r'"""(.*?)"""', r'<strong><em>\1</em></strong>', line)
+        line = re.sub(r'""(.*?)""', r'<strong>\1</strong>', line)
+        line = re.sub(r'"(.*?)"', r'<em>\1</em>', line)
         line = re.sub(r'@@(.*?)@@', r'<span style="font-family: monospace">\1</span>', line)
         # url
         pattern = re.compile('@(.*?)@')
@@ -406,10 +257,10 @@ class LogToHtml(TexParser):
         pattern = re.compile('\[(?P<a>.+?)\|(?P<b>.+?)\]')
         # re.compile('\[(.+?)\|(.+?)\]')
         for m in re.finditer(pattern, line):
-            line = line.replace(m.group(0), '<a style="text-shadow: 1px 1px 1px #999;" href="%s">%s</a>' % (m.group('b'), m.group('a'))
+            line = line.replace(m.group(0), '<a style="text-shadow: 1px 1px 1px #999;" href="%s">%s</a>' % (m.group('b'), m.group('a')))
         # more kw
-        line = line.replace('"', '&rdquo;')
-        line = line.replace("'", '&rsquo;')
+        line = line.replace("''", '"')
+        line = line.replace("``", '"')
         # recover raw html syntax
         for i in range(len(raw)):
             line = line.replace(ph + str(i), raw[i])
@@ -457,7 +308,7 @@ class LogToHtml(TexParser):
                     idx += 1
             # handle 1st level indentation
             self.text[i] = '\n'.join(text)
-            self.text[i] = '<ul>\n%s\n</ul>\n' % re.sub(r'^{0}|\n{0}'.format(self.mark), '\n<li> ', self.text[i] + '</li>')
+            self.text[i] = '<ol>\n%s\n</ol>\n' % re.sub(r'^{0}|\n{0}'.format(self.mark), '\n<li> ', self.text[i] + '</li>')
         return
 
 
@@ -470,7 +321,7 @@ class LogToHtml(TexParser):
             if len(ncols) > 1:
                 self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(self.text[i]))
             start = '<td style="vertical-align: top;"><{}>'.format(fsize)
-            end = '<br></{}></td>'.format(fsize)
+            end = '<br /></{}></td>'.format(fsize)
             head = '<table><tbody>'
             body = []
             line = ''
@@ -480,7 +331,7 @@ class LogToHtml(TexParser):
             for item in table[1:]:
                 line = ''
                 for cell in item:
-                    line += start + '<b>' + cell + '</b>' + end + '\n'
+                    line += start + cell + end + '\n'
                 body.append(line)
             #
             for idx, item in enumerate(body):
@@ -489,7 +340,14 @@ class LogToHtml(TexParser):
                 else:
                     body[idx] = '<tr class="dark">' + item + '</tr>'
             tail = '</tbody></table>\n'
-            self.text[i] = head + body + tail
+            self.text[i] = head + '\n'.join(body) + tail
+        return
+
+    def m_blockizeOut(self):
+        if len(self.blocks['out']) == 0:
+            return
+        for i in self.blocks['out']:
+            self.text[i] = '<br /><textarea rows="20" cols="120">{}</textarea><br />'.format(self.text[i])
         return
 
     def m_parseText(self):
@@ -507,6 +365,7 @@ class LogToHtml(TexParser):
                 idx += 1
                 continue
             if not self.text[idx].startswith(self.mark):
+#FIXME
 #                # regular cmd text, or with syntax
 #                if idx + 1 < len(self.text):
 #                    for i in range(idx + 1, len(self.text) + 1):
@@ -539,7 +398,8 @@ class LogToHtml(TexParser):
 #                    for j in range(idx + 1, i):
 #                        self.text[j] = ''
 #                idx = i
-#fixme
+#FIXME
+#FIXME
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark * 3) and self.text[idx+1].startswith(self.mark + '!') and self.text[idx+2].startswith(self.mark * 3):
@@ -564,6 +424,7 @@ class LogToHtml(TexParser):
                 # too many #'s
                 self.quit("You have so many urgly '{0}' symbols in a regular line. Please clear them up in this line: '{1}'".format(self.mark, self.text[idx]))
             if self.text[idx].startswith(self.mark + '!!!'):
+#FIXME
 #                # box
 #                self.text[idx] = '\\shabox{' + self.m_recode(self.text[idx][len(self.mark)+3:]) + '}'
                 idx += 1
@@ -583,7 +444,8 @@ class LogToHtml(TexParser):
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark + '*'):
-                # fig: figure.pdf 0.9
+#FIXME
+#                # fig: figure.pdf 0.9
 #                try:
 #                    fig, width = self.text[idx][len(self.mark)+1:].split()
 #                except ValueError:
@@ -605,3 +467,51 @@ class LogToHtml(TexParser):
                 continue
         return
 
+    def get(self, include_comment):
+        if include_comment and len(self.blocks['err']) > 0:
+            for idx in range(len(self.text)):
+                for item in self.blocks['err']:
+                    if idx in range(item[0], item[1]):
+                        self.text[idx] = ''
+                        break
+        self.text = [x.strip() for x in self.text if x and x.strip()]
+        self.text = [x if x.startswith('<h') else x + '<br />' for x in self.text]
+        return '''
+<!DOCTYPE html>
+<html><head><title>{} | {}</title>
+{}
+</head><body><a name="top"></a>
+<div class="frame">
+{}
+<div class="content">
+{}
+</div></div></body></html>
+        '''.format(self.title, self.author, HTML_STYLE, self.m_title(self.title, self.author), '\n'.join(self.text))
+
+    def m_title(self, title, author):
+        return '''
+        <div class="top">
+        <h1 class="title">{}</h1>
+        <h3 class="subsubheading"><em>{}</em></h3>
+        </div>
+        '''.format(title, author)
+
+    def m_chapter(self, text):
+        return '''
+        <h1 class="superheading">{}</h1>
+        '''.format(text)
+
+    def m_section(self, text):
+        return '''
+        <h2 class="heading">{}</h2>
+        '''.format(text)
+
+    def m_ssection(self, text):
+        return '''
+        <h3 class="subheading">{}</h3>
+        '''.format(text)
+
+    def m_sssection(self, text):
+        return '''
+        <h3 class="subsubheading"><em>{}</em></h3>
+        '''.format(text)

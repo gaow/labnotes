@@ -5,13 +5,13 @@ from minted import minted
 from btheme import btheme
 
 # functions
-def getfname(innames, outname):
+def getfname(innames, outname, suffix='.pdf'):
 	if not outname:
 		fname = '-'.join([os.path.splitext(name)[0] for name in innames])
 	else:
 		fname = outname
-	if fname.endswith('.pdf'):
-		fname = fname.replace('.pdf', '')
+	if fname.endswith(suffix):
+		fname = fname.replace(suffix, '')
 	return os.path.split(fname)[-1]
 
 def wraptxt(line, sep, by, rmblank = True):
