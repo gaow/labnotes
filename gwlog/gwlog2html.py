@@ -296,7 +296,7 @@ class LogToHtml(TexParser):
                     self.quit("Input file format '%s' not supported. Valid extensions are 'tif', 'png' and 'jpg'" % fig.split('.')[1])
                 if not os.path.exists(fig):
                     self.quit("Cannot find file %s" % fig)
-                self.text[idx] = '<center><img src="{}" alt="{}" width="{}" /></center>'.format(os.path.abspath(fig), os.path.split(fig)[-1], int(width * 800))
+                self.text[idx] = '<p><center><img src="{}" alt="{}" width="{}" /></center></p>'.format(os.path.abspath(fig), os.path.split(fig)[-1], int(width * 800))
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark):
