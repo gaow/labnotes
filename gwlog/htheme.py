@@ -114,6 +114,8 @@ a:hover
 	border-right: solid transparent 30px;
 	text-align:center;
 	color: #666;
+	font-variant: small-caps;
+	font-family: Georgia, Times, serif;
 	background: #eee
 }
 

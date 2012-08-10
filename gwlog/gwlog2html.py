@@ -378,7 +378,7 @@ class LogToHtml(TexParser):
         elif k.startswith('section'):
             return '{}'.format(v)
         else:
-            return '{}</small>'.format(v)
+            return '<small>{}</small>'.format(v)
 
     def _isize(self, k):
         if k.startswith('chapter'):
