@@ -1,5 +1,5 @@
 ###
-#!KBAC statistic implementation
+#!KBAC
 ###
 ###
 #Methodology
@@ -36,7 +36,7 @@ Flag	Default	Description
 ###
 #Please contact @wangow [at] gmail [dot] com@ for comments/questions.
 ###
-# Keyword test
+#!Tests
 ###
 
 \ $ { }  % -- - & < > ~ ^ #

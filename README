@@ -37,7 +37,7 @@ HTML Example
 ------------
 gw_log html -h
 gw_log html demo.hnotes -o d9 -a "Gao Wang, Dajiang Liu and Suzanne M. Leal | Last update Dec-01-2010" -t "KBAC Statistic Implementation"
-gw_log html demo.notes -o d1 --author "John Doe" --title "Example log documentation"
+gw_log html demo.notes -o d1 --author "John Doe" --title "Example log documentation" --toc --lite
 
 Syntax
 ------

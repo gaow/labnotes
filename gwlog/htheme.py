@@ -1,13 +1,30 @@
-HTML_STYLE = '''
-<style type="text/css">
+MAIN_STY = r'''
+html {background: #FFFFFF}
+/*
+body {
+	columns: 30em;
+	column-gap: 20px;
+	padding: 0;
+	margin: 6em 3% 19em 3%;
+	background: #fff;
+	font-family: 'Lucida Grande', 'Lucida Sans', 'Lucida Sans Unicode', Tahoma, sans-serif;
+	font-size: 10pt;
+	line-height: 150%;
+	text-align:justify;
+	color: #555;
+	position: relative;
+	box-shadow: 0 .3em 1em #000
+}
+*/
 body
 {
-        margin:40px 0;
-        padding:0;
+	margin:40px 0;
+	padding:0;
 	font-family: 'Lucida Grande', 'Lucida Sans', 'Lucida Sans Unicode', Tahoma, sans-serif;
-        font-size: 9pt;
-        text-align:justify;
-        line-height: 150%;
+	font-size: 9pt;
+	text-align:justify;
+	line-height: 150%;
+	color: #333;
 }
 
 table {border-spacing: 2px;}
@@ -89,20 +106,23 @@ a:hover
 	padding: 0 20px;
 }
 
-.title
-{
-	font-variant: small-caps;
-	margin:0;
-	padding:0;
-	font-family: Georgia, Times, serif;
-	font-size:20pt;
-	color:rgb(220, 20, 60);
+.title {
+	column-span: all;
+	margin: 0 -20px 0 -20px;
+	padding: .6em 1em;
+	border-left: solid transparent 30px;
+	border-right: solid transparent 30px;
+	text-align:center;
+	color: #666;
+	background: #eee
 }
 
 .superheading
 {
-	margin-top: 40px;
-	font-size: 16pt;
+    break-inside: avoid;
+	margin: 1em 0 0 0;
+	padding: .5em;
+	font-size: 20pt;
 	color: #666;
 }
 
@@ -110,7 +130,7 @@ a:hover
 {
 	margin-top: 30px;
 	font-size: 14pt;
-	color:rgb(220, 20, 60);
+	color:#666;
 }
 
 .subheading
@@ -123,9 +143,9 @@ a:hover
 .subsubheading
 {
 	margin-top: 15px;
-	font-size: 12pt;
+	font-size: 10pt;
 	font-weight:normal;
-	color: #666;
+	color:#304860;
 }
 
 .download
@@ -184,26 +204,59 @@ a:hover
 	margin-top: 5px;
 }
 
+#wrapper {
+	text-align: left;
+	width: 500px;
+}
+
+#toc {
+	list-style: none;
+	margin-bottom: 20px;
+}
+#toc li {
+	/* background: url(dot.gif) repeat-x bottom left; */
+	overflow: hidden;
+	padding-bottom: 2px;
+}
+#toc a,
+#toc span {
+	display: inline-block;
+	background: #fff;
+	position: relative;
+	bottom: -4px;
+}
+#toc a {
+	float: right;
+	padding: 0 0 3px 2px;
+}
+#toc span {
+	float: left;
+	padding: 0 2px 3px 0;
+}
+
 .tip {
-  padding-left: 80px;
-  background: #ddffdd no-repeat 20px;
+	padding-left: 30px;
+	background: #ddffdd no-repeat 20px;
 }
 
 .note {
-  padding-left: 80px;
-  background: lightblue no-repeat 20px;
+	padding-left: 30px;
+	background: lightblue no-repeat 20px;
 }
 
 .important {
-  padding-left: 80px;
-  background: #ffffcc no-repeat 20px;
+	padding-left: 30px;
+	background: #ffffcc no-repeat 20px;
 }
 
 .warning {
-  padding-left: 80px;
-  background: #ffdddd no-repeat 20px;
+	padding-left: 30px;
+	background: #ffdddd no-repeat 20px;
 }
+.textborder {border: 1px dashed rgb(220, 20, 60); padding: 2px;}
+'''
 
+SYN_STY = r'''
 .syntaxhighlighter a,
 .syntaxhighlighter div,
 .syntaxhighlighter code,
@@ -528,10 +581,9 @@ a:hover
   font-style: italic !important;
   color: #2a00ff !important;
 }
-</style>
 '''
-
-JS_SCRIPT = '''
+HTML_STYLE = '<style type="text/css">' + MAIN_STY + SYN_STY + '</style>'
+JS_SCRIPT = r'''
 <script LANGUAGE="JavaScript">
 (function()
 {

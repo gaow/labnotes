@@ -1,5 +1,6 @@
 import sys, re, os
 import codecs
+from collections import OrderedDict
 from utils import wraptxt, TexParser, SYNTAX
 from htheme import HTML_STYLE, JS_SCRIPT
 
@@ -16,6 +17,7 @@ class LogToHtml(TexParser):
             except IOError as e:
                 sys.exit(e)
         self.toc = toc
+        self.dtoc = OrderedDict()
         self.alertbox = ['warning', 'tip', 'important', 'note']
         self.keywords = list(set(SYNTAX.values())) + self.alertbox + ['err', 'out', 'list', 'table']
         for item in self.keywords:
@@ -67,11 +69,11 @@ class LogToHtml(TexParser):
         # [text|@link@] defines the pattern for citation.
         pattern = re.compile('\[(?P<a>.+?)\|@(?P<b>.+?)@\]')
         for m in re.finditer(pattern, line):
-            line = line.replace(m.group(0), '<a style="text-shadow: 1px 1px 1px #999;" href="http://{0}">{1}</a>'.format(re.sub(r'http://', '', m.group('b')), m.group('a')))
+            line = line.replace(m.group(0), '<a style="text-shadow: 1px 1px 1px #999;" href="http://{0}">{1}</a>'.format(m.group('b').replace('http://', '', 1), m.group('a')))
         # url
         pattern = re.compile('@(.*?)@')
         for m in re.finditer(pattern, line):
-            line = line.replace(m.group(0), '<a href="http://{0}">{0}</a>'.format(re.sub(r'http://', '', m.group(1))))
+            line = line.replace(m.group(0), '<a href="http://{0}">{0}</a>'.format(m.group(1).replace('http://', '', 1)))
         # footnote
         # [note|reference] defines the pattern for citation.
         pattern = re.compile('\[(?P<a>.+?)\|(?P<b>.+?)\]')
@@ -183,8 +185,8 @@ class LogToHtml(TexParser):
             if len(self.blocks[item]) == 0:
                 continue
             for i in self.blocks[item]:
-                self.text[i] = '<span style="color:rgb(220, 20, 60);font-weight:bold">' + \
-                        item.capitalize() + '</span>' + \
+                self.text[i] = '<div style="color:rgb(220, 20, 60);font-weight:bold;text-align:right;padding-right:2em;"><span class="textborder">' + \
+                        item.capitalize() + '</span></div>' + \
                         self._parsecmd(wraptxt(self.text[i], '', int(self.wrap_width), rmblank = True).split('\n'), i)
         return
 
@@ -202,7 +204,7 @@ class LogToHtml(TexParser):
             for i in self.blocks[k]:
                 if not self.text[i].startswith(self.mark):
                     self.quit('Items must start with "{0}" in blocks. Problematic text is: \n {1}'.format(self.mark, self.text[i]))
-                self.text[i] = '<div class="{0}"><strong>{1}:</strong><br />{2}</div>'.\
+                self.text[i] = '<center><div id="wrapper"><div class="{0}"><strong>{1}:</strong><br />{2}</div></div></center>'.\
                         format(k.lower(), k.capitalize(), self.m_recode(re.sub(r'^{0}|\n{0}'.format(self.mark), '', self.text[i])))
         return
 
@@ -215,6 +217,7 @@ class LogToHtml(TexParser):
                 except:
                     skip.append(i)
         idx = 0
+        cnt_chapter = cnt_section = cnt_subsection = 0
         while idx < len(self.text):
             if idx in skip or self.text[idx] == '':
                 # no need to process
@@ -244,19 +247,21 @@ class LogToHtml(TexParser):
                 continue
             if self.text[idx].startswith(self.mark * 3) and self.text[idx+1].startswith(self.mark + '!') and self.text[idx+2].startswith(self.mark * 3):
                 # chapter
+                chapter = ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(self.text[idx + 1][len(self.mark)+1:]).split()])
+                cnt_chapter += 1
+                self.dtoc['chapter_{}'.format(cnt_chapter)] = chapter
                 self.text[idx] = ''
-                self.text[idx + 1] = self.m_chapter(
-                        ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(self.text[idx + 1][len(self.mark)+1:]).split()])
-                        )
+                self.text[idx + 1] = self.m_chapter(chapter, cnt_chapter)
                 self.text[idx + 2] = ''
                 idx += 3
                 continue
             if self.text[idx].startswith(self.mark * 3) and self.text[idx+1].startswith(self.mark) and (not self.text[idx+1].startswith(self.mark * 2)) and self.text[idx+2].startswith(self.mark * 3):
                 # section
+                section = ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(self.text[idx + 1][len(self.mark):]).split()])
+                cnt_section += 1
+                self.dtoc['section_{}'.format(cnt_section)] = section
                 self.text[idx] = ''
-                self.text[idx + 1] = self.m_section(
-                        ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(self.text[idx + 1][len(self.mark):]).split()])
-                        )
+                self.text[idx + 1] = self.m_section(section, cnt_section)
                 self.text[idx + 2] = ''
                 idx += 3
                 continue
@@ -277,9 +282,10 @@ class LogToHtml(TexParser):
                 continue
             if self.text[idx].startswith(self.mark + '!'):
                 # subsection, subsubsection ...
-                self.text[idx] = self.m_ssection(
-                        self.m_recode(self.text[idx][len(self.mark)+1:])
-                        )
+                subsection = self.m_recode(self.text[idx][len(self.mark)+1:])
+                cnt_subsection += 1
+                self.dtoc['subsection_{}'.format(cnt_subsection)] = subsection
+                self.text[idx] = self.m_ssection(subsection, cnt_subsection)
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark + '*'):
@@ -310,7 +316,7 @@ class LogToHtml(TexParser):
         if not self.bib:
             return
         bibkeys = []
-        self.textbib = '<hr />'
+        self.textbib = '<hr style="border: 3px double #555;margin-top:2em;margin-bottom:1em;">'
         #unique, ordered reference list
         for line in self.text:
             bibkeys.extend([m.group(1) for m in re.finditer(re.compile('"#footnote-(.*?)"'), line)])
@@ -337,32 +343,55 @@ class LogToHtml(TexParser):
 <div class="content">
 {}
 </div></div></body></html>
-        '''.format(self.title, self.author, HTML_STYLE, JS_SCRIPT, self.m_title(self.title, self.author), '\n'.join(self.text))
+        '''.format(self.title, self.author, HTML_STYLE, JS_SCRIPT, self.m_title(self.title, self.author), (self.m_toc(self.dtoc) if self.toc else '') + '\n'.join(self.text))
 
     def m_title(self, title, author):
         return '''
         <div class="top">
-        <h1 class="title">{}</h1>
-        <h3 class="subsubheading"><em>{}</em></h3>
+        {}{}
         </div>
-        '''.format(title, author)
+        '''.format('<h1 class="title">{}</h1>'.format(title) if title else '', '<center><h3 class="subsubheading"><em>Edited by: {}</em></h3></center>'.format(author) if author else '')
 
-    def m_chapter(self, text):
+    def m_chapter(self, text, i):
         return '''
-        <h1 class="superheading">{}</h1>
-        '''.format(text)
+        <h1 class="superheading" id="chapter_{}">{}</h1><hr size="5" noshade>
+        '''.format(i, text)
 
-    def m_section(self, text):
+    def m_section(self, text, i):
         return '''
-        <h2 class="heading">{}</h2>
-        '''.format(text)
+        <h2 class="heading" id="section_{}">{}</h2>
+        '''.format(i, text)
 
-    def m_ssection(self, text):
+    def m_ssection(self, text, i):
         return '''
-        <h3 class="subheading">{}</h3>
-        '''.format(text)
+        <h3 class="subheading" id="subsection_{}">{}</h3>
+        '''.format(i, text)
 
     def m_sssection(self, text):
         return '''
         <h3 class="subsubheading"><em>{}</em></h3>
         '''.format(text)
+
+    def _csize(self, v, k):
+        if k.startswith('chapter'):
+            return '<big>{}</big>'.format(v)
+        elif k.startswith('section'):
+            return '{}'.format(v)
+        else:
+            return '{}</small>'.format(v)
+
+    def _isize(self, k):
+        if k.startswith('chapter'):
+            return 'text-decoration:underline'
+        elif k.startswith('section'):
+            return 'padding-left:2em'
+        else:
+            return 'padding-left:4em'
+
+    def m_toc(self, dtoc):
+        if not dtoc:
+            return ''
+        head = '<b>Contents:</b><ul id="toc">\n'
+        tail = '\n</ul>'
+        body = '\n'.join(['<li><span style="{}">{}</span><a href="#{}">{}</a></li>'.format(self._isize(k), self._csize(v,k),k,'&clubs;') for k, v in dtoc.items()])
+        return head + body + tail
