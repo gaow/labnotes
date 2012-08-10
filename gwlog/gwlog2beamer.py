@@ -1,14 +1,12 @@
 import sys, re, os
 import codecs
-from utils import wraptxt, TexParser
-from gwlog2tex import SYNTAX
+from utils import wraptxt, TexParser, SYNTAX
 from btheme import MODE, CONFIG, TITLE, THANK, THEME
 
 class LogToBeamer(TexParser):
     def __init__(self, title, author, institute, toc, mode, theme, thank, filename):
         TexParser.__init__(self, title, author, filename)
         self.text = []
-        self.textbib = None
         for fn in filename:
             try:
                 with codecs.open(fn, 'r', encoding='UTF-8', errors='ignore') as f:
@@ -175,6 +173,7 @@ class LogToBeamer(TexParser):
                 # fig: figure.pdf 0.9
                 try:
                     fig, width = self.text[idx][len(self.mark)+1:].split()
+                    width = float(width)
                 except ValueError:
                     fig = self.text[idx][len(self.mark)+1:].split()[0]
                     width = 0.9

@@ -4,7 +4,7 @@
 ###
 #Methodology
 ###
-#This program implements the KBAC statistic in [Liu and Leal 2010|http://www.plosgenetics.org/article/info%3Adoi%2F10.1371%2Fjournal.pgen.1001156]. It carries out case-control association testing for rare variants for whole exome association studies. Briefly, consider a gene of length "n" which harbors "m" rare variants. Genotype on the "m" variant sites & the disease status (case/control) are known for each individual. The program takes as input the m-site genotype and disease status (case/control) data files, and computes a "p-value" indicating the significance of association. In order to speed up permutation testing we use an ``adaptive'' approach to obtain p-values.
+#This program implements the KBAC statistic in [Liu and Leal 2010|@http://www.plosgenetics.org/article/info%3Adoi%2F10.1371%2Fjournal.pgen.1001156@]. It carries out case-control association testing for rare variants for whole exome association studies. Briefly, consider a gene of length "n" which harbors "m" rare variants. Genotype on the "m" variant sites & the disease status (case/control) are known for each individual. The program takes as input the m-site genotype and disease status (case/control) data files, and computes a "p-value" indicating the significance of association. In order to speed up permutation testing we use an ``adaptive'' approach to obtain p-values.
 #! Caution
 #In the current implementation
 #{list
@@ -60,3 +60,112 @@ running install_egg_info
 Removing /home/min/local/lib/python3.2/site-packages/gw_log-1.0-py3.2.egg-info
 Writing /home/min/local/lib/python3.2/site-packages/gw_log-1.0-py3.2.egg-info
 #}
+./kbac -f phengen_recode.dat --ref null 
+R --no-save phengen_recode.dat < cmc.R 
+#{bash
+unzip kbac-101201.zip
+cd kbac-101201
+make clean
+make all
+./kbac --help 
+#}
+#{r
+> install.packages("Rcpp") 
+> install.packages("inline") 
+> source("kbacRcpp.r") 
+> KbacTest 
+function (ccdat, alpha, nperm) {
+ysexp <- ccdat[,1]
+xmat <- ccdat[,-1]
+xsexp <- matrix(t(xmat), nrow = 1)
+colsexp <- ncol(xmat)
+rowsexp <- nrow(xmat)
+npermsexp <- nperm
+alphasexp <- alpha
+pvalue <- KbacFct(npermsexp, xsexp, colsexp, rowsexp, ysexp, alphasexp)
+return(pvalue)
+}
+#}
+#The demo reads below:
+#{r
+casectrl.dat <-read.table("phengen_recode.dat", skip = 1) 
+### 
+# Set parameters and use the KbacTest() function to obtain p-value 
+### 
+alpha <- 0.05 
+num.permutation <- 2000 
+kbac.pvalue <- KbacTest(casectrl.dat, alpha, num.permutation) 
+print(kbac.pvalue) 
+### 
+# To evaluate test at small alpha we need huge number of permutations. Adaptive approach is thus necessary. 
+### 
+kbac.pvalue <- KbacTest(casectrl.dat, 0.00001, 20000000) 
+print(kbac.pvalue) 
+### 
+# Not using adaptive p-value calculation; will take long time 
+### 
+kbac.pvalue <- KbacTest(casectrl.dat, 9, 20000000) 
+print(kbac.pvalue) 
+#}
+./kbac -f phengen_recode.dat --ref null 
+R --no-save phengen_recode.dat < cmc.R 
+#{r
+> install.packages("Rcpp") 
+> install.packages("inline") 
+> source("kbacRcpp.r") 
+> KbacTest 
+function (ccdat, alpha, nperm) {
+ysexp <- ccdat[,1]
+xmat <- ccdat[,-1]
+xsexp <- matrix(t(xmat), nrow = 1)
+colsexp <- ncol(xmat)
+rowsexp <- nrow(xmat)
+npermsexp <- nperm
+alphasexp <- alpha
+pvalue <- KbacFct(npermsexp, xsexp, colsexp, rowsexp, ysexp, alphasexp)
+return(pvalue)
+}
+#}
+#The demo reads below:
+#{r
+casectrl.dat <-read.table("phengen_recode.dat", skip = 1) 
+### 
+# Set parameters and use the KbacTest() function to obtain p-value 
+### 
+alpha <- 0.05 
+num.permutation <- 2000 
+kbac.pvalue <- KbacTest(casectrl.dat, alpha, num.permutation) 
+print(kbac.pvalue) 
+### 
+# To evaluate test at small alpha we need huge number of permutations. Adaptive approach is thus necessary. 
+### 
+kbac.pvalue <- KbacTest(casectrl.dat, 0.00001, 20000000) 
+print(kbac.pvalue) 
+### 
+# Not using adaptive p-value calculation; will take long time 
+### 
+kbac.pvalue <- KbacTest(casectrl.dat, 9, 20000000) 
+print(kbac.pvalue) 
+#}
+
+###
+# Boxes
+###
+#{ warning
+# this is a warning block
+#}
+#{ note
+# this is a note block
+#}
+#{ important
+# this is an important block
+#}
+#{ tip
+# this is a tip block
+#}
+#!!! this is a shadowed square
+
+#!Figures
+#* bcm.png 
+# and smaller ...
+#* bcm.png 0.5

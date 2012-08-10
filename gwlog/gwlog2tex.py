@@ -1,16 +1,6 @@
 import sys, re, os
 import codecs
-from utils import wraptxt, TexParser
-
-SYNTAX = {'r':'r',
-          'sh':'bash',
-          'py':'python',
-          'tex':'latex',
-          'c':'c',
-          'cpp':'cpp',
-          'h':'c',
-          'sqlite':'sql'
-          }
+from utils import wraptxt, TexParser, SYNTAX
 
 class LogToTex(TexParser):
     def __init__(self, title, author, toc, footnote, filename):
@@ -19,7 +9,6 @@ class LogToTex(TexParser):
             self.mark = '//'
         self.ftype = []
         self.text = []
-        self.textbib = None
         for fn in filename:
             try:
                 self.ftype.append(fn.split('.')[-1].lower())
@@ -167,6 +156,7 @@ class LogToTex(TexParser):
                 # fig: figure.pdf 0.9
                 try:
                     fig, width = self.text[idx][len(self.mark)+1:].split()
+                    width = float(width)
                 except ValueError:
                     fig = self.text[idx][len(self.mark)+1:].split()[0]
                     width = 0.9

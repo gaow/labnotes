@@ -3,7 +3,15 @@ from subprocess import PIPE, Popen
 import tempfile
 from minted import minted
 from btheme import btheme
-
+SYNTAX = {'r':'r',
+          'sh':'bash',
+          'py':'python',
+          'tex':'latex',
+          'c':'c',
+          'cpp':'cpp',
+          'h':'c',
+          'sqlite':'sql'
+          }
 # functions
 def getfname(innames, outname, suffix='.pdf'):
 	if not outname:
@@ -108,6 +116,7 @@ class TexParser:
         for item in self.keywords:
             self.blocks[item] = []
         self.bib = {}
+        self.textbib = ''
         self.footnote = False
 
     def m_recode(self, line):

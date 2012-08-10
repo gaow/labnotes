@@ -319,9 +319,9 @@ class btheme:
           \\vbox{}\\vskip-.75ex%
           \\leftskip0.3cm%
           \\rightskip0.3cm plus1fil\\leavevmode
-            \\insertframetitle 
-            \\ifbeamer@ricet \\hfill {\\Large \\trjnfamily RICE} 
-            \\else \\ifbeamer@ricetm \\hfill {\\large \\trjnfamily RICE} 
+            \\insertframetitle
+            \\ifbeamer@ricet \\hfill {\\Large \\trjnfamily RICE}
+            \\else \\ifbeamer@ricetm \\hfill {\\large \\trjnfamily RICE}
             \\else \\ifbeamer@ricets \\hfill {\\small \\trjnfamily RICE} \\fi \\fi
             \\fi%
           \\ifx\\insertframesubtitle\\@empty%
@@ -461,7 +461,7 @@ class btheme:
          color(1ex)=(frametitle.bg);%
          color(2ex)=(section in head/foot.bg)
        }
-    \\fi  
+    \\fi
 
     \\pgfdeclareverticalshading{beamer@belowframetitle}{\\the\\paperwidth}{%
       color(0ex)=(global.bg);%
@@ -502,8 +502,8 @@ class btheme:
   \\nointerlineskip%
   \\begin{beamercolorbox}[wd=\\paperwidth,leftskip=.3cm,rightskip=.3cm plus1fil,vmode]{frametitle}
     \\usebeamerfont*{frametitle}\\insertframetitle
-                \\ifbeamer@ricet \\hfill {\\Large \\trjnfamily RICE} 
-            \\else \\ifbeamer@ricetm \\hfill {\\large \\trjnfamily RICE} 
+                \\ifbeamer@ricet \\hfill {\\Large \\trjnfamily RICE}
+            \\else \\ifbeamer@ricetm \\hfill {\\large \\trjnfamily RICE}
             \\else \\ifbeamer@ricets \\hfill {\\small \\trjnfamily RICE} \\fi \\fi
             \\fi%
       \\ifx\\insertframesubtitle\\@empty%
@@ -512,7 +512,7 @@ class btheme:
         \\par{\\usebeamerfont*{framesubtitle}{\\usebeamercolor[fg]{framesubtitle}\\insertframesubtitle}\\strut\\par}%
       \\fi%%
     \\usebeamerfont{headline}%
-    \\vskip.5ex  
+    \\vskip.5ex
   \\end{beamercolorbox}%
   \\nointerlineskip
   \\begin{beamercolorbox}[wd=\\paperwidth,ht=.5ex,dp=0ex]{empty}

@@ -1,195 +1,7 @@
 import sys, re, os
 import codecs
-from utils import wraptxt, TexParser
-
-HTML_STYLE = '''
-<link rel="stylesheet" type="text/css">
-<style type="text/css">
-body
-{
-        margin:40px 0;
-        padding:0;
-	font-family: 'Lucida Grande', 'Lucida Sans', 'Lucida Sans Unicode', Tahoma, sans-serif;
-        font-size: 9pt;
-        text-align:justify;
-        line-height: 150%;
-}
-
-table {border-spacing: 2px;}
-td, th
-{
-	border: 0;
-	padding: 10px;
-	text-align: left;
-}
-td
-{
-	vertical-align:top;
-}
-th
-{
-	background-color:#eee;
-}
-td.flag
-{
-	font-family:monospace;
-}
-tr.dark
-{
-	background-color:#f9f9f9;
-}
-
-ul
-{
-	list-style-type: lower-greek;
-	font-family: 'Lucida Grande';
-}
-
-a,
-a:link,
-a:visited,
-a:active
-{
-	color: #3366CC;
-	border-bottom: 1px dotted #3366CC;
-	text-decoration:none;
-}
-a:hover
-{
-	border-bottom: none;
-	color: #000030;
-}
-
-.normal
-{
-	font-family: Helvetica, Arial, sans-serif;
-	font-size: 10pt;
-}
-
-.minorhead
-{
-	color: #666;
-	font-family: monospace;
-	line-height: 30px;
-}
-
-.gray
-{
-	color:#666;
-	font-weight: bold;
-	font-family:monospace;
-	background: #eee;
-	padding: 2px 6px 2px 6px;
-	white-space: nowrap;
-}
-
-.frame
-{
-	margin: 0px auto 50px auto;
-	width: 800px;
-}
-
-.content
-{
-	padding: 0 20px;
-}
-
-.title
-{
-	font-variant: small-caps;
-	margin:0;
-	padding:0;
-	font-family: Georgia, Times, serif;
-	font-size:20pt;
-	color:rgb(220, 20, 60);
-}
-
-.superheading
-{
-	margin-top: 40px;
-	font-size: 16pt;
-	color: #666;
-}
-
-.heading
-{
-	margin-top: 30px;
-	font-size: 14pt;
-	color:rgb(220, 20, 60);
-}
-
-.subheading
-{
-	margin-top: 20px;
-	font-size: 12pt;
-	color:#304860;
-}
-
-.subsubheading
-{
-	margin-top: 15px;
-	font-size: 12pt;
-	font-weight:normal;
-	color: #666;
-}
-
-.download
-{
-	font-weight: normal;
-	font-family: Georgia;
-	background: #eee;
-	padding:20px 20px;
-	color: #666;
-	text-align:center;
-	font-style: italic;
-}
-.download:hover
-{
-	background:#fafafa;
-}
-.download a
-{
-	text-transform: uppercase;
-	font-weight: bold;
-	font-size: 12pt;
-	text-shadow: 1px 1px 1px #999;
-	border: none;
-	font-style: normal;
-}
-
-#clear { clear:both; }
-
-#form
-{
-	background-color: #f9f9f9;
-	padding: 5px 20px 20px 20px;
-}
-
-#form .set
-{
-	float: left;
-	margin-right: 20px;
-}
-
-#form .field
-{
-	border: 1px solid #ccc;
-	padding: 1px;
-	margin-top: 5px;
-	width: 150px;
-}
-
-#form .text_input
-{
-	width: 146px;
-}
-
-#form #zoosbmt
-{
-	margin-top: 5px;
-}
-</style>
-'''
+from utils import wraptxt, TexParser, SYNTAX
+from htheme import HTML_STYLE, JS_SCRIPT
 
 class LogToHtml(TexParser):
     def __init__(self, title, author, toc, filename):
@@ -204,21 +16,23 @@ class LogToHtml(TexParser):
             except IOError as e:
                 sys.exit(e)
         self.toc = toc
-        self.keywords = ['err', 'list', 'table', 'out']
+        self.alertbox = ['warning', 'tip', 'important', 'note']
+        self.keywords = list(set(SYNTAX.values())) + self.alertbox + ['err', 'out', 'list', 'table']
         for item in self.keywords:
             self.blocks[item] = []
+        self.wrap_width = 120
         self.m_parseBlocks()
         self.m_blockizeAll()
         self.m_parseText()
+        self.m_parseBib()
+        self.text.append(self.textbib)
 
     def m_blockizeAll(self):
-#FIXME
-#        self.m_blockizeIn()
+        self.m_blockizeIn()
         self.m_blockizeOut()
         self.m_blockizeList()
         self.m_blockizeTable(fsize='small')
-#FIXME
-#        self.m_blockizeAlert()
+        self.m_blockizeAlert()
 
     def m_recode(self, line):
         if not line:
@@ -247,17 +61,30 @@ class LogToHtml(TexParser):
         line = re.sub(r'"""(.*?)"""', r'<strong><em>\1</em></strong>', line)
         line = re.sub(r'""(.*?)""', r'<strong>\1</strong>', line)
         line = re.sub(r'"(.*?)"', r'<em>\1</em>', line)
-        line = re.sub(r'@@(.*?)@@', r'<span style="font-family: monospace">\1</span>', line)
+#        line = re.sub(r'@@(.*?)@@', r'<span style="font-family: monospace">\1</span>', line)
+        line = re.sub(r'@@(.*?)@@', r'<code>\1</code>', line)
+        # hyperlink
+        # [text|@link@] defines the pattern for citation.
+        pattern = re.compile('\[(?P<a>.+?)\|@(?P<b>.+?)@\]')
+        for m in re.finditer(pattern, line):
+            line = line.replace(m.group(0), '<a style="text-shadow: 1px 1px 1px #999;" href="http://{0}">{1}</a>'.format(re.sub(r'http://', '', m.group('b')), m.group('a')))
         # url
         pattern = re.compile('@(.*?)@')
         for m in re.finditer(pattern, line):
-            line = line.replace(m.group(0), '<a href="{0}">{0}</a>'.format(m.group(1).replace('&tilde;', '~')))
-        # citation
+            line = line.replace(m.group(0), '<a href="http://{0}">{0}</a>'.format(re.sub(r'http://', '', m.group(1))))
+        # footnote
         # [note|reference] defines the pattern for citation.
         pattern = re.compile('\[(?P<a>.+?)\|(?P<b>.+?)\]')
         # re.compile('\[(.+?)\|(.+?)\]')
         for m in re.finditer(pattern, line):
-            line = line.replace(m.group(0), '<a style="text-shadow: 1px 1px 1px #999;" href="%s">%s</a>' % (m.group('b'), m.group('a')))
+            k = re.sub('\W', '', m.group('a'))
+            if not k:
+                self.quit("Invalid citation keyword for reference item '{}'.".format(m.group('b')))
+            if k in self.bib.keys():
+                if self.bib[k] != [m.group('a'), m.group('b')]:
+                    k += str(len(self.bib.keys()))
+            self.bib[k] = [m.group('a'), m.group('b')]
+            line = line.replace(m.group(0), '<a href="#footnote-{}">{}</a>'.format(k, m.group('a')))
         # more kw
         line = line.replace("''", '"')
         line = line.replace("``", '"')
@@ -322,7 +149,7 @@ class LogToHtml(TexParser):
                 self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(self.text[i]))
             start = '<td style="vertical-align: top;"><{}>'.format(fsize)
             end = '<br /></{}></td>'.format(fsize)
-            head = '<table><tbody>'
+            head = '<center><table><tbody>'
             body = []
             line = ''
             for cell in table[0]:
@@ -339,15 +166,44 @@ class LogToHtml(TexParser):
                     body[idx] = '<tr>' + item + '</tr>'
                 else:
                     body[idx] = '<tr class="dark">' + item + '</tr>'
-            tail = '</tbody></table>\n'
+            tail = '</tbody></table></center>\n'
             self.text[i] = head + '\n'.join(body) + tail
+        return
+
+
+    def _parsecmd(self, text, serial):
+        head = '<div><div id="highlighter_{}" class="syntaxhighlighter bash"><table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="gutter">'.format(serial)
+        numbers = ''.join(['<div class="line number{0} index{1} alt{2}">{0}</div>'.format(j+1, j, 2 - j % 2) for j in range(len(text))]) + '</td><td class="code"><div class="container">'
+        lines = ''.join(['<div class="line number{0} index{1} alt{2}"><code class="bash plain">{3}</code></div>'.format(j+1, j, 2 - j % 2, line) for j, line in enumerate(text)])
+        tail = '</div></td></tr></tbody></table></div></div>'
+        return head + numbers + lines + tail
+
+    def m_blockizeIn(self):
+        for item in list(set(SYNTAX.values())):
+            if len(self.blocks[item]) == 0:
+                continue
+            for i in self.blocks[item]:
+                self.text[i] = '<span style="color:rgb(220, 20, 60);font-weight:bold">' + \
+                        item.capitalize() + '</span>' + \
+                        self._parsecmd(wraptxt(self.text[i], '', int(self.wrap_width), rmblank = True).split('\n'), i)
         return
 
     def m_blockizeOut(self):
         if len(self.blocks['out']) == 0:
             return
         for i in self.blocks['out']:
-            self.text[i] = '<br /><textarea rows="20" cols="120">{}</textarea><br />'.format(self.text[i])
+            self.text[i] = '<br /><textarea rows="20" cols="105">{}</textarea><br />'.format(self.text[i])
+        return
+
+    def m_blockizeAlert(self):
+        for k in self.alertbox:
+            if len(self.blocks[k]) == 0:
+                continue
+            for i in self.blocks[k]:
+                if not self.text[i].startswith(self.mark):
+                    self.quit('Items must start with "{0}" in blocks. Problematic text is: \n {1}'.format(self.mark, self.text[i]))
+                self.text[i] = '<div class="{0}"><strong>{1}:</strong><br />{2}</div>'.\
+                        format(k.lower(), k.capitalize(), self.m_recode(re.sub(r'^{0}|\n{0}'.format(self.mark), '', self.text[i])))
         return
 
     def m_parseText(self):
@@ -365,42 +221,26 @@ class LogToHtml(TexParser):
                 idx += 1
                 continue
             if not self.text[idx].startswith(self.mark):
-#FIXME
-#                # regular cmd text, or with syntax
-#                if idx + 1 < len(self.text):
-#                    for i in range(idx + 1, len(self.text) + 1):
-#                        try:
-#                            if self.text[i].startswith(self.mark) or i in skip or self.text[i] == '':
-#                                break
-#                        except IndexError:
-#                            pass
-#                else:
-#                    i = idx + 1
-#                lan = list(set(self.ftype))
-#                sep = '\\'
-#                cnt = 114
-#                sminted = '\\mint[bgcolor=bg, fontsize=\\footnotesize]{text}?'
-#                lminted = '\\begin{minted}[bgcolor=bg, fontsize=\\footnotesize]{text}\n'
-#                #
-#                if (len(lan) == 1 and lan[0] in ['r','sh','py']) or self.mark == '//':
-#                    if lan[0] == 'h': lan[0] = 'cpp'
-#                    sep = '' if not lan[0] == 'sh' else '\\'
-#                    cnt = 131
-#                    sminted = '\\mint[fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=0.5pt, framesep=2mm]{%s}?' % (SYNTAX[lan[0]])
-#                    lminted =  '\\begin{minted}[samepage=false, fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=0.5pt, framesep=2mm]{%s}\n' % (SYNTAX[lan[0]])
-#                #
-#                cmd = '\n'.join([wraptxt(x, sep, cnt) for x in self.text[idx:i]])
-#                cmd = cmd.split('\n')
-#                if len(cmd) == 1:
-#                    self.text[idx] = sminted + cmd[0] + '?'
-#                else:
-#                    self.text[idx] = lminted + '\n'.join(cmd) + '\n\\end{minted}'
-#                    for j in range(idx + 1, i):
-#                        self.text[j] = ''
-#                idx = i
-#FIXME
-#FIXME
-                idx += 1
+                # regular cmd text, or with syntax
+                if idx + 1 < len(self.text):
+                    for i in range(idx + 1, len(self.text) + 1):
+                        try:
+                            if self.text[i].startswith(self.mark) or i in skip or self.text[i] == '':
+                                break
+                        except IndexError:
+                            pass
+                else:
+                    i = idx + 1
+                #
+                cmd = '\n'.join([wraptxt(x, '', int(self.wrap_width)) for x in self.text[idx:i]])
+                cmd = cmd.split('\n')
+                if len(cmd) == 1:
+                    self.text[idx] = self._parsecmd(cmd, idx)
+                else:
+                    self.text[idx] = self._parsecmd(cmd, idx)
+                    for j in range(idx + 1, i):
+                        self.text[j] = ''
+                idx = i
                 continue
             if self.text[idx].startswith(self.mark * 3) and self.text[idx+1].startswith(self.mark + '!') and self.text[idx+2].startswith(self.mark * 3):
                 # chapter
@@ -424,9 +264,8 @@ class LogToHtml(TexParser):
                 # too many #'s
                 self.quit("You have so many urgly '{0}' symbols in a regular line. Please clear them up in this line: '{1}'".format(self.mark, self.text[idx]))
             if self.text[idx].startswith(self.mark + '!!!'):
-#FIXME
-#                # box
-#                self.text[idx] = '\\shabox{' + self.m_recode(self.text[idx][len(self.mark)+3:]) + '}'
+                # box
+                self.text[idx] = '<span style="color:red;background:yellow;font-weight:bold">' + self.m_recode(self.text[idx][len(self.mark)+3:]) + '</span>'
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark + '!!'):
@@ -444,20 +283,20 @@ class LogToHtml(TexParser):
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark + '*'):
-#FIXME
-#                # fig: figure.pdf 0.9
-#                try:
-#                    fig, width = self.text[idx][len(self.mark)+1:].split()
-#                except ValueError:
-#                    fig = self.text[idx][len(self.mark)+1:].split()[0]
-#                    width = 0.9
-#                if not '.' in fig:
-#                    self.quit("Cannot determine graphic file format for '%s'. Valid extensions are 'pdf', 'png' and 'jpg'" % fig)
-#                if fig.split('.')[1] not in ['jpg','pdf','png']:
-#                    self.quit("Input file format '%s' not supported. Valid extensions are 'pdf', 'png' and 'jpg'" % fig.split('.')[1])
-#                if not os.path.exists(fig):
-#                    self.quit("Cannot find file %s" % fig)
-#                self.text[idx] = '\\begin{center}\\includegraphics[width=%s\\textwidth]{%s}\\end{center}' % (width, os.path.abspath(fig))
+                # fig: figure.png 0.9
+                try:
+                    fig, width = self.text[idx][len(self.mark)+1:].split()
+                    width = float(width)
+                except ValueError:
+                    fig = self.text[idx][len(self.mark)+1:].split()[0]
+                    width = 0.9
+                if not '.' in fig:
+                    self.quit("Cannot determine graphic file format for '%s'. Valid extensions are 'tif', 'png' and 'jpg'" % fig)
+                if fig.split('.')[1] not in ['jpg','tif','png']:
+                    self.quit("Input file format '%s' not supported. Valid extensions are 'tif', 'png' and 'jpg'" % fig.split('.')[1])
+                if not os.path.exists(fig):
+                    self.quit("Cannot find file %s" % fig)
+                self.text[idx] = '<center><img src="{}" alt="{}" width="{}" /></center>'.format(os.path.abspath(fig), os.path.split(fig)[-1], int(width * 800))
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark):
@@ -466,6 +305,18 @@ class LogToHtml(TexParser):
                 idx += 1
                 continue
         return
+
+    def m_parseBib(self):
+        if not self.bib:
+            return
+        bibkeys = []
+        self.textbib = '<hr />'
+        #unique, ordered reference list
+        for line in self.text:
+            bibkeys.extend([m.group(1) for m in re.finditer(re.compile('"#footnote-(.*?)"'), line)])
+        seen = set()
+        for k in [x for x in bibkeys if x not in seen and not seen.add(x)]:
+            self.textbib += '<p id="footnote-{}">[{}]: {}</p>\n'.format(k, self.bib[k][0], self.bib[k][1])
 
     def get(self, include_comment):
         if include_comment and len(self.blocks['err']) > 0:
@@ -479,14 +330,14 @@ class LogToHtml(TexParser):
         return '''
 <!DOCTYPE html>
 <html><head><title>{} | {}</title>
-{}
+{}{}
 </head><body><a name="top"></a>
 <div class="frame">
 {}
 <div class="content">
 {}
 </div></div></body></html>
-        '''.format(self.title, self.author, HTML_STYLE, self.m_title(self.title, self.author), '\n'.join(self.text))
+        '''.format(self.title, self.author, HTML_STYLE, JS_SCRIPT, self.m_title(self.title, self.author), '\n'.join(self.text))
 
     def m_title(self, title, author):
         return '''
