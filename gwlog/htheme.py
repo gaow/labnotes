@@ -125,6 +125,7 @@ a:hover
 	margin: 1em 0 0 0;
 	padding: .5em;
 	font-size: 20pt;
+	line-height: 120%;
 	color: #666;
 }
 
