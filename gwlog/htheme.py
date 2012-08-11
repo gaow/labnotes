@@ -664,3 +664,81 @@ eval(function(p,a,c,k,e,d){e=function(c){return(c<a?'':e(parseInt(c/a)))+((c=c%a
         SyntaxHighlighter.defaults['toolbar'] = false;
         SyntaxHighlighter.all();
 '''
+HTML_INDEX = {
+'head':r'''
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Documentation Files Navigation</title>
+	<style type="text/css"/>
+* {
+	/* Lazy reset */
+	margin: 0;
+	padding: 0;
+}
+body {
+	background: #fff;
+	color: #444;
+	font-size: 14px;
+	line-height: 1.5em;
+	font-family: arial, sans-serif;
+	text-align: center;
+}
+#wrapper {
+	text-align: left;
+	margin: 5em auto;
+	width: 500px;
+}
+
+/* Font styles */
+h1 {
+	font-size: 18px;
+	margin-bottom: 20px;
+	text-align: center;
+}
+a {
+	color: #990000;
+	text-decoration: none;
+}
+a:hover {
+	color: #c40000;
+	opacity: 0.7;
+	-moz-opacity: 0.7;
+	filter:alpha(opacity=70);
+}
+
+/* Core nav styles */
+#toc {
+	list-style: none;
+	margin-bottom: 20px;
+}
+#toc li {
+	background: url(dot.gif) repeat-x bottom left;
+	overflow: hidden;
+	padding-bottom: 2px;
+}
+#toc a,
+#toc span {
+	display: inline-block;
+	background: #fff;
+	position: relative;
+	bottom: -4px;
+}
+#toc a {
+	float: right;
+	padding: 0 0 3px 2px;
+}
+#toc span {
+	float: left;
+	padding: 0 2px 3px 0;
+}
+</style>
+</head>
+<body>
+<div id="wrapper">
+	<h1>Documentation Files Navigation</h1>
+	<ul id="toc">
+''',
+'tail':'</ul></div></body></html>'
+        }

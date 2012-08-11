@@ -3,6 +3,9 @@ from subprocess import PIPE, Popen
 import tempfile
 from minted import minted
 from btheme import btheme
+from htheme import HTML_INDEX
+from collections import OrderedDict
+
 SYNTAX = {'r':'r',
           'sh':'bash',
           'py':'python',
@@ -12,6 +15,7 @@ SYNTAX = {'r':'r',
           'h':'c',
           'sqlite':'sql'
           }
+
 # functions
 def getfname(innames, outname, suffix='.pdf'):
 	if not outname:
@@ -102,6 +106,30 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
 	sys.stderr.write('Done!\n')
 	return
 
+def indexhtml(fnames):
+    d = OrderedDict()
+    try:
+        for fn in fnames:
+            with open(fn, 'r') as f:
+                flag = True
+                while flag:
+                    line = f.readline()
+                    if not line:
+                        break
+                    m = re.search(r'<!DOCTYPE html><html><head><title>(.+?)\|(.+?)</title>', line)
+                    if m:
+                        if m.group(1).strip():
+                            d[fn] = (m.group(1).strip(), m.group(2).strip())
+                            flag = False
+            if flag:
+                sys.stderr.write('WARNING: Cannot find valid title for "{}". Please make sure the html files are generated with "--title" option\n'.format(fn))
+        if len(d) == 0:
+            sys.exit('WARNING: No output generated')
+    except Exception as e:
+        sys.exit("ERROR processing input html: {}".format(e))
+    #
+    otext = '\n'.join(['<li><span>{}{}</span><a href="{}">{}</a></li>'.format(v[0], '&nbsp;&nbsp;<em><small>by {}</small></em>'.format(v[1]) if v[1] else '', k, '[view]') for k, v in d.items()])
+    return HTML_INDEX['head'] + otext + HTML_INDEX['tail']
 
 # classes
 class TexParser:

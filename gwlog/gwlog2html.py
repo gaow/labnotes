@@ -194,7 +194,8 @@ class LogToHtml(TexParser):
         if len(self.blocks['out']) == 0:
             return
         for i in self.blocks['out']:
-            self.text[i] = '<br /><textarea rows="20" cols="105">{}</textarea><br />'.format(self.text[i])
+            nrow = len(self.text[i].split('\n'))
+            self.text[i] = '<br /><textarea rows="{}" cols="105">{}</textarea><br />'.format(max(min(nrow, 20), 1), self.text[i])
         return
 
     def m_blockizeAlert(self):
@@ -235,7 +236,7 @@ class LogToHtml(TexParser):
                 else:
                     i = idx + 1
                 #
-                cmd = '\n'.join([wraptxt(x, '', int(self.wrap_width)) for x in self.text[idx:i]])
+                cmd = '\n'.join([wraptxt(x, ' \\', int(self.wrap_width)) for x in self.text[idx:i]])
                 cmd = cmd.split('\n')
                 if len(cmd) == 1:
                     self.text[idx] = self._parsecmd(cmd, idx)
@@ -333,7 +334,7 @@ class LogToHtml(TexParser):
                         break
         self.text = [x.strip() for x in self.text if x and x.strip()]
         self.text = [x if x.startswith('<h') else x + '<br />' for x in self.text]
-        otext = '<!DOCTYPE html><html><head><title>{} | {}</title>\n'.format(self.title, self.author)
+        otext = '<!DOCTYPE html><html><head><title>{}</title>\n'.format((self.title + ' | ' + self.author) if self.title or self.author else '')
         if separate:
             otext += '<link href="main.css" rel="stylesheet" type="text/css"><script LANGUAGE="JavaScript" src="main.js"></script>'
         else:

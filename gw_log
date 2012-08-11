@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import argparse
-from gwlog.utils import getfname, pdflatex
+from gwlog.utils import getfname, pdflatex, indexhtml
 from gwlog.gwlog2tex import LogToTex
 from gwlog.gwlog2beamer import LogToBeamer
 from gwlog.gwlog2html import LogToHtml
@@ -69,6 +69,21 @@ def getHtmlArguments(parser):
 	parser.add_argument('-s', '--separate',
 			action='store_true',
                         help='''use separate files for css and js scripts''')
+
+def getAdminArguments(parser):
+	parser.add_argument('filename',
+                        metavar = 'FN',
+                        nargs = '+',
+                        help='''name of the input file(s)''')
+	parser.add_argument('-a', '--action',
+			type=str,
+			choices=['index_html'],
+                        help='''action to be applied to input files''')
+	parser.add_argument('-o', '--output',
+			metavar='name',
+                        type=str,
+                        help='''name of output file''')
+
 def doc(args):
 	tex = LogToTex(args.title, args.author, args.toc, args.footnote, args.filename)
 	lite = 1 if args.lite else 0
@@ -96,6 +111,16 @@ def html(args):
 		with open('main.js', 'w') as f: f.writelines(js)
 	return
 
+def admin(args):
+	if args.action == 'index_html':
+		fname = 'index.html'
+		if args.output:
+			fname = getfname([], args.output, suffix='.html') + '.html'
+		otext = indexhtml([x for x in args.filename if x != fname])
+		with open(fname, 'w') as f:
+			f.writelines(otext)
+	return
+
 if __name__ == '__main__':
 	master_parser = argparse.ArgumentParser(
         description = '''Compile formatted log notes into pdf file''',
@@ -120,6 +145,10 @@ if __name__ == '__main__':
 	getTexArguments(parser)
 	getHtmlArguments(parser)
 	parser.set_defaults(func=html)
+	# admin
+	parser = subparsers.add_parser('admin', help='A collection of utility features')
+	getAdminArguments(parser)
+	parser.set_defaults(func=admin)
 	# getting args
 	args = master_parser.parse_args()
 	# calling the associated functions
