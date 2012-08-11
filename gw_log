@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import argparse
+import codecs
 from gwlog.utils import getfname, pdflatex, indexhtml
 from gwlog.gwlog2tex import LogToTex
 from gwlog.gwlog2beamer import LogToBeamer
@@ -104,11 +105,11 @@ def html(args):
 	fname = getfname(args.filename, args.output, suffix='.html')
 	body, css, js = htm.get(lite, args.separate)
 	if body:
-		with open(fname + '.html', 'w') as f: f.writelines(body)
+		with codecs.open(fname + '.html', 'w', encoding='UTF-8', errors='ignore') as f: f.writelines(body)
 	if css:
-		with open('main.css', 'w') as f: f.writelines(css)
+		with codecs.open('main.css', 'w', encoding='UTF-8', errors='ignore') as f: f.writelines(css)
 	if js:
-		with open('main.js', 'w') as f: f.writelines(js)
+		with codecs.open('main.js', 'w', encoding='UTF-8', errors='ignore') as f: f.writelines(js)
 	return
 
 def admin(args):
@@ -117,7 +118,7 @@ def admin(args):
 		if args.output:
 			fname = getfname([], args.output, suffix='.html') + '.html'
 		otext = indexhtml([x for x in args.filename if x != fname])
-		with open(fname, 'w') as f:
+		with codecs.open(fname, 'w', encoding='UTF-8', errors='ignore') as f:
 			f.writelines(otext)
 	return
 
