@@ -65,6 +65,10 @@ def getSlidesArguments(parser):
                         default = '',
                         help='''build document from scratch without using cached data''')
 
+def getHtmlArguments(parser):
+	parser.add_argument('-s', '--separate',
+			action='store_true',
+                        help='''use separate files for css and js scripts''')
 def doc(args):
 	tex = LogToTex(args.title, args.author, args.toc, args.footnote, args.filename)
 	lite = 1 if args.lite else 0
@@ -83,8 +87,13 @@ def html(args):
 	htm = LogToHtml(args.title, args.author, args.toc, args.filename)
 	lite = 1 if args.lite else 0
 	fname = getfname(args.filename, args.output, suffix='.html')
-	with open(fname + '.html', 'w') as f:
-		f.writelines(htm.get(lite))
+	body, css, js = htm.get(lite, args.separate)
+	if body:
+		with open(fname + '.html', 'w') as f: f.writelines(body)
+	if css:
+		with open('main.css', 'w') as f: f.writelines(css)
+	if js:
+		with open('main.js', 'w') as f: f.writelines(js)
 	return
 
 if __name__ == '__main__':
@@ -109,6 +118,7 @@ if __name__ == '__main__':
 	# html
 	parser = subparsers.add_parser('html', help='Generate HTML page from log file(s)')
 	getTexArguments(parser)
+	getHtmlArguments(parser)
 	parser.set_defaults(func=html)
 	# getting args
 	args = master_parser.parse_args()

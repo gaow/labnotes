@@ -584,9 +584,8 @@ SYN_STY = r'''
   color: #2a00ff !important;
 }
 '''
-HTML_STYLE = '<style type="text/css">' + MAIN_STY + SYN_STY + '</style>'
+HTML_STYLE = MAIN_STY + SYN_STY
 JS_SCRIPT = r'''
-<script LANGUAGE="JavaScript">
 (function()
 {
 	// CommonJS
@@ -664,6 +663,4 @@ eval(function(p,a,c,k,e,d){e=function(c){return(c<a?'':e(parseInt(c/a)))+((c=c%a
         SyntaxHighlighter.defaults['pad-line-numbers'] = false;
         SyntaxHighlighter.defaults['toolbar'] = false;
         SyntaxHighlighter.all();
-
-</script>
 '''

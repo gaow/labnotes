@@ -37,7 +37,7 @@ HTML Example
 ------------
 gw_log html -h
 gw_log html demo.notes -o d1 --author "John Doe" --title "Example log documentation" --lite
-gw_log html demo.notes -o d2 --author "John Doe" --title "Example log documentation" --toc
+gw_log html demo.notes -o d2 --author "John Doe" --title "Example log documentation" --toc --separate
 
 Syntax
 ------

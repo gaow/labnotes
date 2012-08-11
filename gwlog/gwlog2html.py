@@ -324,7 +324,7 @@ class LogToHtml(TexParser):
         for k in [x for x in bibkeys if x not in seen and not seen.add(x)]:
             self.textbib += '<p id="footnote-{}">[{}]: {}</p>\n'.format(k, self.bib[k][0], self.bib[k][1])
 
-    def get(self, include_comment):
+    def get(self, include_comment, separate):
         if include_comment and len(self.blocks['err']) > 0:
             for idx in range(len(self.text)):
                 for item in self.blocks['err']:
@@ -333,17 +333,14 @@ class LogToHtml(TexParser):
                         break
         self.text = [x.strip() for x in self.text if x and x.strip()]
         self.text = [x if x.startswith('<h') else x + '<br />' for x in self.text]
-        return '''
-<!DOCTYPE html>
-<html><head><title>{} | {}</title>
-{}{}
-</head><body><a name="top"></a>
-<div class="frame">
-{}
-<div class="content">
-{}
-</div></div></body></html>
-        '''.format(self.title, self.author, HTML_STYLE, JS_SCRIPT, self.m_title(self.title, self.author), (self.m_toc(self.dtoc) if self.toc else '') + '\n'.join(self.text))
+        otext = '<!DOCTYPE html><html><head><title>{} | {}</title>\n'.format(self.title, self.author)
+        if separate:
+            otext += '<link href="main.css" rel="stylesheet" type="text/css"><script LANGUAGE="JavaScript" src="main.js"></script>'
+        else:
+            otext += '<style type="text/css">\n{}</style><script LANGUAGE="JavaScript">\n{}\n</script>'.format(HTML_STYLE, JS_SCRIPT)
+        otext += '</head><body><a name="top"></a><div class="frame">{}<div class="content">{}</div></div></body></html>'.\
+                format(self.m_title(self.title, self.author), (self.m_toc(self.dtoc) if self.toc else '') + '\n'.join(self.text))
+        return otext, HTML_STYLE if separate else '', JS_SCRIPT if separate else ''
 
     def m_title(self, title, author):
         return '''
