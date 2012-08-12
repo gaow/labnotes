@@ -48,18 +48,18 @@ class LogToHtml(TexParser):
             line = line.replace(m.group(0), ph + str(len(raw)))
             raw.append(m.group(1))
         # html keywords
-        # no need to convert any
-#        for item in [
+        # no need to convert most of them
+        for item in [
 #                ('\\', '&#92;'),('$', '&#36;'),
 #                ('{', '&#123;'),('}', '&#125;'),
 #                ('%', '&#37;'),('--', '&mdash;'),
 #                ('-', '&ndash;'),('&', '&amp;'),
-#                ('<', '&lt;'),('>', '&gt;'),
 #                ('~', '&tilde;'),('^', '&circ;'),
 #                ('``', '&ldquo;'),('`', '&lsquo;'),
-#                ('#', '&#35;')
-#                ]:
-#            line = line.replace(item[0], item[1])
+#                ('#', '&#35;'),
+                ('<', '&lt;'),('>', '&gt;'),
+                ]:
+            line = line.replace(item[0], item[1])
         line = re.sub(r'"""(.*?)"""', r'<strong><em>\1</em></strong>', line)
         line = re.sub(r'""(.*?)""', r'<strong>\1</strong>', line)
         line = re.sub(r'"(.*?)"', r'<em>\1</em>', line)
@@ -67,7 +67,7 @@ class LogToHtml(TexParser):
         line = re.sub(r'@@(.*?)@@', r'<code>\1</code>', line)
         # hyperlink
         # [text|@link@] defines the pattern for citation.
-        pattern = re.compile('\[(?P<a>.+?)\|@(?P<b>.+?)@\]')
+        pattern = re.compile('\[(\s*)(?P<a>.+?)(\s*)\|(\s*)@(?P<b>.+?)@(\s*)\]')
         for m in re.finditer(pattern, line):
             line = line.replace(m.group(0), '<a style="text-shadow: 1px 1px 1px #999;" href="http://{0}">{1}</a>'.format(m.group('b').replace('http://', '', 1), m.group('a')))
         # url
@@ -76,7 +76,7 @@ class LogToHtml(TexParser):
             line = line.replace(m.group(0), '<a href="http://{0}">{0}</a>'.format(m.group(1).replace('http://', '', 1)))
         # footnote
         # [note|reference] defines the pattern for citation.
-        pattern = re.compile('\[(?P<a>.+?)\|(?P<b>.+?)\]')
+        pattern = re.compile('\[(\s*)(?P<a>.+?)(\s*)\|(\s*)(?P<b>.+?)(\s*)\]')
         # re.compile('\[(.+?)\|(.+?)\]')
         for m in re.finditer(pattern, line):
             k = re.sub('\W', '', m.group('a'))
@@ -90,10 +90,11 @@ class LogToHtml(TexParser):
         # more kw
         line = line.replace("''", '"')
         line = line.replace("``", '"')
+        line = line.replace("`", "'")
         # recover raw html syntax
         for i in range(len(raw)):
             line = line.replace(ph + str(i), raw[i])
-        return line
+        return line.strip()
 
 
     def m_blockizeList(self):
@@ -126,8 +127,8 @@ class LogToHtml(TexParser):
                             except IndexError:
                                 pass
                     #
-                    text[start] = '<ul>\n' + text[start]
-                    text[end] = text[end] + '\n</ul>'
+                    text[start] = '<ol>\n' + text[start]
+                    text[end] = text[end] + '\n</ol>'
                     idx = end + 1
                 elif text[idx].startswith(self.mark):
                     text[idx] = self.mark + self.m_recode(text[idx][1:])
@@ -137,7 +138,7 @@ class LogToHtml(TexParser):
                     idx += 1
             # handle 1st level indentation
             self.text[i] = '\n'.join(text)
-            self.text[i] = '<ol>\n%s\n</ol>\n' % re.sub(r'^{0}|\n{0}'.format(self.mark), '\n<li> ', self.text[i] + '</li>')
+            self.text[i] = '<ul>\n%s\n</ul>\n' % re.sub(r'^{0}|\n{0}'.format(self.mark), '\n<li> ', self.text[i] + '</li>')
         return
 
 
@@ -236,7 +237,7 @@ class LogToHtml(TexParser):
                 else:
                     i = idx + 1
                 #
-                cmd = '\n'.join([wraptxt(x, ' \\', int(self.wrap_width)) for x in self.text[idx:i]])
+                cmd = '\n'.join([wraptxt(x, '\\', int(self.wrap_width)) for x in self.text[idx:i]])
                 cmd = cmd.split('\n')
                 if len(cmd) == 1:
                     self.text[idx] = self._parsecmd(cmd, idx)
@@ -308,7 +309,7 @@ class LogToHtml(TexParser):
                 continue
             if self.text[idx].startswith(self.mark):
                 # a plain line here
-                self.text[idx] = '\n' + self.m_recode(self.text[idx][len(self.mark):]) + '\n'
+                self.text[idx] = '\n<p>' + self.m_recode(self.text[idx][len(self.mark):]) + '</p>\n'
                 idx += 1
                 continue
         return
@@ -333,7 +334,6 @@ class LogToHtml(TexParser):
                         self.text[idx] = ''
                         break
         self.text = [x.strip() for x in self.text if x and x.strip()]
-        self.text = [x if x.startswith('<h') else x + '<br />' for x in self.text]
         otext = '<!DOCTYPE html><html><head><title>{}</title>\n'.format((self.title + ' | ' + self.author) if self.title or self.author else '')
         if separate:
             otext += '<link href="main.css" rel="stylesheet" type="text/css"><script LANGUAGE="JavaScript" src="main.js"></script>'

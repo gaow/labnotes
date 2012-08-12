@@ -107,9 +107,9 @@ def html(args):
 	if body:
 		with codecs.open(fname + '.html', 'w', encoding='UTF-8', errors='ignore') as f: f.writelines(body)
 	if css:
-		with codecs.open('main.css', 'w', encoding='UTF-8', errors='ignore') as f: f.writelines(css)
+		with open('main.css', 'w') as f: f.writelines(css)
 	if js:
-		with codecs.open('main.js', 'w', encoding='UTF-8', errors='ignore') as f: f.writelines(js)
+		with open('main.js', 'w') as f: f.writelines(js)
 	return
 
 def admin(args):

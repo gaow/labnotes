@@ -46,4 +46,8 @@ Syntax
 #!   #									#						#(or ##)
 ###, ###, #!, #!!, #!!!, #, #*, 	#} ----------,  #}	#}	#}     						#} 		#}
 
-Emphasis: ``double quote'', `single quote',  "italics", ""bold"", """bold italics""", @@@raw \LaTeXe syntax@@@, @@monospaced@@, @url@, [keyword|footnote],
+Emphasis: ``double quote'', `single quote',  "italics", ""bold"", """bold italics""", @@@raw \LaTeXe syntax@@@, @@monospaced@@, @url@, [keyword|footnote]
+
+Known Issues
+------------
+html: cannot incorporate raw html codes in block or cmd mode (will conflict with the source)

@@ -51,7 +51,7 @@ tr.dark
 	background-color:#f9f9f9;
 }
 
-ul
+ol
 {
 	list-style-type: lower-greek;
 	font-family: 'Lucida Grande';
@@ -256,6 +256,7 @@ a:hover
 	padding-left: 30px;
 	background: #ffdddd no-repeat 20px;
 }
+/* .textborder {border: 1px dashed rgb(0, 36, 105); padding: 2px;} */
 .textborder {border: 1px dashed rgb(220, 20, 60); padding: 2px;}
 '''
 
