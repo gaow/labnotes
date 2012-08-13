@@ -37,6 +37,13 @@ class LogToHtml(TexParser):
         self.m_blockizeTable(fsize='small')
         self.m_blockizeAlert()
 
+    def _parseUrlPrefix(self, text):
+        prefix = re.search(r'^(.+?)://', text)
+        if prefix:
+            return prefix.group(0), text.replace(prefix.group(0), '')
+        else:
+            return '', text
+
     def m_recode(self, line):
         if not line:
             return ''
@@ -70,11 +77,13 @@ class LogToHtml(TexParser):
         # [text|@link@] defines the pattern for citation.
         pattern = re.compile('\[(\s*)(?P<a>.+?)(\s*)\|(\s*)@(?P<b>.+?)@(\s*)\]')
         for m in re.finditer(pattern, line):
-            line = line.replace(m.group(0), '<a style="text-shadow: 1px 1px 1px #999;" href="http://{0}">{1}</a>'.format(m.group('b').replace('http://', '', 1), m.group('a')))
+            prefix, address = self._parseUrlPrefix(m.group('b'))
+            line = line.replace(m.group(0), '<a style="text-shadow: 1px 1px 1px #999;" href="{0}{1}">{2}</a>'.format(prefix, address, m.group('a')))
         # url
         pattern = re.compile('@(.*?)@')
         for m in re.finditer(pattern, line):
-            line = line.replace(m.group(0), '<a href="http://{0}">{0}</a>'.format(m.group(1).replace('http://', '', 1)))
+            prefix, address = self._parseUrlPerfix(m.group(1))
+            line = line.replace(m.group(0), '<a href="{0}{1}">{1}</a>'.format(prefix, address, address))
         # footnote
         # [note|reference] defines the pattern for citation.
         pattern = re.compile('\[(\s*)(?P<a>.+?)(\s*)\|(\s*)(?P<b>.+?)(\s*)\]')
