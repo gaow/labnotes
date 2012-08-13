@@ -702,7 +702,6 @@ h1 {
 	text-align: center;
 }
 h4 {
-    text-align: center;
 	font-style: italic;
 	margin-bottom: 5px;
 }
@@ -747,8 +746,7 @@ a:hover {
 <body>
 <div id="wrapper">
 	<h1>Documentation Files Navigation</h1>
-    <h4>%s</h4>
 	<ul id="toc">
-''' % strftime("%a %d %b %Y %H:%M:%S", localtime()) ,
-'tail':'</ul></div></body></html>'
+''',
+'tail':'</ul><h4>Last updated: %s</h4></div></body></html>' % strftime("%a %d %b %Y %H:%M:%S", localtime())
         }

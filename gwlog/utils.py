@@ -128,7 +128,7 @@ def indexhtml(fnames):
     except Exception as e:
         sys.exit("ERROR processing input html: {}".format(e))
     #
-    otext = '\n'.join(['<li><span>{}{}</span><a href="{}">{}</a></li>'.format(v[0], '&nbsp;&nbsp;<em><small>by {}</small></em>'.format(v[1]) if v[1] else '', k, '[view]') for k, v in d.items()])
+    otext = '\n'.join(['<li><span>{}{}</span><a href="{}">{}</a></li>'.format(v[0].replace('_', ' '), '&nbsp;&nbsp;<em><small>by {}</small></em>'.format(v[1]) if v[1] else '', k, '[view]') for k, v in d.items()])
     return HTML_INDEX['head'] + otext + HTML_INDEX['tail']
 
 # classes
