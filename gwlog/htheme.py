@@ -147,9 +147,9 @@ a:hover
 {
 	margin-top: 15px;
 	font-size: 10pt;
-	font-weight:normal;
-	color:#304860;
-	font-style: italic;
+	font-weight: normal;
+	color: #304860;
+	font-style: oblique;
 }
 
 .download
