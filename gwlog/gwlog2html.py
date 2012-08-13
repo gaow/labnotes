@@ -82,7 +82,7 @@ class LogToHtml(TexParser):
         # url
         pattern = re.compile('@(.*?)@')
         for m in re.finditer(pattern, line):
-            prefix, address = self._parseUrlPerfix(m.group(1))
+            prefix, address = self._parseUrlPrefix(m.group(1))
             line = line.replace(m.group(0), '<a href="{0}{1}">{1}</a>'.format(prefix, address, address))
         # footnote
         # [note|reference] defines the pattern for citation.
