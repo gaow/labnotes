@@ -149,6 +149,7 @@ a:hover
 	font-size: 10pt;
 	font-weight:normal;
 	color:#304860;
+	font-style: italic;
 }
 
 .download
@@ -666,6 +667,7 @@ eval(function(p,a,c,k,e,d){e=function(c){return(c<a?'':e(parseInt(c/a)))+((c=c%a
         SyntaxHighlighter.defaults['toolbar'] = false;
         SyntaxHighlighter.all();
 '''
+from time import strftime, localtime
 HTML_INDEX = {
 'head':r'''
 <!DOCTYPE html>
@@ -698,6 +700,11 @@ h1 {
 	font-size: 18px;
 	margin-bottom: 20px;
 	text-align: center;
+}
+h4 {
+    text-align: center;
+	font-style: italic;
+	margin-bottom: 5px;
 }
 a {
 	color: #990000;
@@ -740,7 +747,8 @@ a:hover {
 <body>
 <div id="wrapper">
 	<h1>Documentation Files Navigation</h1>
+    <h4>%s</h4>
 	<ul id="toc">
-''',
+''' % strftime("%a %d %b %Y %H:%M:%S", localtime()) ,
 'tail':'</ul></div></body></html>'
         }

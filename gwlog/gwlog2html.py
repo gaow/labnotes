@@ -3,6 +3,7 @@ import codecs
 from collections import OrderedDict
 from utils import wraptxt, TexParser, SYNTAX
 from htheme import HTML_STYLE, JS_SCRIPT
+from time import strftime, localtime
 
 class LogToHtml(TexParser):
     def __init__(self, title, author, toc, filename):
@@ -348,7 +349,7 @@ class LogToHtml(TexParser):
         <div class="top">
         {}{}
         </div>
-        '''.format('<h1 class="title">{}</h1>'.format(title) if title else '', '<center><h3 class="subsubheading"><em>Edited by: {}</em></h3></center>'.format(author) if author else '')
+        '''.format('<h1 class="title">{}</h1>'.format(title) if title else '', '<center><h3 class="subsubheading">Edited by {}, on {}</h3></center>'.format(author, strftime("%a %d %b %Y %H:%M:%S", localtime())) if author else '')
 
     def m_chapter(self, text, i):
         return '''
@@ -367,7 +368,7 @@ class LogToHtml(TexParser):
 
     def m_sssection(self, text):
         return '''
-        <h3 class="subsubheading"><em>{}</em></h3>
+        <h3 class="subsubheading">{}</h3>
         '''.format(text)
 
     def _csize(self, v, k):
