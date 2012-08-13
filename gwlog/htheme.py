@@ -113,6 +113,7 @@ a:hover
 	border-left: solid transparent 30px;
 	border-right: solid transparent 30px;
 	text-align:center;
+	line-height: 120%;
 	color: #666;
 	font-variant: small-caps;
 	font-family: Georgia, Times, serif;
@@ -210,7 +211,7 @@ a:hover
 
 #wrapper {
 	text-align: left;
-	width: 500px;
+	width: 600px;
 }
 
 #toc {
@@ -239,22 +240,22 @@ a:hover
 }
 
 .tip {
-	padding-left: 30px;
+	padding: 10px 5px 10px 15px;
 	background: #ddffdd no-repeat 20px;
 }
 
-.note {
-	padding-left: 30px;
+.important {
+	padding: 10px 5px 10px 15px;
 	background: lightblue no-repeat 20px;
 }
 
-.important {
-	padding-left: 30px;
+.note {
+	padding: 10px 5px 10px 15px;
 	background: #ffffcc no-repeat 20px;
 }
 
 .warning {
-	padding-left: 30px;
+	padding: 10px 5px 10px 15px;
 	background: #ffdddd no-repeat 20px;
 }
 /* .textborder {border: 1px dashed rgb(0, 36, 105); padding: 2px;} */
