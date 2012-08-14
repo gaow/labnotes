@@ -184,9 +184,9 @@ class LogToHtml(TexParser):
         return
 
 
-    def _parsecmd(self, text, serial):
+    def _parsecmd(self, text, serial, numbered = False):
         head = '<div><div id="highlighter_{}" class="syntaxhighlighter bash"><table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="gutter">'.format(serial)
-        numbers = ''.join(['<div class="line number{0} index{1} alt{2}">{0}</div>'.format(j+1, j, 2 - j % 2) for j in range(len(text))]) + '</td><td class="code"><div class="container">'
+        numbers = ''.join(['<div class="line number{0} index{1} alt{2}">{0}</div>'.format(j+1 if numbered else ' ', j, 2 - j % 2) for j in range(len(text))]) + '</td><td class="code"><div class="container">'
         lines = ''.join(['<div class="line number{0} index{1} alt{2}"><code class="bash plain">{3}</code></div>'.format(j+1, j, 2 - j % 2, line) for j, line in enumerate(text)])
         tail = '</div></td></tr></tbody></table></div></div>'
         return head + numbers + lines + tail
@@ -198,7 +198,7 @@ class LogToHtml(TexParser):
             for i in self.blocks[item]:
                 self.text[i] = '<div style="color:rgb(220, 20, 60);font-weight:bold;text-align:right;padding-right:2em;"><span class="textborder">' + \
                         item.capitalize() + '</span></div>' + \
-                        self._parsecmd(wraptxt(self.text[i], '', int(self.wrap_width), rmblank = True).split('\n'), i)
+                        self._parsecmd(wraptxt(self.text[i], '', int(self.wrap_width), rmblank = True).split('\n'), i, numbered = True)
         return
 
     def m_blockizeOut(self):
