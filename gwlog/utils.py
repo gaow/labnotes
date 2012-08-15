@@ -141,13 +141,26 @@ class TexParser:
         self.fn = '-'.join(fname)
         self.mark = '#'
         self.text = []
-        self.blocks = {}
-        self.keywords = ['err', 'list', 'table']
-        for item in self.keywords:
-            self.blocks[item] = []
+        self.PARSER_RULE = {
+                'list':'self.m_blockizeList',
+                'table':'self.m_blockizeTable',
+                'out':'self.m_blockizeOut',
+                }
+        for item in list(set(SYNTAX.values())):
+            self.PARSER_RULE[item] = 'self.m_blockizeIn'
+        for item in ['warning', 'tip', 'important', 'note']:
+            self.PARSER_RULE[item] = 'self.m_blockizeAlert'
+        self.comments = []
+        self.keywords = ['list', 'table']
         self.bib = {}
         self.textbib = ''
         self.footnote = False
+        self.tablefont = 'footnotesize'
+        # dirty place holders ....
+        self.blockph = 'THISISABLOODYBLOCKPLACEHOLDER'
+        self.latexph = 'BLOODYLATEXRAWPATTERNPLACEHOLDER'
+        self.htmlph = 'BLOODYHTMLRAWPATTERNPLACEHOLDER'
+        self.pause = False
 
     def m_recode(self, line):
         # the use of ? is very important
@@ -159,11 +172,10 @@ class TexParser:
             return ''
         line = line.strip()
         raw = []
-        ph = 'LATEXRAWPATTERNPLACEHOLDER'
         # support for raw latex syntax
         pattern = re.compile(r'@@@(.*?)@@@')
         for m in re.finditer(pattern, line):
-            line = line.replace(m.group(0), ph + str(len(raw)))
+            line = line.replace(m.group(0), self.latexph + str(len(raw)))
             raw.append(m.group(1))
         # latex keywords
         for item in [('\\', '!!\\backslash!!'),('$', '\$'),('!!\\backslash!!', '$\\backslash$'),
@@ -198,7 +210,7 @@ class TexParser:
                 line = line.replace(m.group(0), '{\\color{MidnightBlue}%s}~\\footnote{%s}' % (m.group('a'), '\\underline{' + m.group('a') + '} ' + m.group('b')))
         # recover raw latex syntax
         for i in range(len(raw)):
-            line = line.replace(ph + str(i), raw[i])
+            line = line.replace(self.latexph + str(i), raw[i])
         return line
 
     def m_parseBlocks(self):
@@ -211,7 +223,7 @@ class TexParser:
             if self.text[idx].startswith(self.mark + '{') and '--' not in self.text[idx]:
                 # define block
                 bname = self.text[idx].split('{')[1].strip()
-                if bname not in [x for x in self.keywords if x != 'err']:
+                if bname not in [x for x in self.keywords]:
                     self.quit("Invalid block definition '%s{ %s'" % (self.mark, bname))
                 endidx = None
                 self.text[idx] = ''
@@ -233,11 +245,13 @@ class TexParser:
                 for i in range(idx + 1, endidx):
                     self.text[idx] += self.text[i] + ('\n' if not i + 1 == endidx else '')
                 del self.text[(idx + 1) : (endidx + 1)]
-                # keep block index
-                self.blocks[bname].append(idx)
+                # parse the block
+                self.text[idx] = self.blockph + eval(self.PARSER_RULE[bname])(self.text[idx], bname)
             idx += 1
             continue
-        #
+        return
+
+    def m_parseComments(self):
         for idx, item in enumerate(self.text):
             # define err block
             if self.text[idx].startswith(self.mark + '}') and '--' in self.text[idx]:
@@ -252,72 +266,71 @@ class TexParser:
                         break
                 if not endidx:
                     self.quit('Comment blocks must appear in pairs, near {0}'.format(self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
-                self.blocks['err'].append([idx, endidx])
+                self.comments.append([idx, endidx])
                 self.text[idx] = ''
                 self.text[endidx] = ''
         return
 
-    def m_blockizeList(self, pause = False):
-        if len(self.blocks['list']) == 0:
-            return
-        for i in self.blocks['list']:
-            if i >= len(self.text):
-                self.quit('BUG: block specification does not match text')
-            if not self.text[i].startswith(self.mark):
-                self.quit('Items must start with "{0}" in list block. Problematic text is: \n {1}'.format(self.mark, self.text[i]))
-            # handle 2nd level indentation first
-            # in the mean time take care of recoding
-            text = self.text[i].split('\n')
-            idx = 0
-            while idx < len(text):
-                if text[idx].startswith(self.mark * 2):
-                    start = idx
-                    end = idx
-                    text[idx] = self.mark * 2 + self.m_recode(text[idx][2:])
-                    text[idx] = re.sub(r'^{0}'.format(self.mark * 2), '\\item ', text[idx])
-                    if idx + 1 < len(text):
-                        for j in range(idx + 1, len(text) + 1):
-                            try:
-                                if not text[j].startswith(self.mark * 2):
-                                    break
-                                else:
-                                    text[j] = self.mark * 2 + self.m_recode(text[j][2:])
-                                    text[j] = re.sub(r'^{0}'.format(self.mark * 2), '\\item ', text[j])
-                                    end = j
-                            except IndexError:
-                                pass
-                    #
-                    text[start] = '\\begin{itemize}\n' + text[start]
-                    text[end] = text[end] + '\n\\end{itemize}'
-                    idx = end + 1
-                elif text[idx].startswith(self.mark):
-                    text[idx] = self.mark + self.m_recode(text[idx][1:])
-                    idx += 1
-                else:
-                    text[idx] = self.m_recode(text[idx])
-                    idx += 1
-            # handle 1st level indentation
-            self.text[i] = '\n'.join(text)
-            self.text[i] = '\\begin{itemize}%s\n\\end{itemize}\n' % re.sub(r'^{0}|\n{0}'.format(self.mark), '\n\\item ', self.text[i])
-            # this is for beamer \pause option
-            if pause:
-                self.text[i] = self.text[i].replace('\\item -', '\\pause \\item ')
-        return
+    def m_blockizeList(self, text, k):
+        # handle 2nd level indentation first
+        # in the mean time take care of recoding
+        text = text.split('\n')
+        idx = 0
+        while idx < len(text):
+            if text[idx].startswith(self.blockph):
+                text[idx] = text[idx].replace(self.blockph, '', 1)
+                idx += 1
+                continue
+            if text[idx].startswith(self.mark * 2):
+                start = idx
+                end = idx
+                text[idx] = self.mark * 2 + self.m_recode(text[idx][2:])
+                text[idx] = re.sub(r'^{0}'.format(self.mark * 2), '\\item ', text[idx])
+                if idx + 1 < len(text):
+                    for j in range(idx + 1, len(text) + 1):
+                        try:
+                            if not text[j].startswith(self.mark * 2):
+                                break
+                            else:
+                                text[j] = self.mark * 2 + self.m_recode(text[j][2:])
+                                text[j] = re.sub(r'^{0}'.format(self.mark * 2), '\\item ', text[j])
+                                end = j
+                        except IndexError:
+                            pass
+                #
+                text[start] = '\\begin{itemize}\n' + text[start]
+                text[end] = text[end] + '\n\\end{itemize}'
+                idx = end + 1
+            elif text[idx].startswith(self.mark):
+                text[idx] = self.mark + self.m_recode(text[idx][1:])
+                idx += 1
+            else:
+                text[idx] = self.m_recode(text[idx])
+                idx += 1
+        # handle 1st level indentation
+        text = '\n'.join([x.replace(self.blockph, '', 1) if x.startswith(self.blockph) else  re.sub(r'^{0}'.format(self.mark), '\\item ', x) for x in text])
+        text = '\\begin{itemize}%s\n\\end{itemize}\n' % text
+        # this is for beamer \pause option
+        if self.pause:
+            text = text.replace('\\item -', '\\pause \\item ')
+        return text
 
-    def m_blockizeTable(self, fsize = 'footnotesize'):
-        if len(self.blocks['table']) == 0:
-            return
-        for i in self.blocks['table']:
-            table = [[self.m_recode(iitem) for iitem in item.split('\t')] for item in self.text[i].split('\n')]
-            ncols = list(set([len(x) for x in table]))
-            if len(ncols) > 1:
-                self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(self.text[i]))
-            cols = 'c' * ncols[0]
-            head = '\\begin{center}\n{\\%s\\begin{longtable}{%s}\n\\hline\n' % (fsize, cols)
-            body = '&'.join(table[0]) + '\\\\\n' + '\\hline\n' + '\\\\\n'.join(['&'.join(item) for item in table[1:]]) + '\\\\\n'
-            tail = '\\hline\n\\end{longtable}}\n\\end{center}\n'
-            self.text[i] = head + body + tail
-        return
+    def _quitOnNest(self, text):
+        nests = [item for item in text.split('\n') if item.startswith(self.blockph)]
+        if len(nests):
+            self.quit('Cannot nest other blocks here: {0}'.format(nests[0].replace(self.blockph, '', 1)))
+
+    def m_blockizeTable(self, text, k):
+        self._quitOnNest(text)
+        table = [[self.m_recode(iitem) for iitem in item.split('\t')] for item in text.split('\n')]
+        ncols = list(set([len(x) for x in table]))
+        if len(ncols) > 1:
+            self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(text))
+        cols = 'c' * ncols[0]
+        head = '\\begin{center}\n{\\%s\\begin{longtable}{%s}\n\\hline\n' % (self.tablefont, cols)
+        body = '&'.join(table[0]) + '\\\\\n' + '\\hline\n' + '\\\\\n'.join(['&'.join(item) for item in table[1:]]) + '\\\\\n'
+        tail = '\\hline\n\\end{longtable}}\n\\end{center}\n'
+        return head + body + tail
 
     def m_parseBib(self):
         if not self.bib:

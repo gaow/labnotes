@@ -28,10 +28,10 @@ class LogToBeamer(TexParser):
         self.thank = thank
         self.alertbox = ['warning', 'tip', 'important', 'note']
         self.keywords = list(set(SYNTAX.values())) + self.alertbox + ['err', 'out', 'list', 'table']
-        for item in self.keywords:
-            self.blocks[item] = []
+        self.pause = True
+        self.tablefont = 'tiny'
         self.m_parseBlocks()
-        self.m_blockizeAll()
+        self.m_parseComments()
         self.m_parseText()
         self.m_parseBib()
         if self.thank:
@@ -40,49 +40,27 @@ class LogToBeamer(TexParser):
             self.text.append('\\appendix\n\\begin{frame}[allowframebreaks]\n\\tiny\n' + \
                 self.textbib + '\n\\end{frame}')
 
-    def m_blockizeIn(self):
-        for item in list(set(SYNTAX.values())):
-            if len(self.blocks[item]) == 0:
-                continue
-            for i in self.blocks[item]:
-                self.text[i] = '\\begin{exampleblock}{\\texttt{%s}}\\scriptsize\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{exampleblock}\n' % \
-                        (item.capitalize(), wraptxt(self.text[i], '', int(78 * self.wrap_adjust), rmblank = False))
-        return
+    def m_blockizeIn(self, text, k):
+        self._quitOnNest(text)
+        return '\\begin{exampleblock}{\\texttt{%s}}\\scriptsize\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{exampleblock}\n' % \
+                        (k.capitalize(), wraptxt(text, '', int(78 * self.wrap_adjust), rmblank = False))
 
-    def m_blockizeOut(self):
-        if len(self.blocks['out']) == 0:
-            return
-        for i in self.blocks['out']:
-            self.text[i] = '\\begin{exampleblock}{}\\tiny\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{exampleblock}\n' % \
-                    wraptxt(self.text[i], '', int(105 * self.wrap_adjust), rmblank = False)
-        return
+    def m_blockizeOut(self, text, k):
+        self._quitOnNest(text)
+        return '\\begin{exampleblock}{}\\tiny\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{exampleblock}\n' % \
+                    wraptxt(text, '', int(105 * self.wrap_adjust), rmblank = False)
 
-    def m_blockizeAlert(self):
-        for k in self.alertbox:
-            if len(self.blocks[k]) == 0:
-                continue
-            for i in self.blocks[k]:
-                if not self.text[i].startswith(self.mark):
-                    self.quit('Items must start with "{0}" in blocks. Problematic text is: \n {1}'.format(self.mark, self.text[i]))
-                self.text[i] = '\\begin{{{0}block}}{{{1}}}\n{2}\n\\end{{{0}block}}\n'.\
-                        format('alert' if k in ['important', 'warning'] else '', k.capitalize(), self.m_recode(re.sub(r'^{0}|\n{0}'.format(self.mark), '', self.text[i])))
-        return
-
-    def m_blockizeAll(self):
-        self.m_blockizeIn()
-        self.m_blockizeOut()
-        self.m_blockizeList(pause=True)
-        self.m_blockizeTable(fsize='tiny')
-        self.m_blockizeAlert()
+    def m_blockizeAlert(self, text, k):
+        text = '\n'.join([item.replace(self.blockph, '', 1) if item.startswith(self.blockph) else self.m_recode(re.sub(r'^{0}'.format(self.mark), '', item)) for item in text.split('\n')])
+        return '\\begin{{{0}block}}{{{1}}}\n{2}\n\\end{{{0}block}}\n'.\
+                        format('alert' if k in ['important', 'warning'] else '', k.capitalize(), text)
 
     def m_parseText(self):
         skip = []
-        for item in self.blocks.keys():
-            for i in self.blocks[item]:
-                try:
-                    skip.extend(i)
-                except:
-                    skip.append(i)
+        for idx, item in enumerate(self.text):
+            if item.startswith(self.blockph):
+                self.text[idx] = item.replace(self.blockph, '', 1)
+                skip.append(idx)
         idx = 0
         framestart = 0
         frameend = 0
@@ -222,9 +200,9 @@ class LogToBeamer(TexParser):
         titlepage = '\\frame{\\titlepage}\n' if not self.mode == 'notes' else '\\maketitle\n'
         tocpage = '\\begin{frame}[allowframebreaks]\n\\frametitle{Outline}\n\\tableofcontents[hideallsubsections]\n\\end{frame}\n' if not self.mode == 'notes' else '\\tableofcontents\n'
         sectiontoc = '\\AtBeginSection[]\n{\n\\begin{frame}<beamer>\n\\frametitle{$\clubsuit$}\n\\tableofcontents[currentsection, currentsubsection, sectionstyle=show/hide, subsectionstyle=show/show/hide]\n\\end{frame}\n}\n'
-        if include_comment and len(self.blocks['err']) > 0:
+        if include_comment and len(self.comments) > 0:
             for idx in range(len(self.text)):
-                for item in self.blocks['err']:
+                for item in self.comments:
                     if idx in range(item[0], item[1]):
                         self.text[idx] = ''
                         break

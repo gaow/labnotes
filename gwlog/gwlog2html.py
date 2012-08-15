@@ -21,21 +21,13 @@ class LogToHtml(TexParser):
         self.dtoc = OrderedDict()
         self.alertbox = ['warning', 'tip', 'important', 'note']
         self.keywords = list(set(SYNTAX.values())) + self.alertbox + ['err', 'out', 'list', 'table']
-        for item in self.keywords:
-            self.blocks[item] = []
         self.wrap_width = 120
+        self.tablefont = 'small'
         self.m_parseBlocks()
-        self.m_blockizeAll()
+        self.m_parseComments()
         self.m_parseText()
         self.m_parseBib()
         self.text.append(self.textbib)
-
-    def m_blockizeAll(self):
-        self.m_blockizeIn()
-        self.m_blockizeOut()
-        self.m_blockizeList()
-        self.m_blockizeTable(fsize='small')
-        self.m_blockizeAlert()
 
     def _parseUrlPrefix(self, text):
         prefix = re.search(r'^(.+?)://', text)
@@ -49,11 +41,10 @@ class LogToHtml(TexParser):
             return ''
         line = line.strip()
         raw = []
-        ph = 'HTMLRAWPATTERNPLACEHOLDER'
         # support for raw html syntax/symbols
         pattern = re.compile(r'@@@(.*?)@@@')
         for m in re.finditer(pattern, line):
-            line = line.replace(m.group(0), ph + str(len(raw)))
+            line = line.replace(m.group(0), self.htmlph + str(len(raw)))
             raw.append(m.group(1))
         # html keywords
         # no need to convert most of them
@@ -103,85 +94,77 @@ class LogToHtml(TexParser):
         line = line.replace("`", "'")
         # recover raw html syntax
         for i in range(len(raw)):
-            line = line.replace(ph + str(i), raw[i])
+            line = line.replace(self.htmlph + str(i), raw[i])
         return line.strip()
 
 
-    def m_blockizeList(self):
-        if len(self.blocks['list']) == 0:
-            return
-        for i in self.blocks['list']:
-            if i >= len(self.text):
-                self.quit('BUG: block specification does not match text')
-            if not self.text[i].startswith(self.mark):
-                self.quit('Items must start with "{0}" in list block. Problematic text is: \n {1}'.format(self.mark, self.text[i]))
-            # handle 2nd level indentation first
-            # in the mean time take care of recoding
-            text = self.text[i].split('\n')
-            idx = 0
-            while idx < len(text):
-                if text[idx].startswith(self.mark * 2):
-                    start = idx
-                    end = idx
-                    text[idx] = self.mark * 2 + self.m_recode(text[idx][2:])
-                    text[idx] = re.sub(r'^{0}'.format(self.mark * 2), '<li> ', text[idx]) + '</li>'
-                    if idx + 1 < len(text):
-                        for j in range(idx + 1, len(text) + 1):
-                            try:
-                                if not text[j].startswith(self.mark * 2):
-                                    break
-                                else:
-                                    text[j] = self.mark * 2 + self.m_recode(text[j][2:])
-                                    text[j] = re.sub(r'^{0}'.format(self.mark * 2), '<li> ', text[j]) + '</li>'
-                                    end = j
-                            except IndexError:
-                                pass
-                    #
-                    text[start] = '<ol>\n' + text[start]
-                    text[end] = text[end] + '\n</ol>'
-                    idx = end + 1
-                elif text[idx].startswith(self.mark):
-                    text[idx] = self.mark + self.m_recode(text[idx][1:])
-                    idx += 1
-                else:
-                    text[idx] = self.m_recode(text[idx])
-                    idx += 1
-            # handle 1st level indentation
-            self.text[i] = '\n'.join(text)
-            self.text[i] = '<ul>\n%s\n</ul>\n' % re.sub(r'^{0}|\n{0}'.format(self.mark), '\n<li> ', self.text[i] + '</li>')
-        return
+    def m_blockizeList(self, text, k):
+        # handle 2nd level indentation first
+        # in the mean time take care of recoding
+        text = text.split('\n')
+        idx = 0
+        while idx < len(text):
+            if text[idx].startswith(self.blockph):
+                text[idx] = text[idx].replace(self.blockph, '', 1)
+                idx += 1
+                continue
+            if text[idx].startswith(self.mark * 2):
+                start = idx
+                end = idx
+                text[idx] = self.mark * 2 + self.m_recode(text[idx][2:])
+                text[idx] = re.sub(r'^{0}'.format(self.mark * 2), '<li> ', text[idx]) + '</li>'
+                if idx + 1 < len(text):
+                    for j in range(idx + 1, len(text) + 1):
+                        try:
+                            if not text[j].startswith(self.mark * 2):
+                                break
+                            else:
+                                text[j] = self.mark * 2 + self.m_recode(text[j][2:])
+                                text[j] = re.sub(r'^{0}'.format(self.mark * 2), '<li> ', text[j]) + '</li>'
+                                end = j
+                        except IndexError:
+                            pass
+                #
+                text[start] = '<ol>\n' + text[start]
+                text[end] = text[end] + '\n</ol>'
+                idx = end + 1
+            elif text[idx].startswith(self.mark):
+                text[idx] = self.mark + self.m_recode(text[idx][1:])
+                idx += 1
+            else:
+                text[idx] = self.m_recode(text[idx])
+                idx += 1
+        # handle 1st level indentation
+        text = '\n'.join([x.replace(self.blockph, '', 1) if x.startswith(self.blockph) else  re.sub(r'^{0}'.format(self.mark), '\n<li> ', x + '</li>') for x in text])
+        return '<ul>\n%s\n</ul>\n' % text
 
-
-    def m_blockizeTable(self, fsize = 'small'):
-        if len(self.blocks['table']) == 0:
-            return
-        for i in self.blocks['table']:
-            table = [[self.m_recode(iitem) for iitem in item.split('\t')] for item in self.text[i].split('\n')]
-            ncols = list(set([len(x) for x in table]))
-            if len(ncols) > 1:
-                self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(self.text[i]))
-            start = '<td style="vertical-align: top;"><{}>'.format(fsize)
-            end = '<br /></{}></td>'.format(fsize)
-            head = '<center><table><tbody>'
-            body = []
+    def m_blockizeTable(self, text, k):
+        self._quitOnNest(text)
+        table = [[self.m_recode(iitem) for iitem in item.split('\t')] for item in text.split('\n')]
+        ncols = list(set([len(x) for x in table]))
+        if len(ncols) > 1:
+            self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(text))
+        start = '<td style="vertical-align: top;"><{}>'.format(self.tablefont)
+        end = '<br /></{}></td>'.format(self.tablefont)
+        head = '<center><table><tbody>'
+        body = []
+        line = ''
+        for cell in table[0]:
+            line += start + '<b>' + cell + '</b>' + end + '\n'
+        body.append(line)
+        for item in table[1:]:
             line = ''
-            for cell in table[0]:
-                line += start + '<b>' + cell + '</b>' + end + '\n'
+            for cell in item:
+                line += start + cell + end + '\n'
             body.append(line)
-            for item in table[1:]:
-                line = ''
-                for cell in item:
-                    line += start + cell + end + '\n'
-                body.append(line)
-            #
-            for idx, item in enumerate(body):
-                if idx % 2:
-                    body[idx] = '<tr>' + item + '</tr>'
-                else:
-                    body[idx] = '<tr class="dark">' + item + '</tr>'
-            tail = '</tbody></table></center>\n'
-            self.text[i] = head + '\n'.join(body) + tail
-        return
+        #
+        for idx, item in enumerate(body):
+            if idx % 2:
+                body[idx] = '<tr>' + item + '</tr>'
+            else:
+                body[idx] = '<tr class="dark">' + item + '</tr>'
+        tail = '</tbody></table></center>\n'
+        return head + '\n'.join(body) + tail
 
 
     def _parsecmd(self, text, serial, numbered = False):
@@ -191,43 +174,28 @@ class LogToHtml(TexParser):
         tail = '</div></td></tr></tbody></table></div></div>'
         return head + numbers + lines + tail
 
-    def m_blockizeIn(self):
-        for item in list(set(SYNTAX.values())):
-            if len(self.blocks[item]) == 0:
-                continue
-            for i in self.blocks[item]:
-                self.text[i] = '<div style="color:rgb(220, 20, 60);font-weight:bold;text-align:right;padding-right:2em;"><span class="textborder">' + \
-                        item.capitalize() + '</span></div>' + \
-                        self._parsecmd(wraptxt(self.text[i], '', int(self.wrap_width), rmblank = True).split('\n'), i, numbered = True)
-        return
+    def m_blockizeIn(self, text, k):
+        self._quitOnNest(text)
+        return '<div style="color:rgb(220, 20, 60);font-weight:bold;text-align:right;padding-right:2em;"><span class="textborder">' + \
+                        k.capitalize() + '</span></div>' + \
+                        self._parsecmd(wraptxt(text, '', int(self.wrap_width), rmblank = True).split('\n'), k, numbered = True)
 
-    def m_blockizeOut(self):
-        if len(self.blocks['out']) == 0:
-            return
-        for i in self.blocks['out']:
-            nrow = len(self.text[i].split('\n'))
-            self.text[i] = '<br /><textarea rows="{}" cols="105">{}</textarea><br />'.format(max(min(nrow, 20), 1), self.text[i])
-        return
+    def m_blockizeOut(self, text, k):
+        self._quitOnNest(text)
+        nrow = len(text.split('\n'))
+        return '<br /><textarea rows="{}" cols="105">{}</textarea><br />'.format(max(min(nrow, 20), 1), text)
 
-    def m_blockizeAlert(self):
-        for k in self.alertbox:
-            if len(self.blocks[k]) == 0:
-                continue
-            for i in self.blocks[k]:
-                if not self.text[i].startswith(self.mark):
-                    self.quit('Items must start with "{0}" in blocks. Problematic text is: \n {1}'.format(self.mark, self.text[i]))
-                self.text[i] = '<center><div id="wrapper"><div class="{0}"><strong>{1}:</strong><br />{2}</div></div></center>'.\
-                        format(k.lower(), k.capitalize(), self.m_recode(re.sub(r'^{0}|\n{0}'.format(self.mark), '', self.text[i])))
-        return
+    def m_blockizeAlert(self, text, k):
+        text = '\n'.join([item.replace(self.blockph, '', 1) if item.startswith(self.blockph) else self.m_recode(re.sub(r'^{0}'.format(self.mark), '', item)) for item in text.split('\n')])
+        return '<center><div id="wrapper"><div class="{0}"><strong>{1}:</strong><br />{2}</div></div></center>'.\
+                        format(k.lower(), k.capitalize(), text)
 
     def m_parseText(self):
         skip = []
-        for item in self.blocks.keys():
-            for i in self.blocks[item]:
-                try:
-                    skip.extend(i)
-                except:
-                    skip.append(i)
+        for idx, item in enumerate(self.text):
+            if item.startswith(self.blockph):
+                self.text[idx] = item.replace(self.blockph, '', 1)
+                skip.append(idx)
         idx = 0
         cnt_chapter = cnt_section = cnt_subsection = 0
         while idx < len(self.text):
@@ -337,9 +305,9 @@ class LogToHtml(TexParser):
             self.textbib += '<p id="footnote-{}">[{}]: {}</p>\n'.format(k, self.bib[k][0], self.bib[k][1])
 
     def get(self, include_comment, separate):
-        if include_comment and len(self.blocks['err']) > 0:
+        if include_comment and len(self.comments) > 0:
             for idx in range(len(self.text)):
-                for item in self.blocks['err']:
+                for item in self.comments:
                     if idx in range(item[0], item[1]):
                         self.text[idx] = ''
                         break
