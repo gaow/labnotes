@@ -266,7 +266,7 @@ class TexParser:
                     self.quit("'%s{ %s' and '%s}' must pair properly, near %s" % \
                             (self.mark, bname, self.mark, text[idx+1] if idx + 1 < len(text) else "end of document"))
                 # block end found, take out this block as new text
-                # and apply the iteration algorithm
+                # and apply the recursion
                 nestedtext = self.m_parseBlocks(text[idx+1:endidx])
                 text = self._bulkreplace(text, idx, endidx, nestedtext)
                 newend = idx + len(nestedtext) - 1
@@ -282,7 +282,7 @@ class TexParser:
 
     def m_parseComments(self):
         for idx, item in enumerate(self.text):
-            # define err block
+            # define comment
             if self.text[idx].startswith(self.mark + '}') and '--' in self.text[idx]:
                 self.quit("Invalid use of '%s}----' without previous '%s{----', near %s" % (self.mark, self.mark, self.text[idx+1] if idx + 1 < len(self.text) else "end of document") )
             if item.startswith(self.mark + '{') and '--' in item:
@@ -319,19 +319,12 @@ class TexParser:
                     text[i] = self.blockph + str(i)
                     mapping[text[i]] = text[i+1]
                     idxes.append(i)
+                    # block skipped
                     i += 3
                 else:
+                    # no block identified
                     i += 1
             text = ''.join([item for idx, item in enumerate(text) if idx in idxes])
-# do not use the following because I hate very large string replacement
-#            pattern = re.compile('{}(.*?){}'.format('BEGIN' + self.blockph, 'END' + self.blockph), re.DOTALL)
-#            idx = 0
-#            for m in re.finditer(pattern, text):
-#                idx += 1
-#                bid = self.blockph + str(idx)
-#                text = text.replace(m.group(0), bid, 1)
-#                mapping[bid] = m.group(1)
-
         elif mode == 'release':
             mapping = rule
             for k, item in mapping.items():
@@ -348,11 +341,11 @@ class TexParser:
         if m:
             e = m.group(1)
             if kw is None:
-                self.quit('Cannot nest this blocks here: {0}'.format(e[:max(200, len(e))]))
+                self.quit('Cannot nest this blocks here:\n{0}'.format(e[:max(200, len(e))]))
             else:
                 for k in kw:
                     if re.search(k, '%r' % e):
-                        self.quit('Cannot nest this blocks here: {0}'.format(e[:max(200, len(e))]))
+                        self.quit('Cannot nest this blocks here:\n{0}'.format(e[:max(200, len(e))]))
         return
 
     def _checkblockprefix(self, text):
@@ -436,4 +429,4 @@ class TexParser:
         return 'None'
 
     def quit(self, msg):
-        sys.exit('An ERROR has occured while processing input text "{}":\n\t '.format(self.fn) + msg)
+        sys.exit('\033[91mAn ERROR has occured while processing input text "{}":\033[0m\n\t '.format(self.fn) + msg)
