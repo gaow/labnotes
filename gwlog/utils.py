@@ -350,7 +350,7 @@ class TexParser:
 
     def _checkblockprefix(self, text):
         for item in text.split('\n'):
-            if not (item.startswith(self.blockph) or item.startswith(self.mark)):
+            if item.strip() and (not (item.startswith(self.blockph) or item.startswith(self.mark))):
                 self.quit('Items must start with "{0}" in this block. Problematic text is: "{1}"'.format(self.mark, item))
         return
 

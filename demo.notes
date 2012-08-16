@@ -55,7 +55,9 @@ gw_log doc demo.notes --author "John Doe" --title "Example log documentation" --
 #!!! this is a shadowed square
 #{ list
 #this
+#
 #is
+  
 #a list block
 ## and you can indent it further
 ### but not any further
@@ -63,6 +65,9 @@ gw_log doc demo.notes --author "John Doe" --title "Example log documentation" --
 #}
 #{ warning
 # this is a warning block
+#
+
+# warnings ....
 #}
 #{ note
 # this is a note block
