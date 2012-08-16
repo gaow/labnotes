@@ -57,7 +57,7 @@ def wraptxt(line, sep, by, rmblank = True):
     return sline
 
 def pdflatex(fname, text, vanilla=False, beamer = False):
-    # setup temp dir
+	# setup temp dir
 	tmp_dir = None
 	pattern = re.compile(r'gw_log_cache_*(.*)')
 	for fn in os.listdir(tempfile.gettempdir()):
@@ -94,12 +94,12 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
 				f.writelines(out.decode(sys.getdefaultencoding()) + error.decode(sys.getdefaultencoding()))
 			os.system('rm -f {0}.out {0}.toc {0}.aux {0}.log {0}.nav {0}.snm {0}.vrb'.format(fname))
 			#sys.stderr.write('DEBUG:\n\t$ cd {0}\n\t$ pdflatex -shell-escape -halt-on-error -file-line-error {1}\n'.format(tmp_dir, fname + '.tex'))
-			sys.stderr.write('WARNING: Non-empty error message or non-zero return code captured. Please run the program again.\n'\
-                    '\033[91mNOTE: If you have used raw LaTeX syntax @@@ ... @@@ please make sure the syntax are valid ' \
-                    '(the program will crash on invalid raw LaTeX code).\nNOTE: You can also try to run with --vanilla option to remove '\
-                    'potentially problematic cached files.\n\033[0mIf this message presists after all your trouble-shooting, '\
-                    'please find file "{0}-ERROR.txt" and report it to Gao Wang.\n'.format(fname))
-            sys.exit(1)
+			sys.stderr.write('Oops!... non-empty error message or non-zero return code captured. Please run the program again.\n'\
+					'\033[91mNOTE: If you have used raw LaTeX syntax @@@ ... @@@ please make sure the syntax are valid ' \
+					'(the program will crash on invalid raw LaTeX code).\nNOTE: You can also try to run with --vanilla option to remove '\
+					'potentially problematic cached files.\n\033[0mIf this message presists after all your trouble-shooting, '\
+					'please find file "{0}-ERROR.txt" and report it to Gao Wang.\n'.format(fname))
+			sys.exit(1)
 		if visit == 1:
 			sys.stderr.write('Still working ...\n')
 			os.system('rm -f *.pdf')
