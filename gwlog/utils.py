@@ -301,15 +301,37 @@ class TexParser:
         return
 
     def _holdblockplace(self, text, mode = 'remove', rule = {}):
+        # there should be better way to make sure the existing block not to be modified but will use this solution for now
         mapping = {}
         if mode == 'hold':
-            pattern = re.compile('{}(.*?){}'.format('BEGIN' + self.blockph, 'END' + self.blockph), re.DOTALL)
-            idx = 0
-            for m in re.finditer(pattern, text):
-                idx += 1
-                bid = self.blockph + str(idx)
-                text = text.replace(m.group(0), bid, 1)
-                mapping[bid] = m.group(1)
+            text = re.split('({}|{})'.format('BEGIN' + self.blockph, 'END' + self.blockph), text)
+            idxes = [0]
+            i = 1
+            while i < len(text):
+                if text[i] == 'BEGIN' + self.blockph:
+                    # block identified
+                    try:
+                        flag = self.blockph not in text[i+1] and text[i+2] == 'END' + self.blockph
+                        if not flag: raise ValueError("invalid block flag found")
+                    except:
+                        self.quit("This is a bug in _holdblockplace() function. Please report it to Gao Wang.")
+                    # block checked
+                    text[i] = self.blockph + str(i)
+                    mapping[text[i]] = text[i+1]
+                    idxes.append(i)
+                    i += 3
+                else:
+                    i += 1
+            text = ''.join([item for idx, item in enumerate(text) if idx in idxes])
+# do not use the following because I hate very large string replacement
+#            pattern = re.compile('{}(.*?){}'.format('BEGIN' + self.blockph, 'END' + self.blockph), re.DOTALL)
+#            idx = 0
+#            for m in re.finditer(pattern, text):
+#                idx += 1
+#                bid = self.blockph + str(idx)
+#                text = text.replace(m.group(0), bid, 1)
+#                mapping[bid] = m.group(1)
+
         elif mode == 'release':
             mapping = rule
             for k, item in mapping.items():
