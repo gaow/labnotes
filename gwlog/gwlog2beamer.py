@@ -30,7 +30,7 @@ class LogToBeamer(TexParser):
         self.keywords = list(set(SYNTAX.values())) + self.alertbox + ['err', 'out', 'list', 'table']
         self.pause = True
         self.tablefont = 'tiny'
-        self.m_parseBlocks()
+        self.text = self.m_parseBlocks(self.text)
         self.m_parseComments()
         self.m_parseText()
         self.m_parseBib()
@@ -41,25 +41,29 @@ class LogToBeamer(TexParser):
                 self.textbib + '\n\\end{frame}')
 
     def m_blockizeIn(self, text, k):
-        self._quitOnNest(text)
+        self._checknest(text)
         return '\\begin{exampleblock}{\\texttt{%s}}\\scriptsize\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{exampleblock}\n' % \
                         (k.capitalize(), wraptxt(text, '', int(78 * self.wrap_adjust), rmblank = False))
 
     def m_blockizeOut(self, text, k):
-        self._quitOnNest(text)
+        self._checknest(text)
         return '\\begin{exampleblock}{}\\tiny\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{exampleblock}\n' % \
                     wraptxt(text, '', int(105 * self.wrap_adjust), rmblank = False)
 
     def m_blockizeAlert(self, text, k):
-        text = '\n'.join([item.replace(self.blockph, '', 1) if item.startswith(self.blockph) else self.m_recode(re.sub(r'^{0}'.format(self.mark), '', item)) for item in text.split('\n')])
+        self._checknest(text, kw = [r'\\\\begin{(.*?)block}', r'\\\\end{(.*?)block}'])
+        text, mapping = self._holdblockplace(text, mode = 'hold')
+        self._checkblockprefix(text)
+        text = '\n'.join([item if item.startswith(self.blockph) else self.m_recode(re.sub(r'^{0}'.format(self.mark), '', item)) for item in text.split('\n')])
+        text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
         return '\\begin{{{0}block}}{{{1}}}\n{2}\n\\end{{{0}block}}\n'.\
                         format('alert' if k in ['important', 'warning'] else '', k.capitalize(), text)
 
     def m_parseText(self):
         skip = []
         for idx, item in enumerate(self.text):
-            if item.startswith(self.blockph):
-                self.text[idx] = item.replace(self.blockph, '', 1)
+            if self.blockph in item:
+                self.text[idx] = self._holdblockplace(item, mode = 'remove')[0]
                 skip.append(idx)
         idx = 0
         framestart = 0

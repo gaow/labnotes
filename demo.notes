@@ -157,8 +157,83 @@ chr	pos	sample_size_SNV	beta_x_SNV	pvalue_SNV
 #}
 
 ###
-# another section
+# Nested blocks 
 ###
+# these blocks supports nesting of other blocks: list, warning, note, tip, important
+#! nested list/list/list
+#{list
+# this is item 1
+## this item 1-1
+#{list
+# this is a list in item 1-1
+## and ..
+## still ...
+#{list
+# keep nesting!
+#}
+# Ok that's enough
+#}
+#}
+
+#! nested list/out
+#{list
+# this is item 1
+#{ out
+HELLO WORLD
+#}
+# this is item 2
+#}
+
+#! nested list/python
+#{list
+# this is item 1
+#{ python
+print('HELLO WORLD')
+#}
+# this is item 2
+#}
+
+#! nested list/warning
+#{list
+# this is item 1
+#{ warning
+# I am nested!
+#}
+# this is item 2
+#}
+
+#! nested warning/list
+#{ warning
+# I am nested!
+#{list
+# this is item 1
+## this item 1-1
+#{list
+# this is a list in item 1-1
+## and ..
+## still ...
+# Ok that's enough
+#}
+#}
+#}
+
+#! nested warning/out
+#{warning
+# this is item 1
+#{ out
+HELLO WORLD
+#}
+# this is item 2
+#}
+
+#! nested warning/python
+#{warning
+# this is item 1
+#{ python
+print(HELLO WORLD)
+#}
+# this is item 2
+#}
 
 ###
 #! Another chapter

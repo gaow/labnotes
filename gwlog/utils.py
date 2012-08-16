@@ -157,9 +157,9 @@ class TexParser:
         self.footnote = False
         self.tablefont = 'footnotesize'
         # dirty place holders ....
-        self.blockph = 'THISISABLOODYBLOCKPLACEHOLDER'
-        self.latexph = 'BLOODYLATEXRAWPATTERNPLACEHOLDER'
-        self.htmlph = 'BLOODYHTMLRAWPATTERNPLACEHOLDER'
+        self.blockph = 'ABLOCKBLOODYPLACEHOLDER'
+        self.latexph = 'ALATEXBLOODYRAWPATTERNPLACEHOLDER'
+        self.htmlph = 'AHTMLBLOODYRAWPATTERNPLACEHOLDER'
         self.pause = False
 
     def m_recode(self, line):
@@ -213,43 +213,72 @@ class TexParser:
             line = line.replace(self.latexph + str(i), raw[i])
         return line
 
-    def m_parseBlocks(self):
+    def _bulkreplace(self, text, start, end, nestedtext):
+        end += 1
+        if (end - start) > len(nestedtext):
+            for i in range(start, end):
+                j = i - start
+                if j < len(nestedtext):
+                    text[i] = nestedtext[j]
+                else:
+                    text[i] = None
+        else:
+            self.quit('This is a bug in _bulkreplace() function. Please report it to Gao Wang.')
+        return [x for x in text if x is not None]
+
+    def m_parseBlocks(self, text):
         idx = 0
         while True:
-            if idx >= len(self.text):
+            if idx >= len(text):
                 break
-            if self.text[idx].startswith(self.mark + '}') and '--' not in self.text[idx]:
-                self.quit("Invalid use of '%s' without previous %s{, near %s" % (self.text[idx], self.mark, self.text[idx+1] if idx + 1 < len(self.text) else "end of document"))
-            if self.text[idx].startswith(self.mark + '{') and '--' not in self.text[idx]:
+            if text[idx].startswith(self.mark + '}') and '--' not in text[idx]:
+                self.quit("Invalid use of '%s' without previous %s{, near %s" % \
+                        (text[idx], self.mark, text[idx+1] if idx + 1 < len(text) else "end of document"))
+            if text[idx].startswith(self.mark + '{') and '--' not in text[idx]:
                 # define block
-                bname = self.text[idx].split('{')[1].strip()
+                bname = text[idx].split('{')[1].strip()
                 if bname not in [x for x in self.keywords]:
                     self.quit("Invalid block definition '%s{ %s'" % (self.mark, bname))
+                # find block end
                 endidx = None
-                self.text[idx] = ''
-                # find end of block
-                for i in range(idx+1, len(self.text)):
-                    # do not allow nested blocks
-                    if self.text[i].startswith(self.mark + '{'):
-                        self.quit("Nested use of blocks is disallowed: '{0}', near {1}".format(self.text[i], self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
-                    # find end of block
-                    if self.text[i].startswith(self.mark + '}'):
-                        if self.text[i].rstrip() == self.mark + '}':
-                            endidx = i
-                            break
+                text[idx] = ''
+                base = 0
+                for i in range(idx + 1, len(text)):
+                    # nested block identified
+                    if text[i].startswith(self.mark + '{'):
+                        if '--' in text[i]:
+                            self.quit('Invalid use of "%s{----" within block environment, near %') %\
+                                (self.mark, self.text[i+1] if i + 1 < len(self.text) else "end of document")
+                        base += 1
+                    # block end identified
+                    if text[i].startswith(self.mark + '}'):
+                        if text[i].rstrip() == self.mark + '}':
+                            if base == 0:
+                                endidx = i
+                                break
+                            else:
+                                base -= 1
                         else:
-                            self.quit("Invalid %s '%s', near %s" % ('nested use of' if '--' in self.text[i] else 'symbol', self.text[i], self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
+                            self.quit("Invalid %s '%s', near %s" % \
+                                    ('nested use of' if '--' in text[i] else 'symbol', text[i], text[i+1] if idx + 1 < len(text) else "end of document"))
                 if not endidx:
-                    self.quit("'%s{ %s' and '%s}' must appear in pairs, near %s" % (self.mark, bname, self.mark, self.text[idx+1] if idx + 1 < len(self.text) else "end of document"))
+                    # end of block not found
+                    self.quit("'%s{ %s' and '%s}' must pair properly, near %s" % \
+                            (self.mark, bname, self.mark, text[idx+1] if idx + 1 < len(text) else "end of document"))
+                # block end found, take out this block as new text
+                # and apply the iteration algorithm
+                nestedtext = self.m_parseBlocks(text[idx+1:endidx])
+                text = self._bulkreplace(text, idx, endidx, nestedtext)
+                newend = idx + len(nestedtext) - 1
                 # combine block values
-                for i in range(idx + 1, endidx):
-                    self.text[idx] += self.text[i] + ('\n' if not i + 1 == endidx else '')
-                del self.text[(idx + 1) : (endidx + 1)]
+                for i in range(idx + 1, newend + 1):
+                    text[idx] += '\n' + text[i]
+                del text[(idx + 1) : (newend + 1)]
                 # parse the block
-                self.text[idx] = self.blockph + eval(self.PARSER_RULE[bname])(self.text[idx], bname)
+                text[idx] = 'BEGIN' + self.blockph + eval(self.PARSER_RULE[bname])(text[idx], bname) + 'END' + self.blockph
+            #
             idx += 1
-            continue
-        return
+        return text
 
     def m_parseComments(self):
         for idx, item in enumerate(self.text):
@@ -271,14 +300,54 @@ class TexParser:
                 self.text[endidx] = ''
         return
 
+    def _holdblockplace(self, text, mode = 'remove', rule = {}):
+        mapping = {}
+        if mode == 'hold':
+            pattern = re.compile('{}(.*?){}'.format('BEGIN' + self.blockph, 'END' + self.blockph), re.DOTALL)
+            idx = 0
+            for m in re.finditer(pattern, text):
+                idx += 1
+                bid = self.blockph + str(idx)
+                text = text.replace(m.group(0), bid, 1)
+                mapping[bid] = m.group(1)
+        elif mode == 'release':
+            mapping = rule
+            for k, item in mapping.items():
+                text = text.replace(k, item)
+        elif mode == 'remove':
+            text = re.sub(r'{0}|{1}'.format('BEGIN' + self.blockph, 'END' + self.blockph), '', text)
+        return text, mapping
+
+    def _checknest(self, text, kw=None):
+        pattern = re.compile('{}(.*?){}'.format('BEGIN' + self.blockph, 'END' + self.blockph), re.DOTALL)
+        # re.match() will not work here
+        # will not work without re.DOTALL
+        m = re.search(pattern, text)
+        if m:
+            e = m.group(1)
+            if kw is None:
+                self.quit('Cannot nest this blocks here: {0}'.format(e[:max(200, len(e))]))
+            else:
+                for k in kw:
+                    if re.search(k, '%r' % e):
+                        self.quit('Cannot nest this blocks here: {0}'.format(e[:max(200, len(e))]))
+        return
+
+    def _checkblockprefix(self, text):
+        for item in text.split('\n'):
+            if not (item.startswith(self.blockph) or item.startswith(self.mark)):
+                self.quit('Items must start with "{0}" in this block. Problematic text is: "{1}"'.format(self.mark, item))
+        return
+
     def m_blockizeList(self, text, k):
         # handle 2nd level indentation first
         # in the mean time take care of recoding
+        text, mapping = self._holdblockplace(text, mode = 'hold')
+        self._checkblockprefix(text)
         text = text.split('\n')
         idx = 0
         while idx < len(text):
             if text[idx].startswith(self.blockph):
-                text[idx] = text[idx].replace(self.blockph, '', 1)
                 idx += 1
                 continue
             if text[idx].startswith(self.mark * 2):
@@ -308,20 +377,16 @@ class TexParser:
                 text[idx] = self.m_recode(text[idx])
                 idx += 1
         # handle 1st level indentation
-        text = '\n'.join([x.replace(self.blockph, '', 1) if x.startswith(self.blockph) else  re.sub(r'^{0}'.format(self.mark), '\\item ', x) for x in text])
-        text = '\\begin{itemize}%s\n\\end{itemize}\n' % text
+        text = '\n'.join([x if x.startswith(self.blockph) else re.sub(r'^{0}'.format(self.mark), '\\item ', x) for x in text])
+        text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
+        text = '\\begin{itemize}\n%s\n\\end{itemize}\n' % text
         # this is for beamer \pause option
         if self.pause:
             text = text.replace('\\item -', '\\pause \\item ')
         return text
 
-    def _quitOnNest(self, text):
-        nests = [item for item in text.split('\n') if item.startswith(self.blockph)]
-        if len(nests):
-            self.quit('Cannot nest other blocks here: {0}'.format(nests[0].replace(self.blockph, '', 1)))
-
     def m_blockizeTable(self, text, k):
-        self._quitOnNest(text)
+        self._checknest(text)
         table = [[self.m_recode(iitem) for iitem in item.split('\t')] for item in text.split('\n')]
         ncols = list(set([len(x) for x in table]))
         if len(ncols) > 1:

@@ -260,6 +260,14 @@ a:hover
 }
 /* .textborder {border: 1px dashed rgb(0, 36, 105); padding: 2px;} */
 .textborder {border: 1px dashed rgb(220, 20, 60); padding: 2px;}
+
+textarea
+{
+    border:1px solid #999999;
+    width:95%;
+    margin:5px 0;
+    padding:1%;
+}
 '''
 
 SYN_STY = r'''

@@ -29,30 +29,33 @@ class LogToTex(TexParser):
         self.footnote = footnote
         self.bclogo = {'warning':'\\bcattention', 'tip':'\\bclampe', 'important':'\\bctakecare', 'note':'\\bccrayon'}
         self.keywords = list(set(SYNTAX.values())) + self.bclogo.keys() + ['out', 'list', 'table']
-        self.m_parseBlocks()
+        self.text = self.m_parseBlocks(self.text)
         self.m_parseComments()
         self.m_parseText()
         self.m_parseBib()
         self.text.append(self.textbib)
 
     def m_blockizeIn(self, text, k):
-        self._quitOnNest(text)
+        self._checknest(text)
         return '\\begin{minted}[samepage=false, fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{%s}]{%s}\n%s\n\\end{minted}\n' % (k.upper(), k, wraptxt(text, '\\' if k == 'bash' else '', 131))
 
     def m_blockizeOut(self, text, k):
-        self._quitOnNest(text)
+        self._checknest(text)
         return '\\begin{Verbatim}[samepage=false, fontfamily=tt,\nfontsize=\\footnotesize, formatcom=\\color{rgray},\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{\\scriptsize OUTPUT}, labelposition=topline]\n%s\n\\end{Verbatim}\n' % wraptxt(text, '', 116)
 
     def m_blockizeAlert(self, text, k):
-        text = '\n'.join([item.replace(self.blockph, '', 1) if item.startswith(self.blockph) else self.m_recode(re.sub(r'^{0}'.format(self.mark), '', item)) for item in text.split('\n')])
+        self._checknest(text, kw = [r'\\\\begin{bclogo}', r'\\\\end{bclogo}'])
+        text, mapping = self._holdblockplace(text, mode = 'hold')
+        self._checkblockprefix(text)
+        text = '\n'.join([item if item.startswith(self.blockph) else self.m_recode(re.sub(r'^{0}'.format(self.mark), '', item)) for item in text.split('\n')])
+        text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
         return '\\begin{bclogo}[logo=%s, couleurBarre=MidnightBlue, noborder=true, couleur=white]{~%s}%s\n\\end{bclogo}\n' % (self.bclogo[k], k.capitalize(), text)
-
 
     def m_parseText(self):
         skip = []
         for idx, item in enumerate(self.text):
-            if item.startswith(self.blockph):
-                self.text[idx] = item.replace(self.blockph, '', 1)
+            if self.blockph in item:
+                self.text[idx] = self._holdblockplace(item, mode = 'remove')[0]
                 skip.append(idx)
         idx = 0
         while idx < len(self.text):

@@ -23,7 +23,7 @@ class LogToHtml(TexParser):
         self.keywords = list(set(SYNTAX.values())) + self.alertbox + ['err', 'out', 'list', 'table']
         self.wrap_width = 120
         self.tablefont = 'small'
-        self.m_parseBlocks()
+        self.text = self.m_parseBlocks(self.text)
         self.m_parseComments()
         self.m_parseText()
         self.m_parseBib()
@@ -97,15 +97,15 @@ class LogToHtml(TexParser):
             line = line.replace(self.htmlph + str(i), raw[i])
         return line.strip()
 
-
     def m_blockizeList(self, text, k):
         # handle 2nd level indentation first
         # in the mean time take care of recoding
+        text, mapping = self._holdblockplace(text, mode = 'hold')
+        self._checkblockprefix(text)
         text = text.split('\n')
         idx = 0
         while idx < len(text):
             if text[idx].startswith(self.blockph):
-                text[idx] = text[idx].replace(self.blockph, '', 1)
                 idx += 1
                 continue
             if text[idx].startswith(self.mark * 2):
@@ -135,11 +135,12 @@ class LogToHtml(TexParser):
                 text[idx] = self.m_recode(text[idx])
                 idx += 1
         # handle 1st level indentation
-        text = '\n'.join([x.replace(self.blockph, '', 1) if x.startswith(self.blockph) else  re.sub(r'^{0}'.format(self.mark), '\n<li> ', x + '</li>') for x in text])
+        text = '\n'.join([x if x.startswith(self.blockph) else  re.sub(r'^{0}'.format(self.mark), '\n<li> ', x + '</li>') for x in text])
+        text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
         return '<ul>\n%s\n</ul>\n' % text
 
     def m_blockizeTable(self, text, k):
-        self._quitOnNest(text)
+        self._checknest(text)
         table = [[self.m_recode(iitem) for iitem in item.split('\t')] for item in text.split('\n')]
         ncols = list(set([len(x) for x in table]))
         if len(ncols) > 1:
@@ -166,7 +167,6 @@ class LogToHtml(TexParser):
         tail = '</tbody></table></center>\n'
         return head + '\n'.join(body) + tail
 
-
     def _parsecmd(self, text, serial, numbered = False):
         head = '<div><div id="highlighter_{}" class="syntaxhighlighter bash"><table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="gutter">'.format(serial)
         numbers = ''.join(['<div class="line number{0} index{1} alt{2}">{0}</div>'.format(j+1 if numbered else ' ', j, 2 - j % 2) for j in range(len(text))]) + '</td><td class="code"><div class="container">'
@@ -175,26 +175,30 @@ class LogToHtml(TexParser):
         return head + numbers + lines + tail
 
     def m_blockizeIn(self, text, k):
-        self._quitOnNest(text)
+        self._checknest(text)
         return '<div style="color:rgb(220, 20, 60);font-weight:bold;text-align:right;padding-right:2em;"><span class="textborder">' + \
                         k.capitalize() + '</span></div>' + \
                         self._parsecmd(wraptxt(text, '', int(self.wrap_width), rmblank = True).split('\n'), k, numbered = True)
 
     def m_blockizeOut(self, text, k):
-        self._quitOnNest(text)
+        self._checknest(text)
         nrow = len(text.split('\n'))
-        return '<br /><textarea rows="{}" cols="105">{}</textarea><br />'.format(max(min(nrow, 20), 1), text)
+        return '<center><textarea rows="{}">{}</textarea></center>'.format(max(min(nrow, 30), 1), text)
 
     def m_blockizeAlert(self, text, k):
-        text = '\n'.join([item.replace(self.blockph, '', 1) if item.startswith(self.blockph) else self.m_recode(re.sub(r'^{0}'.format(self.mark), '', item)) for item in text.split('\n')])
+        self._checknest(text, kw = [r'id="wrapper"'])
+        text, mapping = self._holdblockplace(text, mode = 'hold')
+        self._checkblockprefix(text)
+        text = '\n'.join([item if item.startswith(self.blockph) else self.m_recode(re.sub(r'^{0}'.format(self.mark), '', item)) for item in text.split('\n')])
+        text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
         return '<center><div id="wrapper"><div class="{0}"><strong>{1}:</strong><br />{2}</div></div></center>'.\
                         format(k.lower(), k.capitalize(), text)
 
     def m_parseText(self):
         skip = []
         for idx, item in enumerate(self.text):
-            if item.startswith(self.blockph):
-                self.text[idx] = item.replace(self.blockph, '', 1)
+            if self.blockph in item:
+                self.text[idx] = self._holdblockplace(item, mode = 'remove')[0]
                 skip.append(idx)
         idx = 0
         cnt_chapter = cnt_section = cnt_subsection = 0

@@ -69,7 +69,21 @@ echo "vtools admin --set_runtime_option temp_dir=/tmp/vtools_$RANDOM; vtools ass
 #this is a tip
 #}
 #}------
-
+#! (nested) blocks
+#{warning
+#{list
+# attention1
+# attention2
+#}
+#}
+#{note
+#{table
+chr	pos	sample_size_SNV	beta_x_SNV	pvalue_SNV
+1	1138931	268	0.417457	0.643625
+1	1179385	268	0.0731516	0.878491
+1	1418004	268	-0.272227	0.464371
+#}
+#}
 #! Use of table
 #{table
 chr	pos	sample_size_SNV	beta_x_SNV	pvalue_SNV
