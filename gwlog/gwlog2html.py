@@ -23,6 +23,7 @@ class LogToHtml(TexParser):
         self.keywords = list(set(SYNTAX.values())) + self.alertbox + ['err', 'out', 'list', 'table']
         self.wrap_width = 120
         self.tablefont = 'small'
+        self.anchor_id = 0
         self.text = self.m_parseBlocks(self.text)
         self.m_parseComments()
         self.m_parseText()
@@ -112,7 +113,7 @@ class LogToHtml(TexParser):
                 start = idx
                 end = idx
                 text[idx] = self.mark * 2 + self.m_recode(text[idx][2:])
-                text[idx] = re.sub(r'^{0}'.format(self.mark * 2), '<li> ', text[idx]) + '</li>'
+                text[idx] = re.sub(r'^{0}'.format(self.mark * 2), '<li>', text[idx]) + '</li>'
                 if idx + 1 < len(text):
                     for j in range(idx + 1, len(text) + 1):
                         try:
@@ -120,7 +121,7 @@ class LogToHtml(TexParser):
                                 break
                             else:
                                 text[j] = self.mark * 2 + self.m_recode(text[j][2:])
-                                text[j] = re.sub(r'^{0}'.format(self.mark * 2), '<li> ', text[j]) + '</li>'
+                                text[j] = re.sub(r'^{0}'.format(self.mark * 2), '<li>', text[j]) + '</li>'
                                 end = j
                         except IndexError:
                             pass
@@ -135,7 +136,7 @@ class LogToHtml(TexParser):
                 text[idx] = self.m_recode(text[idx])
                 idx += 1
         # handle 1st level indentation
-        text = '\n'.join([x if x.startswith(self.blockph) else  re.sub(r'^{0}'.format(self.mark), '\n<li> ', x + '</li>') for x in text])
+        text = '\n'.join([x if x.startswith(self.blockph) else  re.sub(r'^{0}'.format(self.mark), '<li>', x + '</li>') for x in text])
         text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
         return '<ul>\n%s\n</ul>\n' % text
 
@@ -176,9 +177,10 @@ class LogToHtml(TexParser):
 
     def m_blockizeIn(self, text, k):
         self._checknest(text)
+        self.anchor_id += 1
         return '<div style="color:rgb(220, 20, 60);font-weight:bold;text-align:right;padding-right:2em;"><span class="textborder">' + \
                         k.capitalize() + '</span></div>' + \
-                        self._parsecmd(wraptxt(text, '', int(self.wrap_width), rmblank = True).split('\n'), k, numbered = True)
+                        self._parsecmd(wraptxt(text, '', int(self.wrap_width), rmblank = True).split('\n'), str(self.anchor_id), numbered = True)
 
     def m_blockizeOut(self, text, k):
         self._checknest(text)
