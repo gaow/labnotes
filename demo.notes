@@ -197,14 +197,14 @@ print('HELLO WORLD')
 #{list
 # this is item 1
 #{ warning
-# I am nested!
+# I am nested
 #}
 # this is item 2
 #}
 
 #! nested warning/list
 #{ warning
-# I am nested!
+# I am nested
 #{list
 # this is item 1
 ## this item 1-1
@@ -215,6 +215,18 @@ print('HELLO WORLD')
 # Ok that's enough
 #}
 #}
+# I am a duplicate
+#{list
+# this is item 1
+## this item 1-1
+#{list
+# this is a list in item 1-1
+## and ..
+## still ...
+# Ok that's enough
+#}
+#}
+
 #}
 
 #! nested warning/out
