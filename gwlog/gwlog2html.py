@@ -21,7 +21,7 @@ class LogToHtml(TexParser):
         self.dtoc = OrderedDict()
         self.alertbox = ['warning', 'tip', 'important', 'note']
         self.keywords = list(set(SYNTAX.values())) + self.alertbox + ['err', 'out', 'list', 'table']
-        self.wrap_width = 120
+        self.wrap_width = 95
         self.tablefont = 'small'
         self.anchor_id = 0
         self.text = self.m_parseBlocks(self.text)
