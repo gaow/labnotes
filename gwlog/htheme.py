@@ -705,7 +705,7 @@ body {
 #wrapper {
 	text-align: left;
 	margin: 5em auto;
-	width: 500px;
+	width: 600px;
 }
 
 /* Font styles */
