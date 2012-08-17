@@ -124,7 +124,7 @@ class LogToTex(TexParser):
                 continue
             if self.text[idx].startswith(self.mark + '!!'):
                 # subsection, subsubsection ...
-                self.text[idx] = '\\subsubsection*{' + self.m_recode(self.text[idx][len(self.mark)+2:]) + '}'
+                self.text[idx] = '\\subsubsection{' + self.m_recode(self.text[idx][len(self.mark)+2:]) + '}'
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark + '!'):
@@ -176,13 +176,13 @@ class LogToTex(TexParser):
 \\usepackage{fancyvrb}
 \\usepackage{shadow}
 \\usepackage[pdftex]{graphicx}
-\\usepackage[bookmarksnumbered=true,pdfstartview=FitH]{hyperref}
 \\usepackage[dvipsnames]{xcolor}
 \\usepackage{minted}
 \\usepackage{upquote}
 \\usepackage{titlesec}
 \\usepackage{longtable}
 %s
+\\usepackage[tikz]{bclogo}
 \\renewcommand\\rmdefault{bch}
 \\newcommand{\\ie}{\\textit{i.e.}}
 \\newcommand\\me{\\mathrm{e}}
@@ -201,11 +201,11 @@ class LogToTex(TexParser):
 \\definecolor{rblue}{rgb}{0,.14,.41}
 \\definecolor{rgray}{RGB}{94,96,98}
 \\definecolor{wwwcolor}{rgb}{0,0.2,0.6}
-\\titleformat{\\subsubsection}
-{\\color{rblue}\\normalfont\\large\\bfseries}
-{\\color{rblue}\\thesection}{1em}{}
+\\setcounter{secnumdepth}{3}
+\\setcounter{tocdepth}{3}
+\\titleformat{\\subsubsection}{\\color{rblue}\\normalfont\\bfseries}{$\\bullet$}{.5em}{}
+\\usepackage[bookmarksnumbered=true,pdfstartview=FitH]{hyperref}
 \\hypersetup{colorlinks, breaklinks, urlcolor=wwwcolor, linkcolor=wwwcolor, citecolor=MidnightBlue}
-\\usepackage[tikz]{bclogo}
 \\title{%s}
 \\author{%s}
 \\date{Last updated: \\today}
