@@ -325,6 +325,7 @@ class TexParser:
                     i += 3
                 else:
                     # no block identified
+                    idxes.append(i)
                     i += 1
             text = ''.join([item for idx, item in enumerate(text) if idx in idxes])
         elif mode == 'release':
