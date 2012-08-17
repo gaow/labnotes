@@ -318,7 +318,7 @@ class TexParser:
                     except:
                         self.quit("This is a bug in _holdblockplace() function. Please report it to Gao Wang.")
                     # block checked
-                    text[i] = 'B' + self.blockph + str(i) + 'E'
+                    text[i] = self.blockph + str(i) + 'E'
                     mapping[text[i]] = text[i+1]
                     idxes.append(i)
                     # block skipped
