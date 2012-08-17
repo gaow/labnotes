@@ -119,7 +119,8 @@ class LogToTex(TexParser):
                 self.quit("You have so many urgly '{0}' symbols in a regular line. Please clear them up in this line: '{1}'".format(self.mark, self.text[idx]))
             if self.text[idx].startswith(self.mark + '!!!'):
                 # box
-                self.text[idx] = '\\shabox{' + self.m_recode(self.text[idx][len(self.mark)+3:]) + '}'
+                #self.text[idx] = '\\shabox{' + self.m_recode(self.text[idx][len(self.mark)+3:]) + '}'
+                self.text[idx] = '\\colorbox{yellow}{\\textcolor{red}{\\textbf{' + self.m_recode(self.text[idx][len(self.mark)+3:]) + '}}}'
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark + '!!'):
@@ -196,7 +197,8 @@ class LogToTex(TexParser):
 \\parindent 0ex
 \\geometry{left=0.8in,right=0.8in,top=0.8in,bottom=0.8in}
 \\renewcommand\\%s{References}
-\\renewcommand{\\labelitemii}{$\\triangleright$}
+\\renewcommand{\\labelitemii}{$\\blacktriangleright$}
+\\renewcommand{\\labelitemiii}{$\\smalltriangleright$}
 \\makeatletter
 \\renewcommand\\@biblabel[1]{#1.}
 \\renewcommand\\@cite[1]{\\textsuperscript{#1}}
@@ -207,7 +209,7 @@ class LogToTex(TexParser):
 \\definecolor{wwwcolor}{rgb}{0,0.2,0.6}
 \\setcounter{secnumdepth}{3}
 \\setcounter{tocdepth}{3}
-\\titleformat{\\subsubsection}{\\color{rblue}\\normalfont\\bfseries}{$\\sqbullet$}{.5em}{}
+\\titleformat{\\subsubsection}{\\color{rblue}\\normalfont\\bfseries}{$\\centerdot$}{.5em}{}
 \\usepackage[bookmarksnumbered=true,pdfstartview=FitH]{hyperref}
 \\hypersetup{colorlinks, breaklinks, urlcolor=wwwcolor, linkcolor=wwwcolor, citecolor=MidnightBlue}
 \\title{%s}
