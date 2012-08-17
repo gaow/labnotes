@@ -332,7 +332,7 @@ class LogToHtml(TexParser):
         <div class="top">
         {}{}
         </div>
-        '''.format('<h1 class="title">{}</h1>'.format(title) if title else '', '<center><h3 class="subsubheading">Edited by <i>{}</i>, on <small>{}</small></h3></center>'.format(author, strftime("%a %d %b %Y %H:%M:%S", localtime())) if author else '')
+        '''.format('<h1 class="title">{}</h1>'.format(title) if title else '', '<center><h3 class="subsubheading"><small>Edited by <i>{}</i>, on {}</small></h3></center>'.format(author, strftime("%a %d %b %Y %H:%M:%S", localtime())) if author else '')
 
     def m_chapter(self, text, i):
         return '''
