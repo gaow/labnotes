@@ -120,7 +120,7 @@ class LogToTex(TexParser):
             if self.text[idx].startswith(self.mark + '!!!'):
                 # box
                 #self.text[idx] = '\\shabox{' + self.m_recode(self.text[idx][len(self.mark)+3:]) + '}'
-                self.text[idx] = '\\colorbox{yellow}{\\textcolor{red}{\\textbf{' + self.m_recode(self.text[idx][len(self.mark)+3:]) + '}}}'
+                self.text[idx] = '\\colorbox{yellow}{\\begin{varwidth}{\\dimexpr\\linewidth-2\\fboxsep}{\\color{red}\\textbf{' + self.m_recode(self.text[idx][len(self.mark)+3:]) + '}}\\end{varwidth}}'
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark + '!!'):
@@ -183,6 +183,7 @@ class LogToTex(TexParser):
 \\usepackage{upquote}
 \\usepackage{titlesec}
 \\usepackage{longtable}
+\\usepackage{varwidth}
 %s
 \\usepackage[tikz]{bclogo}
 \\renewcommand\\rmdefault{bch}
