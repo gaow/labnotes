@@ -56,6 +56,7 @@ def wraptxt(line, sep, by, rmblank = True):
             sline += item
     return sline
 
+import stat
 def pdflatex(fname, text, vanilla=False, beamer = False):
 	# setup temp dir
 	tmp_dir = None
@@ -70,6 +71,10 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
 		tmp_dir = tempfile.mkdtemp(prefix='gw_log_cache_')
 	if not tmp_dir:
 		tmp_dir = tempfile.mkdtemp(prefix='gw_log_cache_')
+	if (not os.access(tmp_dir, os.R_OK)) or (not os.access(tmp_dir, os.W_OK)) or (os.stat(tmp_dir).st_mode & stat.S_ISVTX == 512):
+			home_dir = os.getenv("HOME")
+			tmp_dir = os.path.join(home_dir, 'gw_log_cache')
+			if not os.path.exists(tmp_dir): os.makedirs(tmp_dir)
 	dest_dir = os.getcwd()
 	os.chdir(tmp_dir)
 	# write tex file
