@@ -247,7 +247,7 @@ HELLO WORLD
 #{warning
 # this is item 1
 #{ python
-print(HELLO WORLD)
+print("HELLO WORLD")
 #}
 # this is item 2
 #}

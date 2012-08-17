@@ -240,21 +240,25 @@ a:hover
 }
 
 .tip {
+	margin: 10px 0px 10px 0px;
 	padding: 10px 5px 10px 15px;
 	background: #ddffdd no-repeat 20px;
 }
 
 .important {
+	margin: 10px 0px 10px 0px;
 	padding: 10px 5px 10px 15px;
 	background: lightblue no-repeat 20px;
 }
 
 .note {
+	margin: 10px 0px 10px 0px;
 	padding: 10px 5px 10px 15px;
 	background: #ffffcc no-repeat 20px;
 }
 
 .warning {
+	margin: 10px 0px 10px 0px;
 	padding: 10px 5px 10px 15px;
 	background: #ffdddd no-repeat 20px;
 }

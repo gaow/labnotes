@@ -64,7 +64,7 @@ class LogToHtml(TexParser):
         line = re.sub(r'""(.*?)""', r'<strong>\1</strong>', line)
         line = re.sub(r'"(.*?)"', r'<em>\1</em>', line)
 #        line = re.sub(r'@@(.*?)@@', r'<span style="font-family: monospace">\1</span>', line)
-        line = re.sub(r'@@(.*?)@@', r'<code>\1</code>', line)
+        line = re.sub(r'@@(.*?)@@', r'<code><span style="color:black">\1</span></code>', line)
         # hyperlink
         # [text|@link@] defines the pattern for citation.
         pattern = re.compile('\[(\s*)(?P<a>.+?)(\s*)\|(\s*)@(?P<b>.+?)@(\s*)\]')
@@ -193,8 +193,8 @@ class LogToHtml(TexParser):
         self._checkblockprefix(text)
         text = '\n'.join([item if item.startswith(self.blockph) else self.m_recode(re.sub(r'^{0}'.format(self.mark), '', item)) for item in text.split('\n')])
         text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
-        return '<center><div id="wrapper"><div class="{0}"><strong>{1}:</strong><br />{2}</div></div></center>'.\
-                        format(k.lower(), k.capitalize(), text)
+        return '<center><div id="wrapper"><div class="{0}"><div style="font-family:comic sans ms;text-align:center;text-decoration:underline{3}; margin-bottom:3px">{1}</div>{2}</div></div></center>'.\
+                        format(k.lower(), k.capitalize(), text, ';color:red' if k.lower() == 'warning' else '')
 
     def m_parseText(self):
         skip = []
@@ -332,7 +332,7 @@ class LogToHtml(TexParser):
         <div class="top">
         {}{}
         </div>
-        '''.format('<h1 class="title">{}</h1>'.format(title) if title else '', '<center><span style="color:#304860">Edited by {}, on {}</span></center>'.format(author, strftime("%a %d %b %Y %H:%M:%S", localtime())) if author else '')
+        '''.format('<h1 class="title">{}</h1>'.format(title) if title else '', '<center><span style="color:#304860;font-family:comic sans ms;font-size:small">Edited by {}, on {}</span></center>'.format(author, strftime("%a %d %b %Y %H:%M:%S", localtime())) if author else '')
 
     def m_chapter(self, text, i):
         return '''
