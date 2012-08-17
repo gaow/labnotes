@@ -134,23 +134,23 @@ a:hover
 {
 	margin-top: 30px;
 	font-size: 14pt;
-	color:#666;
+	color: #666;
 }
 
 .subheading
 {
 	margin-top: 20px;
 	font-size: 12pt;
-	color:#304860;
+	color: #304860;
 }
 
 .subsubheading
 {
 	margin-top: 15px;
 	font-size: 10pt;
-	font-weight: normal;
+	font-weight: bold;
 	color: #304860;
-	font-style: oblique;
+	/* font-style: oblique; */
 }
 
 .download

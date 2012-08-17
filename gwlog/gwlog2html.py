@@ -351,7 +351,7 @@ class LogToHtml(TexParser):
 
     def m_sssection(self, text):
         return '''
-        <h3 class="subsubheading">{}</h3>
+        <h3 class="subsubheading">&#9642; {}</h3>
         '''.format(text)
 
     def _csize(self, v, k):

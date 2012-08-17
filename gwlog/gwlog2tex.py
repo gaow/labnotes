@@ -171,6 +171,7 @@ class LogToTex(TexParser):
 \\usepackage{booktabs}
 \\usepackage{amssymb}
 \\usepackage{amsthm}
+\\usepackage{mathabx}
 \\usepackage{bm}
 \\usepackage{fancyhdr}
 \\usepackage{fancyvrb}
@@ -187,6 +188,9 @@ class LogToTex(TexParser):
 \\newcommand{\\ie}{\\textit{i.e.}}
 \\newcommand\\me{\\mathrm{e}}
 \\newcommand\\mlog{\\mathrm{log}}
+\\newcommand*\\circled[1]{\\kern-2.5em
+  \\put(0,4){\\color{black}\\circle*{18}}\\put(0,4){\\circle{16}}
+  \\put(-3,0){\\color{white}\\\\bfseries\\large#1}}
 \\linespread{1.1}
 \\setlength{\\parskip}{8pt plus 1pt minus 1pt}
 \\parindent 0ex
@@ -203,7 +207,7 @@ class LogToTex(TexParser):
 \\definecolor{wwwcolor}{rgb}{0,0.2,0.6}
 \\setcounter{secnumdepth}{3}
 \\setcounter{tocdepth}{3}
-\\titleformat{\\subsubsection}{\\color{rblue}\\normalfont\\bfseries}{$\\bullet$}{.5em}{}
+\\titleformat{\\subsubsection}{\\color{rblue}\\normalfont\\bfseries}{$\\sqbullet$}{.5em}{}
 \\usepackage[bookmarksnumbered=true,pdfstartview=FitH]{hyperref}
 \\hypersetup{colorlinks, breaklinks, urlcolor=wwwcolor, linkcolor=wwwcolor, citecolor=MidnightBlue}
 \\title{%s}
