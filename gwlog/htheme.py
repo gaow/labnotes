@@ -272,6 +272,10 @@ textarea
     margin:5px 0;
     padding:1%;
 }
+kbd
+{
+    text-shadow:0.2px 0.2px 0.2px;
+}
 '''
 
 SYN_STY = r'''

@@ -64,7 +64,7 @@ class LogToHtml(TexParser):
         line = re.sub(r'""(.*?)""', r'<strong>\1</strong>', line)
         line = re.sub(r'"(.*?)"', r'<em>\1</em>', line)
 #        line = re.sub(r'@@(.*?)@@', r'<span style="font-family: monospace">\1</span>', line)
-        line = re.sub(r'@@(.*?)@@', r'<code><span style="color:black">\1</span></code>', line)
+        line = re.sub(r'@@(.*?)@@', r'<kbd>\1</kbd>', line)
         # hyperlink
         # [text|@link@] defines the pattern for citation.
         pattern = re.compile('\[(\s*)(?P<a>.+?)(\s*)\|(\s*)@(?P<b>.+?)@(\s*)\]')
