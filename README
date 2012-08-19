@@ -4,7 +4,7 @@ Gao Wang (*) 2012, GNU GPL
 
 Dependencies
 ------------
-sudo apt-get install texlive texlive-xetex texlive-latex-extra python-pygments latexmk
+sudo apt-get install texlive texlive-xetex texlive-latex-extra texlive-fonts-extra python-pygments latexmk
 
 Installation
 ------------
