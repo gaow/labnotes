@@ -168,6 +168,8 @@ class TexParser:
         self.latexph = 'ALATEXBLOODYRAWPATTERNPLACEHOLDER'
         self.htmlph = 'AHTMLBLOODYRAWPATTERNPLACEHOLDER'
         self.pause = False
+        self.fig_support = ['jpg','pdf','png']
+        self.fig_tag = 'tex'
 
     def m_recode(self, line):
         # the use of ? is very important
@@ -341,6 +343,36 @@ class TexParser:
             text = re.sub(r'{0}|{1}'.format('BEGIN' + self.blockph, 'END' + self.blockph), '', text)
         return text, mapping
 
+    def _holdfigureplace(self, text):
+        pattern = re.compile('#\*(.*?)(\n|$)')
+        for m in re.finditer(pattern, text):
+            fig = 'BEGIN' + self.blockph + self._parseFigure(m.group(1), self.fig_support, self.fig_tag) + 'END' + self.blockph + '\n'
+            text = text.replace(m.group(0), fig, 1)
+        return text
+
+    def _parseFigure(self, line, support = ['jpg','pdf','png'], tag = 'tex'):
+        if line.startswith(self.mark + '*'):
+            line = line[len(self.mark)+1:].strip()
+        else:
+            line = line.strip()
+        try:
+            fig, width = line.strip().split()
+            width = float(width)
+        except ValueError:
+            fig = line.strip().split()[0]
+            width = 0.9
+        if not '.' in fig:
+            self.quit("Cannot determine graphic file format for '{}'. Valid extensions are {}".format(fig, ' '.join(support)))
+            if fig.split('.')[1] not in support:
+                self.quit("Input file format '{}' not supported. Valid extensions are {}".format(fig.split('.')[1], ' '.join(support)))
+            if not os.path.exists(fig):
+                self.quit("Cannot find file %s" % fig)
+        if tag == 'tex':
+            line = '\\begin{center}\\includegraphics[width=%s\\textwidth]{%s}\\end{center}' % (width, os.path.abspath(fig))
+        else:
+            line = '<p><center><img src="{}" alt="{}" width="{}" /></center></p>'.format(fig, os.path.split(fig)[-1], int(width * 800))
+        return line
+
     def _checknest(self, text, kw=None):
         pattern = re.compile('{}(.*?){}'.format('BEGIN' + self.blockph, 'END' + self.blockph), re.DOTALL)
         # re.match() will not work here
@@ -365,6 +397,7 @@ class TexParser:
     def m_blockizeList(self, text, k):
         # handle 2nd level indentation first
         # in the mean time take care of recoding
+        text = self._holdfigureplace(text)
         text, mapping = self._holdblockplace(text, mode = 'hold')
         self._checkblockprefix(text)
         text = text.split('\n')

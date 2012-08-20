@@ -24,6 +24,8 @@ class LogToHtml(TexParser):
         self.wrap_width = 90
         self.tablefont = 'small'
         self.anchor_id = 0
+        self.fig_support = ['jpg','tif','png']
+        self.fig_tag = 'html'
         self.text = self.m_parseBlocks(self.text)
         self.m_parseComments()
         self.m_parseText()
@@ -101,6 +103,7 @@ class LogToHtml(TexParser):
     def m_blockizeList(self, text, k):
         # handle 2nd level indentation first
         # in the mean time take care of recoding
+        text = self._holdfigureplace(text)
         text, mapping = self._holdblockplace(text, mode = 'hold')
         self._checkblockprefix(text)
         text = text.split('\n')
@@ -189,6 +192,7 @@ class LogToHtml(TexParser):
 
     def m_blockizeAlert(self, text, k):
         self._checknest(text, kw = [r'id="wrapper"'])
+        text = self._holdfigureplace(text)
         text, mapping = self._holdblockplace(text, mode = 'hold')
         self._checkblockprefix(text)
         text = '\n'.join([item if item.startswith(self.blockph) else self.m_recode(re.sub(r'^{0}'.format(self.mark), '', item)) for item in text.split('\n')])
@@ -276,19 +280,7 @@ class LogToHtml(TexParser):
                 continue
             if self.text[idx].startswith(self.mark + '*'):
                 # fig: figure.png 0.9
-                try:
-                    fig, width = self.text[idx][len(self.mark)+1:].split()
-                    width = float(width)
-                except ValueError:
-                    fig = self.text[idx][len(self.mark)+1:].split()[0]
-                    width = 0.9
-                if not '.' in fig:
-                    self.quit("Cannot determine graphic file format for '%s'. Valid extensions are 'tif', 'png' and 'jpg'" % fig)
-                if fig.split('.')[1] not in ['jpg','tif','png']:
-                    self.quit("Input file format '%s' not supported. Valid extensions are 'tif', 'png' and 'jpg'" % fig.split('.')[1])
-                if not os.path.exists(fig):
-                    self.quit("Cannot find file %s" % fig)
-                self.text[idx] = '<p><center><img src="{}" alt="{}" width="{}" /></center></p>'.format(fig, os.path.split(fig)[-1], int(width * 800))
+                self.text[idx] = self._parseFigure(self.text[idx], self.fig_support, self.fig_tag)
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark):

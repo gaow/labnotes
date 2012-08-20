@@ -45,6 +45,7 @@ class LogToTex(TexParser):
 
     def m_blockizeAlert(self, text, k):
         self._checknest(text, kw = [r'\\\\begin{bclogo}', r'\\\\end{bclogo}'])
+        text = self._holdfigureplace(text)
         text, mapping = self._holdblockplace(text, mode = 'hold')
         self._checkblockprefix(text)
         text = '\n'.join([item if item.startswith(self.blockph) else self.m_recode(re.sub(r'^{0}'.format(self.mark), '', item)) for item in text.split('\n')])
@@ -135,19 +136,7 @@ class LogToTex(TexParser):
                 continue
             if self.text[idx].startswith(self.mark + '*'):
                 # fig: figure.pdf 0.9
-                try:
-                    fig, width = self.text[idx][len(self.mark)+1:].split()
-                    width = float(width)
-                except ValueError:
-                    fig = self.text[idx][len(self.mark)+1:].split()[0]
-                    width = 0.9
-                if not '.' in fig:
-                    self.quit("Cannot determine graphic file format for '%s'. Valid extensions are 'pdf', 'png' and 'jpg'" % fig)
-                if fig.split('.')[1] not in ['jpg','pdf','png']:
-                    self.quit("Input file format '%s' not supported. Valid extensions are 'pdf', 'png' and 'jpg'" % fig.split('.')[1])
-                if not os.path.exists(fig):
-                    self.quit("Cannot find file %s" % fig)
-                self.text[idx] = '\\begin{center}\\includegraphics[width=%s\\textwidth]{%s}\\end{center}' % (width, os.path.abspath(fig))
+                self.text[idx] = self._parseFigure(self.text[idx], self.fig_support, self.fig_tag)
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark):

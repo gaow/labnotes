@@ -252,6 +252,18 @@ print("HELLO WORLD")
 # this is item 2
 #}
 
+#! nested figure/list
+#{list
+# this is a list in item 1-1
+## and ..
+## a figure here ...
+#* bcm.png 0.3
+# Ok that's enough
+#}
+#{note
+# a figure here ...
+#* bcm.png 0.3
+#}
 ###
 #! Another chapter
 ###

@@ -73,6 +73,7 @@ echo "vtools admin --set_runtime_option temp_dir=/tmp/vtools_$RANDOM; vtools ass
 #{warning
 #{list
 # attention1
+#* bcm.png 0.2
 # attention2
 #}
 #}
