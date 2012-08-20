@@ -274,6 +274,10 @@ class TexParser:
                     # end of block not found
                     self.quit("'%s{ %s' and '%s}' must pair properly, near %s" % \
                             (self.mark, bname, self.mark, text[idx+1] if idx + 1 < len(text) else "end of document"))
+                if idx + 1 == endidx:
+                    # trivial block
+                    self.quit("Empty block not allowed, near %s" % \
+                            (text[idx+2] if idx + 2 < len(text) else "end of document"))
                 # block end found, take out this block as new text
                 # and apply the recursion
                 nestedtext = self.m_parseBlocks(text[idx+1:endidx])
