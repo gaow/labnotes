@@ -373,10 +373,10 @@ class TexParser:
             width = 0.9
         if not '.' in fig:
             self.quit("Cannot determine graphic file format for '{}'. Valid extensions are {}".format(fig, ' '.join(support)))
-            if fig.split('.')[1] not in support:
-                self.quit("Input file format '{}' not supported. Valid extensions are {}".format(fig.split('.')[1], ' '.join(support)))
-            if not os.path.exists(fig):
-                self.quit("Cannot find file %s" % fig)
+        if fig.split('.')[1] not in support:
+            self.quit("Input file format '{}' not supported. Valid extensions are {}".format(fig.split('.')[1], ' '.join(support)))
+        if not os.path.exists(fig):
+            self.quit("Cannot find file %s" % fig)
         if tag == 'tex':
             line = '\\begin{center}\\includegraphics[width=%s\\textwidth]{%s}\\end{center}' % (width, os.path.abspath(fig))
         else:
