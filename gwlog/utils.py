@@ -115,7 +115,13 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
 	sys.stderr.write('Done!\n')
 	return
 
+def uniq(seq):
+    seen = set()
+    seen_add = seen.add
+    return [x for x in seq if x not in seen and not seen_add(x)]
+
 def indexhtml(fnames):
+    fnames = uniq(fnames)
     d = OrderedDict()
     try:
         for fn in fnames:
