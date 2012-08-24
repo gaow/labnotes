@@ -271,6 +271,8 @@ textarea
     width:95%;
     margin:5px 0;
     padding:1%;
+    font-size: small;
+    font-family: "Lucida Console", Monaco, monospace;
 }
 kbd
 {
