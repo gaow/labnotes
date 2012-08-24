@@ -188,7 +188,7 @@ class LogToHtml(TexParser):
     def m_blockizeOut(self, text, k):
         self._checknest(text)
         nrow = len(text.split('\n'))
-        return '<center><textarea rows="{}">{}</textarea></center>'.format(max(min(nrow, 30), 1), text)
+        return '<center><textarea rows="{}", wrap="off">{}</textarea></center>'.format(max(min(nrow, 30), 1), text)
 
     def m_blockizeAlert(self, text, k):
         self._checknest(text, kw = [r'id="wrapper"'])
