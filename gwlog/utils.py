@@ -283,6 +283,7 @@ class TexParser:
                 if idx + 1 == endidx:
                     # trivial block
                     text.insert(endidx, '\n')
+                    endidx += 1
                 # block end found, take out this block as new text
                 # and apply the recursion
                 nestedtext = self.m_parseBlocks(text[idx+1:endidx])
