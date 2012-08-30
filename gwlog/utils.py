@@ -387,15 +387,15 @@ class TexParser:
         pattern = re.compile('{}(.*?){}'.format('BEGIN' + self.blockph, 'END' + self.blockph), re.DOTALL)
         # re.match() will not work here
         # will not work without re.DOTALL
-        m = re.search(pattern, text)
-        if m:
-            e = m.group(1)
-            if kw is None:
-                self.quit('Cannot nest this blocks here:\n{0}'.format(e[:max(200, len(e))]))
-            else:
-                for k in kw:
-                    if re.search(k, '%r' % e):
-                        self.quit('Cannot nest this blocks here:\n{0}'.format(e[:max(200, len(e))]))
+        for m in re.finditer(pattern, text):
+            if m:
+                e = m.group(1)
+                if kw is None:
+                    self.quit('Cannot nest this blocks here:\n{0}'.format(e[:max(200, len(e))]))
+                else:
+                    for k in kw:
+                        if re.search(k, '%r' % e):
+                            self.quit('Cannot nest this blocks here:\n{0}'.format(e[:max(200, len(e))]))
         return
 
     def _checkblockprefix(self, text):
