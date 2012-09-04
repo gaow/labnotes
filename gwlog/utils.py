@@ -5,6 +5,7 @@ from minted import minted
 from btheme import btheme
 from htheme import HTML_INDEX
 from collections import OrderedDict
+import codecs
 
 SYNTAX = {'r':'r',
           'sh':'bash',
@@ -125,7 +126,7 @@ def indexhtml(fnames):
     d = OrderedDict()
     try:
         for fn in fnames:
-            with open(fn, 'r') as f:
+            with codecs.open(fn, 'r', encoding='UTF-8', errors='ignore') as f:
                 flag = True
                 while flag:
                     line = f.readline()
