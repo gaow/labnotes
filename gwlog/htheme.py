@@ -734,7 +734,18 @@ a:hover {
 	-moz-opacity: 0.7;
 	filter:alpha(opacity=70);
 }
-
+hr {
+      border: 0;
+      height: 2px;
+      /* Mozilla */
+      background: -moz-linear-gradient(left, #990000, white);
+      /* Webkit */
+      background: -webkit-gradient(linear, left top, right top,
+         from(#990000), to(white));
+      /* IE */
+      filter: progid:DXImageTransform.Microsoft.gradient(
+         gradientType=1, startColorstr=#990000, endColorstr=#FFFFFF);
+}
 /* Core nav styles */
 #toc {
 	list-style: none;
