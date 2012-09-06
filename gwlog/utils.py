@@ -122,13 +122,14 @@ def uniq(seq):
     return [x for x in seq if x not in seen and not seen_add(x)]
 
 def indexhtml(fnames):
-    fnames = uniq(fnames)
     d = OrderedDict()
     try:
+        nbars = 0
         for fn in fnames:
             if fn == ',':
                 # write a bar
-                d[fn] = '<hr style="margin-top:1em;margin-bottom:.5em;">'
+                d[',{}'.format(nbars)] = '<hr style="margin-top:1em;margin-bottom:.5em;">'
+                nbars += 1
                 continue
             with codecs.open(fn, 'r', encoding='UTF-8', errors='ignore') as f:
                 flag = True
@@ -151,7 +152,7 @@ def indexhtml(fnames):
     #otext = '\n'.join(['<li><span>{0}{1}</span>{4}<a href="{2}">{3}</a></li>'.format(v[0].replace('_', ' '), '&nbsp;&nbsp;<em><small>by {}</small></em>'.format(v[1]) if v[1] else '', k, '[view]', '<a href="{}">{}</a>'.format(k.replace('.html', '.pdf'), '&nbsp;&nbsp;[download]') if os.path.exists(k.replace('.html', '.pdf')) else '') for k, v in d.items()])
     otext = ''
     for k, v in d.items():
-        if k != ',':
+        if not k.startswith(','):
             otext += '<li><span>{0}{1}</span>{4}<a href="{2}">{3}</a></li>'.format(v[0].replace('_', ' '), '&nbsp;&nbsp;<em><small>by {}</small></em>'.format(v[1]) if v[1] else '', k, '[view]', '<a href="{}">{}</a>'.format(k.replace('.html', '.pdf'), '&nbsp;&nbsp;[download]') if os.path.exists(k.replace('.html', '.pdf')) else '') + '\n'
         else:
             otext += v + '\n'
