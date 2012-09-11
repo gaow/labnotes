@@ -134,6 +134,7 @@ a:hover
 {
 	margin-top: 30px;
 	font-size: 14pt;
+	line-height: 120%;
 	color: #666;
 }
 

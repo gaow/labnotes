@@ -465,7 +465,7 @@ class TexParser:
 
     def m_blockizeTable(self, text, k):
         self._checknest(text)
-        table = [[self.m_recode(iitem) for iitem in item.split('\t')] for item in text.split('\n')]
+        table = [[self.m_recode(iitem) for iitem in item.split('\t')] for item in text.split('\n') if item]
         ncols = list(set([len(x) for x in table]))
         if len(ncols) > 1:
             self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(text))
