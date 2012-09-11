@@ -154,14 +154,20 @@ class LogToHtml(TexParser):
         head = '<center><table><tbody>'
         body = []
         line = ''
-        for cell in table[0]:
-            line += start + '<b>' + cell + '</b>' + end + '\n'
-        body.append(line)
-        for item in table[1:]:
-            line = ''
-            for cell in item:
-                line += start + cell + end + '\n'
+        try:
+            for cell in table[0]:
+                line += start + '<b>' + cell + '</b>' + end + '\n'
             body.append(line)
+        except:
+            pass
+        try:
+            for item in table[1:]:
+                line = ''
+                for cell in item:
+                    line += start + cell + end + '\n'
+                body.append(line)
+        except:
+            pass
         #
         for idx, item in enumerate(body):
             if idx % 2:
