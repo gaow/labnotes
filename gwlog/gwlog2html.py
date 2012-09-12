@@ -158,7 +158,8 @@ class LogToHtml(TexParser):
             for cell in table[0]:
                 line += start + '<b>' + cell + '</b>' + end + '\n'
             body.append(line)
-        except:
+        except IndexError:
+            # emtpy table
             pass
         try:
             for item in table[1:]:
@@ -166,7 +167,8 @@ class LogToHtml(TexParser):
                 for cell in item:
                     line += start + cell + end + '\n'
                 body.append(line)
-        except:
+        except IndexError:
+            # emtpy table
             pass
         #
         for idx, item in enumerate(body):
