@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import argparse
+import sys, argparse
 import codecs
 from gwlog.utils import getfname, pdflatex, indexhtml
 from gwlog.gwlog2tex import LogToTex
@@ -153,4 +153,8 @@ if __name__ == '__main__':
 	# getting args
 	args = master_parser.parse_args()
 	# calling the associated functions
-	args.func(args)
+#	args.func(args)
+	try:
+		args.func(args)
+	except Exception as e:
+		sys.exit('Unexpected error occured while processing {}: {}'.format('-'.join(args.filename), e))

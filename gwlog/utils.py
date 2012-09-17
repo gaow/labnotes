@@ -377,11 +377,13 @@ class TexParser:
             line = line[len(self.mark)+1:].strip()
         else:
             line = line.strip()
+        if not line:
+            return ''
         try:
-            fig, width = line.strip().split()
+            fig, width = line.split()
             width = float(width)
         except ValueError:
-            fig = line.strip().split()[0]
+            fig = line.split()[0]
             width = 0.9
         if not '.' in fig:
             self.quit("Cannot determine graphic file format for '{}'. Valid extensions are {}".format(fig, ' '.join(support)))
