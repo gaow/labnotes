@@ -385,10 +385,11 @@ class TexParser:
         except ValueError:
             fig = line.split()[0]
             width = 0.9
-        if not '.' in fig:
-            self.quit("Cannot determine graphic file format for '{}'. Valid extensions are {}".format(fig, ' '.join(support)))
-        if fig.split('.')[1] not in support:
-            self.quit("Input file format '{}' not supported. Valid extensions are {}".format(fig.split('.')[1], ' '.join(support)))
+        fname = os.path.split(fig)[-1]
+        if not '.' in fname:
+            self.quit("Cannot determine graphic file format for '{}'. Valid extensions are {}".format(fname, ' '.join(support)))
+        if fname.split('.')[-1] not in support:
+            self.quit("Input file format '{}' not supported. Valid extensions are {}".format(fname.split('.')[-1], ' '.join(support)))
         if not os.path.exists(fig):
             self.quit("Cannot find file %s" % fig)
         if tag == 'tex':
