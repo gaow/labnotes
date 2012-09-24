@@ -172,6 +172,8 @@ class LogToTex(TexParser):
 \\usepackage{upquote}
 \\usepackage{titlesec}
 \\usepackage{longtable}
+\\usepackage{subfigure}
+\\usepackage{float}
 \\usepackage{varwidth}
 %s
 \\usepackage[tikz]{bclogo}
@@ -193,6 +195,7 @@ class LogToTex(TexParser):
 \\renewcommand\\@biblabel[1]{#1.}
 \\renewcommand\\@cite[1]{\\textsuperscript{#1}}
 \\makeatother
+\\renewcommand{\\thesubfigure}{\\thefigure.\\arabic{subfigure}}
 \\definecolor{bg}{rgb}{0.95,0.95,0.95}
 \\definecolor{rblue}{rgb}{0,.14,.41}
 \\definecolor{rgray}{RGB}{94,96,98}

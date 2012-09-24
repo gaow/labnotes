@@ -146,7 +146,8 @@ GROUP BY kEntity, sTranType, sItemType
 #* bcm.png 
 # and smaller ...
 #* bcm.png 0.5
-
+# and side by side
+#* bcm.png 0.45; bcm.png 0.45
 #!Tables
 #{table
 chr	pos	sample_size_SNV	beta_x_SNV	pvalue_SNV

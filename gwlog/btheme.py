@@ -669,6 +669,7 @@ CONFIG = '''
 \\usepackage{pdfpages}
 \\usepackage{pgfpages}
 \\usepackage{longtable}
+\\usepackage{subfigure}
 \\usepackage[numbered]{bookmark}
 %%Make sure it comes last of your loaded packages
 \\usepackage{hyperref}

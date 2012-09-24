@@ -372,31 +372,43 @@ class TexParser:
             text = text.replace(m.group(0), fig, 1)
         return text
 
-    def _parseFigure(self, line, support = ['jpg','pdf','png'], tag = 'tex'):
-        if line.startswith(self.mark + '*'):
-            line = line[len(self.mark)+1:].strip()
+    def _parseFigure(self, text, support = ['jpg','pdf','png'], tag = 'tex'):
+        if text.startswith(self.mark + '*'):
+            text = text[len(self.mark)+1:].strip()
         else:
-            line = line.strip()
-        if not line:
+            text = text.strip()
+        if not text:
             return ''
-        try:
-            fig, width = line.split()
-            width = float(width)
-        except ValueError:
-            fig = line.split()[0]
-            width = 0.9
-        fname = os.path.split(fig)[-1]
-        if not '.' in fname:
-            self.quit("Cannot determine graphic file format for '{}'. Valid extensions are {}".format(fname, ' '.join(support)))
-        if fname.split('.')[-1] not in support:
-            self.quit("Input file format '{}' not supported. Valid extensions are {}".format(fname.split('.')[-1], ' '.join(support)))
-        if not os.path.exists(fig):
-            self.quit("Cannot find file %s" % fig)
+        lines = [x.strip() for x in text.split(';') if x.strip()]
+        for idx, line in enumerate(lines):
+            try:
+                fig, width = line.split()
+                width = float(width)
+            except ValueError:
+                fig = line.split()[0]
+                width = 0.9
+            fname = os.path.split(fig)[-1]
+            if not '.' in fname:
+                self.quit("Cannot determine graphic file format for '{}'. Valid extensions are {}".format(fname, ' '.join(support)))
+            if fname.split('.')[-1] not in support:
+                self.quit("Input file format '{}' not supported. Valid extensions are {}".format(fname.split('.')[-1], ' '.join(support)))
+            if not os.path.exists(fig):
+                self.quit("Cannot find file %s" % fig)
+            # syntax images
+            if tag == 'tex':
+                lines[idx] = '\\includegraphics[width=%s\\textwidth]{%s}\n' % (width, os.path.abspath(fig))
+            else:
+                lines[idx] = '<p><center><img src="{}" alt="{}" width="{}" /></center></p>'.format(fig, os.path.split(fig)[-1], int(width * 800))
         if tag == 'tex':
-            line = '\\begin{center}\\includegraphics[width=%s\\textwidth]{%s}\\end{center}' % (width, os.path.abspath(fig))
-        else:
-            line = '<p><center><img src="{}" alt="{}" width="{}" /></center></p>'.format(fig, os.path.split(fig)[-1], int(width * 800))
-        return line
+            if len(lines) > 1:
+                w_minipage = int(1.0 / (1.0 * len(lines)) * 90) / 100.0
+                lines = ['\\subfigure{' + x + '}\n' for x in lines]
+                lines[0] = '\\begin{figure}[H]\n\\centering\n\\mbox{\n' + lines[0]
+                lines[-1] += '\n}\n\\end{figure}\n'
+            else:
+                lines[0] = '\\begin{figure}[H]\n\\centering\n' + lines[0]
+                lines[-1] += '\\end{figure}\n'
+        return '\n'.join(lines)
 
     def _checknest(self, text, kw=None):
         pattern = re.compile('{}(.*?){}'.format('BEGIN' + self.blockph, 'END' + self.blockph), re.DOTALL)
