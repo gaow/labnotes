@@ -100,11 +100,21 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
 				f.writelines(out.decode(sys.getdefaultencoding()) + error.decode(sys.getdefaultencoding()))
 			os.system('rm -f {0}.out {0}.toc {0}.aux {0}.log {0}.nav {0}.snm {0}.vrb'.format(fname))
 			#sys.stderr.write('DEBUG:\n\t$ cd {0}\n\t$ pdflatex -shell-escape -halt-on-error -file-line-error {1}\n'.format(tmp_dir, fname + '.tex'))
-			sys.stderr.write('Oops!... non-empty error message or non-zero return code captured. Please run the program again.\n'\
-					'\033[91mNOTE: If you have used raw LaTeX syntax @@@ ... @@@ please make sure the syntax are valid ' \
-					'(the program will crash on invalid raw LaTeX code).\nNOTE: You can also try to run with --vanilla option to remove '\
-					'potentially problematic cached files.\n\033[0mIf this message presists after all your trouble-shooting, '\
-					'please find file "{0}-ERROR.txt" and report it to Gao Wang.\n'.format(fname))
+            sys.sterr.write('''
+                    * * *
+                    * Oops! One of the following problems occurred:
+                    * 1. LaTeX gives a warning message
+                    *   -> Did you get the pdf file? If so, ignore the warning
+                    *   -> Run the problem again to see if it goes away
+                    * 2. Invalid raw LaTeX syntax
+                    *   -> Make sure text in between @@@ ... @@@ symbols are legal
+                    * 3. Cache files messed up
+                    *   -> Try to run the program with '--vanilla' option
+                    * 4. Other issues
+                    *   -> Tips above do not get rid of the problem
+                    *   -> Report file "{0}-ERROR.txt" to Gao Wang.
+                    * * *
+                    '''.format(fname))
 			sys.exit(1)
 		if visit == 1:
 			sys.stderr.write('Still working ...\n')

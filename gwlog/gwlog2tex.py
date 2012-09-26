@@ -3,7 +3,7 @@ import codecs
 from utils import wraptxt, TexParser, SYNTAX
 
 class LogToTex(TexParser):
-    def __init__(self, title, author, toc, footnote, filename):
+    def __init__(self, title, author, toc, footnote, filename, no_num = False, no_ref = False):
         TexParser.__init__(self, title, author, filename)
         if sum([x.split('.')[-1].lower() in ['c','cpp','h'] for x in filename]) == len(filename):
             self.mark = '//'
@@ -18,22 +18,24 @@ class LogToTex(TexParser):
                     sys.stderr.write("WARNING: Treating input as {0} source code. Please use a different filename extension if this is not your intension.\n".format(SYNTAX[fn.split('.')[-1].lower()]))
                     if lines[0].startswith('#!/') and fn.split('.')[-1].lower() in lines[0].lower():
                         del lines[0]
-                    lines.insert(0,self.mark*3)
-                    lines.insert(0,self.mark + fn.upper())
-                    lines.insert(0,self.mark*3)
+#                    lines.insert(0,self.mark*3)
+#                    lines.insert(0,self.mark + fn.upper())
+#                    lines.insert(0,self.mark*3)
                 self.text.extend(lines)
             except IOError as e:
                 sys.exit(e)
         self.toc = toc
         self.doctype = 'article'
         self.footnote = footnote
+        self.no_num = no_num
         self.bclogo = {'warning':'\\bcattention', 'tip':'\\bclampe', 'important':'\\bctakecare', 'note':'\\bccrayon'}
         self.keywords = list(set(SYNTAX.values())) + self.bclogo.keys() + ['out', 'list', 'table']
         self.text = self.m_parseBlocks(self.text)
         self.m_parseComments()
         self.m_parseText()
-        self.m_parseBib()
-        self.text.append(self.textbib)
+        if not no_ref:
+            self.m_parseBib()
+            self.text.append(self.textbib)
 
     def m_blockizeIn(self, text, k):
         self._checknest(text)
@@ -111,7 +113,8 @@ class LogToTex(TexParser):
             if self.text[idx].startswith(self.mark * 3) and self.text[idx+1].startswith(self.mark) and (not self.text[idx+1].startswith(self.mark * 2)) and self.text[idx+2].startswith(self.mark * 3):
                 # section
                 self.text[idx] = ''
-                self.text[idx + 1] = '\\section{' + ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(self.text[idx + 1][len(self.mark):]).split()]) + '}'
+                self.text[idx + 1] = ('\\section*{' if self.no_num else '\\section{') + \
+                        ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(self.text[idx + 1][len(self.mark):]).split()]) + '}'
                 self.text[idx + 2] = ''
                 idx += 3
                 continue
@@ -131,7 +134,7 @@ class LogToTex(TexParser):
                 continue
             if self.text[idx].startswith(self.mark + '!'):
                 # subsection, subsubsection ...
-                self.text[idx] = '\\subsection{' + self.m_recode(self.text[idx][len(self.mark)+1:]) + '}'
+                self.text[idx] = ('\\subsection*{' if self.no_num else '\\subsection{') + self.m_recode(self.text[idx][len(self.mark)+1:]) + '}'
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark + '*'):

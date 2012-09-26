@@ -38,6 +38,12 @@ def getDocArguments(parser):
                         action='store_true',
                         default = '',
                         help='''generate footnote instead of reference''')
+	parser.add_argument('--no_reference',
+                        action='store_true',
+                        help='''do not include reference in the document''')
+	parser.add_argument('--no_section_number',
+                        action='store_true',
+                        help='''generate un-numbered sections''')
 	parser.add_argument('-v', '--vanilla',
                         action='store_true',
                         default = '',
@@ -86,7 +92,7 @@ def getAdminArguments(parser):
                         help='''name of output file''')
 
 def doc(args):
-	tex = LogToTex(args.title, args.author, args.toc, args.footnote, args.filename)
+	tex = LogToTex(args.title, args.author, args.toc, args.footnote, args.filename, args.no_section_number, args.no_reference)
 	lite = 1 if args.lite else 0
 	fname = getfname(args.filename, args.output)
 	pdflatex(fname, tex.get(lite), vanilla=args.vanilla)
