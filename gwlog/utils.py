@@ -102,7 +102,7 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
                     *   -> Try to run the program with '--vanilla' option
                     * 4. Other issues
                     *   -> Tips above do not get rid of the problem
-                    *   -> Report file "{0}-ERROR.txt" to Gao Wang.
+                    *   -> Report file "{0}-ERROR.txt" to Gao Wang
                     * * *\n\n'''.format(fname))
             sys.exit(1)
         if visit == 1:

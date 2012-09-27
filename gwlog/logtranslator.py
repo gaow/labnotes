@@ -526,9 +526,9 @@ class LogToTex(TexParser):
                         self.text[idx] = ''
                         break
         self.text = filter(None, self.text)
-        return ('\\documentclass[oneside, 10pt]{%s}' % self.doctype + DOC_PACKAGES) + \
+        return '\\documentclass[oneside, 10pt]{%s}' % self.doctype + DOC_PACKAGES + \
                 ('\\usepackage[Lenny]{fncychap}' if self.doctype == 'report' else '') + \
-                ('\\renewcommand\\%s{References}' % 'bibname' if self.doctype == 'report' else 'refname') + \
+                '\\renewcommand\\%s{References}' % ('bibname' if self.doctype == 'report' else 'refname') + \
                 DOC_CONFIG + '\\title{%s}\n' % self.title + '\\author{%s}\n' % self.author + \
                 '\\date{Last updated: \\today}\n\\raggedbottom\n\\begin{document}\n' + \
                 '%s\n%s\n\\bigskip\n%s' % ('\\maketitle' if self.title or self.author else '', '\\tableofcontents' if self.toc else '', '\n'.join(self.text)) + \
