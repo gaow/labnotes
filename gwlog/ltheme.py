@@ -901,3 +901,57 @@ THANK = '''
     \\end{center}
 }
 '''
+
+DOC_PACKAGES = '''
+\\usepackage{geometry}
+\\usepackage{fullpage}
+\\usepackage{amsmath}
+\\usepackage{booktabs}
+\\usepackage{amssymb}
+\\usepackage{amsthm}
+\\usepackage{mathabx}
+\\usepackage{bm}
+\\usepackage{fancyhdr}
+\\usepackage{fancyvrb}
+\\usepackage{shadow}
+\\usepackage[pdftex]{graphicx}
+\\usepackage[dvipsnames]{xcolor}
+\\usepackage{minted}
+\\usepackage{upquote}
+\\usepackage{titlesec}
+\\usepackage{longtable}
+\\usepackage{subfigure}
+\\usepackage{float}
+\\usepackage{varwidth}
+\\usepackage[tikz]{bclogo}
+'''
+
+DOC_CONFIG = '''
+\\renewcommand\\rmdefault{bch}
+\\newcommand{\\ie}{\\textit{i.e.}}
+\\newcommand\\me{\\mathrm{e}}
+\\newcommand\\mlog{\\mathrm{log}}
+\\newcommand*\\circled[1]{\\kern-2.5em
+  \\put(0,4){\\color{black}\\circle*{18}}\\put(0,4){\\circle{16}}
+  \\put(-3,0){\\color{white}\\\\bfseries\\large#1}}
+\\linespread{1.1}
+\\setlength{\\parskip}{8pt plus 1pt minus 1pt}
+\\parindent 0ex
+\\geometry{left=0.8in,right=0.8in,top=0.8in,bottom=0.8in}
+\\renewcommand{\\labelitemii}{$\\blacktriangleright$}
+\\renewcommand{\\labelitemiii}{$\\smalltriangleright$}
+\\makeatletter
+\\renewcommand\\@biblabel[1]{#1.}
+\\renewcommand\\@cite[1]{\\textsuperscript{#1}}
+\\makeatother
+\\renewcommand{\\thesubfigure}{\\thefigure.\\arabic{subfigure}}
+\\definecolor{bg}{rgb}{0.95,0.95,0.95}
+\\definecolor{rblue}{rgb}{0,.14,.41}
+\\definecolor{rgray}{RGB}{94,96,98}
+\\definecolor{wwwcolor}{rgb}{0,0.2,0.6}
+\\setcounter{secnumdepth}{3}
+\\setcounter{tocdepth}{3}
+\\titleformat{\\subsubsection}{\\color{rblue}\\normalfont\\bfseries}{$\\centerdot$}{.5em}{}
+\\usepackage[bookmarksnumbered=true,pdfstartview=FitH]{hyperref}
+\\hypersetup{colorlinks, breaklinks, urlcolor=wwwcolor, linkcolor=wwwcolor, citecolor=MidnightBlue}
+'''
