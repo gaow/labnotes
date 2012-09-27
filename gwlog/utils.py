@@ -93,14 +93,16 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
             sys.stderr.write('''
                     * * *
                     * Oops! One of the following problems occurred:
-                    * 1. LaTeX gives a warning message
+                    * 1. Missing required software / packages dependencies
+                    *   -> Install the dependencies documented in README
+                    * 2. LaTeX gives a warning message
                     *   -> Did you get the pdf file? If so, ignore the warning
                     *   -> Run the problem again to see if it goes away
-                    * 2. Invalid raw LaTeX syntax
-                    *   -> Make sure text in between @@@ ... @@@ symbols are legal
-                    * 3. Cache files messed up
+                    * 3. Invalid raw LaTeX syntax
+                    *   -> Make sure text in between @@@ ... @@@ symbols is legal
+                    * 4. Cache files messed up
                     *   -> Try to run the program with '--vanilla' option
-                    * 4. Other issues
+                    * 5. Other issues
                     *   -> Tips above do not get rid of the problem
                     *   -> Report file "{0}-ERROR.txt" to Gao Wang
                     * * *\n\n'''.format(fname))
