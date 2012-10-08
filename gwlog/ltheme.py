@@ -914,10 +914,13 @@ DOC_PACKAGES = '''
 \\usepackage{fancyhdr}
 \\usepackage{fancyvrb}
 \\usepackage{shadow}
+%%\\usepackage{graphicx}
 \\usepackage[pdftex]{graphicx}
 \\usepackage[dvipsnames]{xcolor}
 \\usepackage{minted}
 \\usepackage{upquote}
+%%\\usepackage[utf8]{inputenc}
+%%\\usepackage{ucs}
 \\usepackage{titlesec}
 \\usepackage{longtable}
 \\usepackage{subfigure}

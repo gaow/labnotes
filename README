@@ -37,7 +37,8 @@ HTML Example
 ------------
 gw_log html -h
 gw_log html demo.notes -o d1 --author "John Doe" --title "Example log documentation" --lite
-gw_log html demo.notes -o d2 --author "John Doe" --title "Example log documentation" --toc --separate
+gw_log html demo.notes -o d2 --author "John Doe" --title "Example log documentation" --lite --columns 2
+gw_log html demo.notes -o d3 --author "John Doe" --title "Example log documentation" --toc --separate
 gw_log admin *.html -o index -a index_html 
 
 Syntax

@@ -49,7 +49,8 @@ gw_log doc demo.notes --author "John Doe" --title "Example log documentation" --
 # ``double quote'', `single quote',  "italics", ""bold"", """bold italics""", @@monospaced@@, @www.google.com@
 #!!! sentence emphasized
 #!! Raw @@@\LaTeXe@@@ syntax
-#@@@\[\hat{\beta} = (\frac{1}{n}\sum_i^n \mathbf{x}_i\mathbf{x}_i^T)^{-1} (\frac{1}{n}\sum_i^n\mathbf{x}_iy_i)\]@@@
+#Display math: @@@\[\hat{\beta} = (\frac{1}{n}\sum_i^n \mathbf{x}_i\mathbf{x}_i^T)^{-1} (\frac{1}{n}\sum_i^n\mathbf{x}_iy_i)\]@@@
+#Inline math: @@@\(\hat{\beta} = (\frac{1}{n}\sum_i^n \mathbf{x}_i\mathbf{x}_i^T)^{-1} (\frac{1}{n}\sum_i^n\mathbf{x}_iy_i)\)@@@
 #!! Reference note
 # I visit the [BCM website|Baylor College of Medicine, @www.bcm.edu@] daily
 #!! Blocks
@@ -89,7 +90,6 @@ ESP6900.chr12.May02.release.vcf.gz      ESP6900.chr22.May02.release.vcf.gz.tbi
 #}
 #!! terminal command
 echo "Hello, world!"
-
 #!! languages
 #{ bash
 vtools init esp69h

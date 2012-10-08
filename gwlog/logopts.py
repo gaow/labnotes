@@ -18,7 +18,7 @@ def slides(args):
     return
 
 def html(args):
-    htm = LogToHtml(args.title, args.author, args.toc, args.filename)
+    htm = LogToHtml(args.title, args.author, args.toc, args.filename, args.columns)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output, suffix='.html')
     body, css, js = htm.get(lite, args.separate)
@@ -145,6 +145,11 @@ class LogOpts:
                         help='''build document from scratch without using cached data''')
 
     def getHtmlArguments(self, parser):
+        parser.add_argument('--columns',
+                        type = int,
+                        choices = [1,2,3],
+                        default = 1,
+                        help='''number of columns in html page (1 ~ 3)''')
         parser.add_argument('-s', '--separate',
                         action='store_true',
                         help='''use separate files for css and js scripts''')

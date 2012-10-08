@@ -95,6 +95,32 @@ a:hover
 	white-space: nowrap;
 }
 
+.three-col {
+       -moz-column-count: 3;
+       -moz-column-gap: 30px;
+       -webkit-column-count: 3;
+       -webkit-column-gap : 30px;
+       -moz-column-rule-color:  #ccc;
+       -moz-column-rule-style:  solid;
+       -moz-column-rule-width:  1px;
+       -webkit-column-rule-color:  #ccc;
+       -webkit-column-rule-style: solid ;
+       -webkit-column-rule-width:  1px;
+}
+
+.two-col {
+       -moz-column-count: 2;
+       -moz-column-gap: 30px;
+       -webkit-column-count: 2;
+       -webkit-column-gap : 30px;
+       -moz-column-rule-color:  #ccc;
+       -moz-column-rule-style:  solid;
+       -moz-column-rule-width:  1px;
+       -webkit-column-rule-color:  #ccc;
+       -webkit-column-rule-style: solid ;
+       -webkit-column-rule-width:  1px;
+}
+
 .frame
 {
 	margin: 0px auto 50px auto;
@@ -212,7 +238,7 @@ a:hover
 
 #wrapper {
 	text-align: left;
-	width: 600px;
+    width:95%;
 }
 
 #toc {

@@ -256,7 +256,7 @@ class TexParser:
             if tag == 'tex':
                 lines[idx] = '\\includegraphics[width=%s\\textwidth]{%s}\n' % (width, os.path.abspath(fig))
             else:
-                lines[idx] = '<p><center><img src="{}" alt="{}" width="{}" /></center></p>'.format(fig, os.path.split(fig)[-1], int(width * 800))
+                lines[idx] = '<p><center><img src="{}" alt="{}" width="{}%" /></center></p>'.format(fig, os.path.split(fig)[-1], int(width * 100))
         if tag == 'tex':
             if len(lines) > 1:
                 w_minipage = int(1.0 / (1.0 * len(lines)) * 90) / 100.0
@@ -749,7 +749,7 @@ class LogToBeamer(TexParser):
 
 
 class LogToHtml(TexParser):
-    def __init__(self, title, author, toc, filename):
+    def __init__(self, title, author, toc, filename, columns):
         TexParser.__init__(self, title, author, filename)
         self.text = []
         for fn in filename:
@@ -761,6 +761,12 @@ class LogToHtml(TexParser):
             except IOError as e:
                 sys.exit(e)
         self.toc = toc
+        if columns == 2:
+            self.frame = 'two-col'
+        elif columns == 3:
+            self.frame = 'three-col'
+        else:
+            self.frame = 'frame'
         self.dtoc = OrderedDict()
         self.alertbox = ['warning', 'tip', 'important', 'note']
         self.keywords = list(set(SYNTAX.values())) + self.alertbox + ['err', 'out', 'list', 'table']
@@ -1062,8 +1068,10 @@ class LogToHtml(TexParser):
             otext += '<link href="main.css" rel="stylesheet" type="text/css"><script LANGUAGE="JavaScript" src="main.js"></script>'
         else:
             otext += '<style type="text/css">\n{}</style><script LANGUAGE="JavaScript">\n{}\n</script>'.format(HTML_STYLE, JS_SCRIPT)
-        otext += '</head><body><a name="top"></a><div class="frame">{}<div class="content">{}</div></div></body></html>'.\
-                format(self.m_title(self.title, self.author), (self.m_toc(self.dtoc) if self.toc else '') + '\n'.join(self.text))
+        # mathjax support
+        otext += '\n<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>\n'
+        otext += '</head><body><a name="top"></a>{1}{2}<div class="{0}"><div class="content">{3}</div></div></body></html>'.\
+                format(self.frame, self.m_title(self.title, self.author), (self.m_toc(self.dtoc) if self.toc else ''), '\n'.join(self.text))
         return otext, HTML_STYLE if separate else '', JS_SCRIPT if separate else ''
 
     def m_title(self, title, author):
@@ -1115,4 +1123,4 @@ class LogToHtml(TexParser):
         head = '<b>Contents:</b><ul id="toc">\n'
         tail = '\n</ul>'
         body = '\n'.join(['<li><span style="{}">{}</span><a href="#{}">{}</a></li>'.format(self._isize(k), self._csize(v,k),k,'&clubs;') for k, v in dtoc.items()])
-        return head + body + tail
+        return '<div class="frame">' + head + body + tail + '</div>'
