@@ -1065,7 +1065,7 @@ class LogToHtml(TexParser):
         self.text = [x.strip() for x in self.text if x and x.strip()]
         otext = '<!DOCTYPE html><html><head><title>{}</title>\n'.format((self.title + ' | ' + self.author) if self.title or self.author else '')
         if separate:
-            otext += '<link href="main.css" rel="stylesheet" type="text/css"><script LANGUAGE="JavaScript" src="main.js"></script>'
+            otext += '<link href="style.css" rel="stylesheet" type="text/css"><script LANGUAGE="JavaScript" src="style.js"></script>'
         else:
             otext += '<style type="text/css">\n{}</style><script LANGUAGE="JavaScript">\n{}\n</script>'.format(HTML_STYLE, JS_SCRIPT)
         # mathjax support
@@ -1079,7 +1079,7 @@ class LogToHtml(TexParser):
         <div class="top">
         {}{}
         </div>
-        '''.format('<h1 class="title">{}</h1>'.format(title) if title else '', '<center><span style="color:#304860;font-family:comic sans ms;font-size:small">Edited by {}, on {}</span></center>'.format(author, strftime("%a %d %b %Y %H:%M:%S", localtime())) if author else '')
+        '''.format('<h1 class="title">{}</h1>'.format(title) if title else '', '<div class="author" >Edited by {}, on {}</div>'.format(author, strftime("%a %d %b %Y %H:%M:%S", localtime())) if author else '')
 
     def m_chapter(self, text, i):
         return '''

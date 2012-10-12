@@ -23,5 +23,6 @@ setup(name = 'gw_log',
     scripts = ['gw_log'],
     cmdclass = {'build_py': build_py },
     package_dir = {'gwlog': 'gwlog'},
-    packages = ['gwlog']
+    packages = ['gwlog'],
+    package_data = {'gwlog': ['PTSans.woff']}
     )

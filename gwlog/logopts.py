@@ -1,4 +1,4 @@
-import sys, argparse
+import sys, argparse, shutil, os
 import codecs
 from .utils import getfname, pdflatex, indexhtml
 from .logtranslator import LogToTex, LogToBeamer, LogToHtml
@@ -25,9 +25,12 @@ def html(args):
     if body:
         with codecs.open(fname + '.html', 'w', encoding='UTF-8', errors='ignore') as f: f.writelines(body)
     if css:
-        with open('main.css', 'w') as f: f.writelines(css)
+        with open('style.css', 'w') as f: f.writelines(css)
     if js:
-        with open('main.js', 'w') as f: f.writelines(js)
+        with open('script.js', 'w') as f: f.writelines(js)
+    woff = os.path.join(os.path.dirname(sys.modules['gwlog'].__file__), 'PTSans.woff')
+    if os.path.exists(woff):
+        shutil.copy2(woff, '.')
     return
 
 def admin(args):

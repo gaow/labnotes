@@ -1,4 +1,10 @@
 MAIN_STY = r'''
+@font-face {
+  font-family: 'PT Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('PT Sans'), local('PTSans-Regular'), url(PTSans.woff) format('woff');
+}
 html {background: #FFFFFF}
 /*
 body {
@@ -20,8 +26,8 @@ body
 {
 	margin:40px 0;
 	padding:0;
-	font-family: 'Lucida Grande', 'Lucida Sans', 'Lucida Sans Unicode', Tahoma, sans-serif;
-	font-size: 9pt;
+	font-family: 'PT Sans', 'Lucida Grande', 'Lucida Sans', 'Lucida Sans Unicode', Tahoma, sans-serif;
+	font-size: 10pt;
 	text-align:justify;
 	line-height: 150%;
 	color: #333;
@@ -54,7 +60,7 @@ tr.dark
 ol
 {
 	list-style-type: lower-greek;
-	font-family: 'Lucida Grande';
+	font-family: 'PT Sans', 'Lucida Grande';
 }
 
 a,
@@ -74,8 +80,8 @@ a:hover
 
 .normal
 {
-	font-family: Helvetica, Arial, sans-serif;
-	font-size: 10pt;
+	font-family: 'PT Sans', Helvetica, Arial, sans-serif;
+	font-size: 11pt;
 }
 
 .minorhead
@@ -142,8 +148,15 @@ a:hover
 	line-height: 120%;
 	color: #666;
 	font-variant: small-caps;
-	font-family: Georgia, Times, serif;
-	background: #eee
+	font-family: 'PT Sans', Georgia, Times, serif;
+	background: #eee;
+}
+
+.author {
+	color:#304860;
+	text-align:center;
+	font-family:"PT Sans", comic sans ms;
+	font-size:small;
 }
 
 .superheading
@@ -174,7 +187,7 @@ a:hover
 .subsubheading
 {
 	margin-top: 15px;
-	font-size: 10pt;
+	font-size: 11pt;
 	font-weight: bold;
 	color: #304860;
 	/* font-style: oblique; */
