@@ -950,7 +950,7 @@ class LogToHtml(TexParser):
         self._checkblockprefix(text)
         text = '\n'.join([item if item.startswith(self.blockph) else self.m_recode(re.sub(r'^{0}'.format(self.mark), '', item)) for item in text.split('\n')])
         text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
-        return '<center><div id="wrapper"><div class="{0}"><div style="font-family:comic sans ms;text-align:center;text-decoration:underline{3}; margin-bottom:3px">{1}</div>{2}</div></div></center>'.\
+        return '<center><div id="wrapper"><div class="{0}"><div style="font-family:\'PT Sans\', comic sans ms;text-align:center;text-decoration:underline{3}; margin-bottom:3px">{1}</div>{2}</div></div></center>'.\
                         format(k.lower(), k.capitalize(), text, ';color:red' if k.lower() == 'warning' else '')
 
     def m_parseText(self):
