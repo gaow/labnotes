@@ -282,24 +282,32 @@ a:hover
 .tip {
 	margin: 10px 0px 10px 0px;
 	padding: 10px 5px 10px 15px;
+    border-radius:12px;
+	box-shadow: 3px 3px 2px #888888;
 	background: #ddffdd no-repeat 20px;
 }
 
 .important {
 	margin: 10px 0px 10px 0px;
 	padding: 10px 5px 10px 15px;
+    border-radius:12px;
+	box-shadow: 3px 3px 2px #888888;
 	background: lightblue no-repeat 20px;
 }
 
 .note {
 	margin: 10px 0px 10px 0px;
 	padding: 10px 5px 10px 15px;
+    border-radius:12px;
+	box-shadow: 3px 3px 2px #888888;
 	background: #ffffcc no-repeat 20px;
 }
 
 .warning {
 	margin: 10px 0px 10px 0px;
 	padding: 10px 5px 10px 15px;
+    border-radius:12px;
+	box-shadow: 3px 3px 2px #888888;
 	background: #ffdddd no-repeat 20px;
 }
 /* .textborder {border: 1px dashed rgb(0, 36, 105); padding: 2px;} */
@@ -316,7 +324,7 @@ textarea
 }
 kbd
 {
-    text-shadow:0.2px 0.2px 0.2px;
+    text-shadow: 0.2px 0.2px 0.2px;
 }
 '''
 
