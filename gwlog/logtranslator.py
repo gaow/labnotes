@@ -123,6 +123,11 @@ class TexParser:
             if text[idx].startswith(self.mark + '{') and '--' not in text[idx]:
                 # define block
                 bname = text[idx].split('{')[1].strip()
+                try:
+                    # blabel only applicable to BEAMER
+                    bname, blabel = bname.split()
+                except:
+                    blabel = None
                 if bname not in [x for x in self.keywords]:
                     self.quit("Invalid block definition '%s{ %s'" % (self.mark, bname))
                 # find block end
@@ -165,7 +170,7 @@ class TexParser:
                     text[idx] += '\n' + text[i]
                 del text[(idx + 1) : (newend + 1)]
                 # parse the block
-                text[idx] = 'BEGIN' + self.blockph + eval(self.PARSER_RULE[bname])(text[idx], bname) + 'END' + self.blockph
+                text[idx] = 'BEGIN' + self.blockph + eval(self.PARSER_RULE[bname])(text[idx], bname, blabel) + 'END' + self.blockph
             #
             idx += 1
         return text
@@ -290,7 +295,7 @@ class TexParser:
                 self.quit('Items must start with "{0}" in this block. Problematic text is: "{1}"'.format(self.mark, item))
         return
 
-    def m_blockizeList(self, text, k):
+    def m_blockizeList(self, text, k, label = None):
         # handle 2nd level indentation first
         # in the mean time take care of recoding
         text = self._holdfigureplace(text)
@@ -407,22 +412,22 @@ class LogToTex(TexParser):
             self.m_parseBib()
             self.text.append(self.textbib)
 
-    def m_blockizeIn(self, text, k):
+    def m_blockizeIn(self, text, k, label = None):
         self._checknest(text)
-        return '\\begin{minted}[samepage=false, fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{%s}]{%s}\n%s\n\\end{minted}\n' % (k.upper(), k, wraptxt(text, '\\' if k == 'bash' else '', 131))
+        return '\\begin{minted}[samepage=false, fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{%s}]{%s}\n%s\n\\end{minted}\n' % (k.upper() if not label else label, k, wraptxt(text, '\\' if k == 'bash' else '', 131))
 
-    def m_blockizeOut(self, text, k):
+    def m_blockizeOut(self, text, k, label = None):
         self._checknest(text)
-        return '\\begin{Verbatim}[samepage=false, fontfamily=tt,\nfontsize=\\footnotesize, formatcom=\\color{rgray},\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{\\scriptsize OUTPUT}, labelposition=topline]\n%s\n\\end{Verbatim}\n' % wraptxt(text, '', 116)
+        return '\\begin{Verbatim}[samepage=false, fontfamily=tt,\nfontsize=\\footnotesize, formatcom=\\color{rgray},\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{\\scriptsize %s}, labelposition=topline]\n%s\n\\end{Verbatim}\n' % ('OUTPUT' if not label else label, wraptxt(text, '', 116))
 
-    def m_blockizeAlert(self, text, k):
+    def m_blockizeAlert(self, text, k, label = None):
         self._checknest(text, kw = [r'\\\\begin{bclogo}', r'\\\\end{bclogo}'])
         text = self._holdfigureplace(text)
         text, mapping = self._holdblockplace(text, mode = 'hold')
         self._checkblockprefix(text)
         text = '\n'.join([item if item.startswith(self.blockph) else self.m_recode(re.sub(r'^{0}'.format(self.mark), '', item)) for item in text.split('\n')])
         text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
-        return '\\begin{bclogo}[logo=%s, couleurBarre=MidnightBlue, noborder=true, couleur=white]{~%s}%s\n\\end{bclogo}\n' % (self.bclogo[k], k.capitalize(), text)
+        return '\\begin{bclogo}[logo=%s, couleurBarre=MidnightBlue, noborder=true, couleur=white]{~%s}%s\n\\end{bclogo}\n' % (self.bclogo[k], k.capitalize() if not label else label, text)
 
     def m_parseText(self):
         skip = []
@@ -573,17 +578,17 @@ class LogToBeamer(TexParser):
             self.text.append('\\appendix\n\\begin{frame}[allowframebreaks]\n\\tiny\n' + \
                 self.textbib + '\n\\end{frame}')
 
-    def m_blockizeIn(self, text, k):
+    def m_blockizeIn(self, text, k, label = None):
         self._checknest(text)
         return '\\begin{exampleblock}{\\texttt{%s}}\\scriptsize\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{exampleblock}\n' % \
-                        (k.capitalize(), wraptxt(text, '', int(78 * self.wrap_adjust), rmblank = False))
+                        (k.capitalize() if not label else label, wraptxt(text, '', int(78 * self.wrap_adjust), rmblank = False))
 
-    def m_blockizeOut(self, text, k):
+    def m_blockizeOut(self, text, k, label = None):
         self._checknest(text)
         return '\\begin{exampleblock}{}\\tiny\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{exampleblock}\n' % \
                     wraptxt(text, '', int(105 * self.wrap_adjust), rmblank = False)
 
-    def m_blockizeAlert(self, text, k):
+    def m_blockizeAlert(self, text, k, label = None):
         self._checknest(text, kw = [r'\\\\begin{(.*?)block}', r'\\\\end{(.*?)block}'])
         text = self._holdfigureplace(text)
         text, mapping = self._holdblockplace(text, mode = 'hold')
@@ -591,7 +596,7 @@ class LogToBeamer(TexParser):
         text = '\n'.join([item if item.startswith(self.blockph) else self.m_recode(re.sub(r'^{0}'.format(self.mark), '', item)) for item in text.split('\n')])
         text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
         return '\\begin{{{0}block}}{{{1}}}\n{2}\n\\end{{{0}block}}\n'.\
-                        format('alert' if k in ['important', 'warning'] else '', k.capitalize(), text)
+                        format('alert' if k in ['important', 'warning'] else '', k.capitalize() if not label else label, text)
 
     def m_parseText(self):
         skip = []
@@ -850,7 +855,7 @@ class LogToHtml(TexParser):
             line = line.replace(self.htmlph + str(i), raw[i])
         return line.strip()
 
-    def m_blockizeList(self, text, k):
+    def m_blockizeList(self, text, k, label = None):
         # handle 2nd level indentation first
         # in the mean time take care of recoding
         text = self._holdfigureplace(text)
@@ -893,7 +898,7 @@ class LogToHtml(TexParser):
         text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
         return '<ul>\n%s\n</ul>\n' % text
 
-    def m_blockizeTable(self, text, k):
+    def m_blockizeTable(self, text, k, label = None):
         self._checknest(text)
         table = [[self.m_recode(iitem) for iitem in item.split('\t')] for item in text.split('\n') if item]
         ncols = list(set([len(x) for x in table]))
@@ -932,19 +937,19 @@ class LogToHtml(TexParser):
         tail = '</div></td></tr></tbody></table></div></div>'
         return head + numbers + lines + tail
 
-    def m_blockizeIn(self, text, k):
+    def m_blockizeIn(self, text, k, label = None):
         self._checknest(text)
         self.anchor_id += 1
         return '<div style="color:rgb(220, 20, 60);font-weight:bold;text-align:right;padding-right:2em;"><span class="textborder">' + \
-                        k.capitalize() + '</span></div>' + \
+                        (k.capitalize() if not label else label) + '</span></div>' + \
                         self._parsecmd(wraptxt(text, '', int(self.wrap_width), rmblank = True).split('\n'), str(self.anchor_id), numbered = True)
 
-    def m_blockizeOut(self, text, k):
+    def m_blockizeOut(self, text, k, label = None):
         self._checknest(text)
         nrow = len(text.split('\n'))
         return '<center><textarea rows="{}", wrap="off">{}</textarea></center>'.format(max(min(nrow, 30), 1), text)
 
-    def m_blockizeAlert(self, text, k):
+    def m_blockizeAlert(self, text, k, label = None):
         self._checknest(text, kw = [r'id="wrapper"'])
         text = self._holdfigureplace(text)
         text, mapping = self._holdblockplace(text, mode = 'hold')
@@ -952,7 +957,7 @@ class LogToHtml(TexParser):
         text = '\n'.join([item if item.startswith(self.blockph) else self.m_recode(re.sub(r'^{0}'.format(self.mark), '', item)) for item in text.split('\n')])
         text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
         return '<center><div id="wrapper"><div class="{0}"><div style="font-family:\'PT Sans\', comic sans ms;text-align:center;text-decoration:underline{3}; margin-bottom:3px">{1}</div>{2}</div></div></center>'.\
-                        format(k.lower(), k.capitalize(), text, ';color:red' if k.lower() == 'warning' else '')
+                        format(k.lower(), k.capitalize() if not label else label, text, ';color:red' if k.lower() == 'warning' else '')
 
     def m_parseText(self):
         skip = []
