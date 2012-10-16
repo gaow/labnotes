@@ -414,11 +414,11 @@ class LogToTex(TexParser):
 
     def m_blockizeIn(self, text, k, label = None):
         self._checknest(text)
-        return '\\begin{minted}[samepage=false, fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{%s}]{%s}\n%s\n\\end{minted}\n' % (k.upper() if not label else label, k, wraptxt(text, '\\' if k == 'bash' else '', 131))
+        return '\\begin{minted}[samepage=false, fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{%s}]{%s}\n%s\n\\end{minted}\n' % (k.upper() if not label else self.m_recode(label), k, wraptxt(text, '\\' if k == 'bash' else '', 131))
 
     def m_blockizeOut(self, text, k, label = None):
         self._checknest(text)
-        return '\\begin{Verbatim}[samepage=false, fontfamily=tt,\nfontsize=\\footnotesize, formatcom=\\color{rgray},\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{\\scriptsize %s}, labelposition=topline]\n%s\n\\end{Verbatim}\n' % ('OUTPUT' if not label else label, wraptxt(text, '', 116))
+        return '\\begin{Verbatim}[samepage=false, fontfamily=tt,\nfontsize=\\footnotesize, formatcom=\\color{rgray},\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{\\scriptsize %s}, labelposition=topline]\n%s\n\\end{Verbatim}\n' % ('OUTPUT' if not label else self.m_recode(label), wraptxt(text, '', 116))
 
     def m_blockizeAlert(self, text, k, label = None):
         self._checknest(text, kw = [r'\\\\begin{bclogo}', r'\\\\end{bclogo}'])
@@ -427,7 +427,7 @@ class LogToTex(TexParser):
         self._checkblockprefix(text)
         text = '\n'.join([item if item.startswith(self.blockph) else self.m_recode(re.sub(r'^{0}'.format(self.mark), '', item)) for item in text.split('\n')])
         text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
-        return '\\begin{bclogo}[logo=%s, couleurBarre=MidnightBlue, noborder=true, couleur=white]{~%s}%s\n\\end{bclogo}\n' % (self.bclogo[k], k.capitalize() if not label else label, text)
+        return '\\begin{bclogo}[logo=%s, couleurBarre=MidnightBlue, noborder=true, couleur=white]{~%s}%s\n\\end{bclogo}\n' % (self.bclogo[k], k.capitalize() if not label else self.m_recode(label), text)
 
     def m_parseText(self):
         skip = []
@@ -583,7 +583,7 @@ class LogToBeamer(TexParser):
     def m_blockizeIn(self, text, k, label = None):
         self._checknest(text)
         return '\\begin{exampleblock}{\\texttt{%s}}\\scriptsize\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{exampleblock}\n' % \
-                        (k.capitalize() if not label else label, wraptxt(text, '', int(78 * self.wrap_adjust), rmblank = False))
+                        (k.capitalize() if not label else self.m_recode(label), wraptxt(text, '', int(78 * self.wrap_adjust), rmblank = False))
 
     def m_blockizeOut(self, text, k, label = None):
         self._checknest(text)
@@ -603,7 +603,7 @@ class LogToBeamer(TexParser):
         if k == 'warning':
             fmt = 'alert'
         return '\\begin{{{0}block}}{{{1}}}\n{2}\n\\end{{{0}block}}\n'.\
-                        format(fmt, k.capitalize() if not label else label, text)
+                        format(fmt, k.capitalize() if not label else self.m_recode(label), text)
 
     def m_parseText(self):
         skip = []
@@ -952,7 +952,7 @@ class LogToHtml(TexParser):
         self._checknest(text)
         self.anchor_id += 1
         return '<div style="color:rgb(220, 20, 60);font-weight:bold;text-align:right;padding-right:2em;"><span class="textborder">' + \
-                        (k.capitalize() if not label else label) + '</span></div>' + \
+                        (k.capitalize() if not label else self.m_recode(label)) + '</span></div>' + \
                         self._parsecmd(wraptxt(text, '', int(self.wrap_width), rmblank = True).split('\n'), str(self.anchor_id), numbered = True)
 
     def m_blockizeOut(self, text, k, label = None):
@@ -968,7 +968,7 @@ class LogToHtml(TexParser):
         text = '\n'.join([item if item.startswith(self.blockph) else self.m_recode(re.sub(r'^{0}'.format(self.mark), '', item)) for item in text.split('\n')])
         text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
         return '<center><div id="wrapper"><div class="{0}"><div style="font-family:\'PT Sans\', comic sans ms;text-align:center;text-decoration:underline{3}; margin-bottom:3px">{1}</div>{2}</div></div></center>'.\
-                        format(k.lower(), k.capitalize() if not label else label, text, ';color:red' if k.lower() == 'warning' else '')
+                        format(k.lower(), k.capitalize() if not label else self.m_recode(label), text, ';color:red' if k.lower() == 'warning' else '')
 
     def m_parseText(self):
         skip = []
