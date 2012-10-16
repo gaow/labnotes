@@ -11,7 +11,7 @@ def doc(args):
     return
 
 def slides(args):
-    tex = LogToBeamer(args.title, args.author, args.institute, args.toc, args.mode, args.theme, args.thank, args.filename)
+    tex = LogToBeamer(args.title, args.author, args.institute, args.toc, args.stoc, args.mode, args.theme, args.thank, args.filename)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output)
     pdflatex(fname, tex.get(lite), vanilla=args.vanilla, beamer = True)
@@ -134,6 +134,10 @@ class LogOpts:
                         choices = ['heavy', 'compact', 'plain'],
                         default = 'compact',
                         help='''slides style theme''')
+        parser.add_argument('--stoc',
+                        action='store_true',
+                        default = '',
+                        help='''generate table of contents for each section''')
         parser.add_argument('--thank',
                         action='store_true',
                         help='''generate last 'thank you' page''')

@@ -542,7 +542,7 @@ class LogToTex(TexParser):
 
 
 class LogToBeamer(TexParser):
-    def __init__(self, title, author, institute, toc, mode, theme, thank, filename):
+    def __init__(self, title, author, institute, toc, stoc, mode, theme, thank, filename):
         TexParser.__init__(self, title, author, filename)
         self.text = []
         for fn in filename:
@@ -555,6 +555,8 @@ class LogToBeamer(TexParser):
                 sys.exit(e)
         self.institute = institute
         self.toc = toc
+        # section toc
+        self.stoc = stoc
         self.mode = mode
         self.theme = theme
         self.wrap_adjust = 1
@@ -730,7 +732,7 @@ class LogToBeamer(TexParser):
     def get(self, include_comment):
         titlepage = '\\frame{\\titlepage}\n' if not self.mode == 'notes' else '\\maketitle\n'
         tocpage = '\\begin{frame}[allowframebreaks]\n\\frametitle{Outline}\n\\tableofcontents[hideallsubsections]\n\\end{frame}\n' if not self.mode == 'notes' else '\\tableofcontents\n'
-        sectiontoc = '\\AtBeginSection[]\n{\n\\begin{frame}<beamer>\n\\tableofcontents[currentsection, currentsubsection, sectionstyle=show/hide, subsectionstyle=show/show/hide]\n\\end{frame}\n}\n'
+        sectiontoc = '\\AtBeginSection[]\n{\n\\begin{frame}<beamer>\n\\tableofcontents[currentsection, currentsubsection, sectionstyle=show/hide, subsectionstyle=show/show/hide]\n\\end{frame}\n}\n' if self.stoc else ''
         if include_comment and len(self.comments) > 0:
             for idx in range(len(self.text)):
                 for item in self.comments:
