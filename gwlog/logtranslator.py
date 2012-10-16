@@ -597,8 +597,13 @@ class LogToBeamer(TexParser):
         self._checkblockprefix(text)
         text = '\n'.join([item if item.startswith(self.blockph) else self.m_recode(re.sub(r'^{0}'.format(self.mark), '', item)) for item in text.split('\n')])
         text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
+        fmt = ''
+        if k == 'important':
+            fmt = 'example'
+        if k == 'warning':
+            fmt = 'alert'
         return '\\begin{{{0}block}}{{{1}}}\n{2}\n\\end{{{0}block}}\n'.\
-                        format('alert' if k in ['important', 'warning'] else '', k.capitalize() if not label else label, text)
+                        format(fmt, k.capitalize() if not label else label, text)
 
     def m_parseText(self):
         skip = []
