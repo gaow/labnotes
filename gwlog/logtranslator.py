@@ -684,12 +684,13 @@ class LogToBeamer(TexParser):
                 continue
             if self.text[idx].startswith(self.mark + '!'):
                 # frame
-                prefix = '\\begin{frame}[fragile, shrink]\n\\frametitle{'
+                prefix = '\\begin{frame}[fragile, shrink]\n'
                 if framestart > frameend:
                     prefix = '\\end{frame}\n\n' + prefix
                     frameend += 1
                 framestart += 1
-                self.text[idx] = prefix + self.m_recode(self.text[idx][len(self.mark)+1:]) + '}'
+                title = self.m_recode(self.text[idx][len(self.mark)+1:])
+                self.text[idx] = prefix + ('' if title == '.' else  '\\frametitle{' + title + '}')
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark + '*'):
@@ -722,7 +723,10 @@ class LogToBeamer(TexParser):
         pattern = re.compile(r'\\\\begin{frame}\[fragile, shrink\](.*?)\\\\end{frame}')
         for m in re.finditer(pattern, '%r' % text):
             frame = m.group(1)
-            frametitle = re.search(r'\\\\frametitle{(.*?)}', frame).group(1).encode().decode('unicode_escape')
+            try:
+                frametitle = re.search(r'\\\\frametitle{(.*?)}', frame).group(1).encode().decode('unicode_escape')
+            except:
+                frametitle = '#!.'
             frame = re.sub(r'\\\\frametitle{(.*?)}', '', frame)
             frame = re.sub(r'\\\\framesubtitle{(.*?)}', '', frame)
             if len(re.sub(r'\s', '', frame.encode().decode('unicode_escape'))) == 0:
