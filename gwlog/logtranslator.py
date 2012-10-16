@@ -731,7 +731,7 @@ class LogToBeamer(TexParser):
 
     def get(self, include_comment):
         titlepage = '\\frame{\\titlepage}\n' if not self.mode == 'notes' else '\\maketitle\n'
-        tocpage = '\\begin{frame}[allowframebreaks]\n\\frametitle{Outline}\n\\tableofcontents[hideallsubsections]\n\\end{frame}\n' if not self.mode == 'notes' else '\\tableofcontents\n'
+        tocpage = '\\begin{frame}[allowframebreaks]\n\\frametitle{Outline}\n\\tableofcontents%s\n\\end{frame}\n' % ('[hideallsubsections]' if self.stoc else '') if not self.mode == 'notes' else '\\tableofcontents\n'
         sectiontoc = '\\AtBeginSection[]\n{\n\\begin{frame}<beamer>\n\\tableofcontents[currentsection, currentsubsection, sectionstyle=show/hide, subsectionstyle=show/show/hide]\n\\end{frame}\n}\n' if self.stoc else ''
         if include_comment and len(self.comments) > 0:
             for idx in range(len(self.text)):
