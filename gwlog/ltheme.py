@@ -652,8 +652,8 @@ CONFIG = '''
 \\usepackage{amsmath}
 \\usepackage{amssymb}
 \\usepackage{url}
-\\usepackage{mathpazo}
-\\usepackage{mathptmx}
+%% \\usepackage{mathpazo}
+%% \\usepackage{mathptmx}
 \\usepackage{latexsym}
 \\usepackage{fancyvrb}
 \\usepackage{graphicx}
@@ -662,6 +662,7 @@ CONFIG = '''
 \\usepackage{pgf,pgfarrows,pgfnodes,pgfautomata,pgfheaps,pgfshade}
 \\usepackage{marvosym}
 \\usepackage{bm}         %% 数学粗体（命令 \\bm）
+\DeclareMathAlphabet{\mathbbm}{U}{bbm}{m}{n}
 \\usepackage{upgreek}    %% 直立体希腊字母（主要使用 \\uppi）
 \\urlstyle{tt}
 \\usepackage{lastpage}
@@ -910,6 +911,7 @@ DOC_PACKAGES = '''
 \\usepackage{amssymb}
 \\usepackage{amsthm}
 \\usepackage{mathabx}
+\\newcommand\hmmax{0} % default 3
 \\usepackage{bm}
 \\usepackage{fancyhdr}
 \\usepackage{fancyvrb}

@@ -19,7 +19,7 @@ SYNTAX = {'r':'r',
 # base class
 class TexParser:
     def __init__(self, title, author, fname):
-        # self.title = ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(title).split()])
+        # self.title = self.captialize(self.m_recode(title))
         self.title = self.m_recode(title)
         self.author = self.m_recode(author)
         self.fn = '-'.join(fname)
@@ -45,8 +45,12 @@ class TexParser:
         self.latexph = 'ALATEXBLOODYRAWPATTERNPLACEHOLDER'
         self.htmlph = 'AHTMLBLOODYRAWPATTERNPLACEHOLDER'
         self.pause = False
-        self.fig_support = ['jpg','pdf','png']
+        self.fig_support = ['jpg','pdf','png', 'eps']
         self.fig_tag = 'tex'
+
+    def capitalize(self, text):
+        omit = ["a", "an", "the", "and", "but", "or", "nor", "as", "at", "by", "for", "in", "of", "on", "to", "but", "cum", "mid", "off", "per", "qua", "re", "up", "via", "to", "from", "into", "onto", "with", "within", "without"]
+        return ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') if x not in omit else x for x in text.split()])
 
     def m_recode(self, line):
         # the use of ? is very important
@@ -481,7 +485,7 @@ class LogToTex(TexParser):
                 # chapter
                 self.doctype = 'report'
                 self.text[idx] = ''
-                self.text[idx + 1] = '\\chapter{' + ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(self.text[idx + 1][len(self.mark)+1:]).split()]) + '}'
+                self.text[idx + 1] = '\\chapter{' + self.capitalize(self.m_recode(self.text[idx + 1][len(self.mark)+1:])) + '}'
                 self.text[idx + 2] = ''
                 idx += 3
                 continue
@@ -489,7 +493,7 @@ class LogToTex(TexParser):
                 # section
                 self.text[idx] = ''
                 self.text[idx + 1] = ('\\section*{' if self.no_num else '\\section{') + \
-                        ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(self.text[idx + 1][len(self.mark):]).split()]) + '}'
+                        self.capitalize(self.m_recode(self.text[idx + 1][len(self.mark):])) + '}'
                 self.text[idx + 2] = ''
                 idx += 3
                 continue
@@ -652,7 +656,7 @@ class LogToBeamer(TexParser):
                     prefix = '\\end{frame}\n\n' + prefix
                     frameend += 1
                 self.text[idx] = ''
-                self.text[idx + 1] = prefix + ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(self.text[idx + 1][len(self.mark)+1:]).split()]) + '}'
+                self.text[idx + 1] = prefix + self.capitalize(self.m_recode(self.text[idx + 1][len(self.mark)+1:])) + '}'
                 self.text[idx + 2] = ''
                 idx += 3
                 continue
@@ -663,7 +667,7 @@ class LogToBeamer(TexParser):
                     prefix = '\\end{frame}\n\n' + prefix
                     frameend += 1
                 self.text[idx] = ''
-                self.text[idx + 1] = prefix + ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(self.text[idx + 1][len(self.mark):]).split()]) + '}'
+                self.text[idx + 1] = prefix + self.capitalize(self.m_recode(self.text[idx + 1][len(self.mark):])) + '}'
                 self.text[idx + 2] = ''
                 idx += 3
                 continue
@@ -1007,7 +1011,7 @@ class LogToHtml(TexParser):
                 continue
             if self.text[idx].startswith(self.mark * 3) and self.text[idx+1].startswith(self.mark + '!') and self.text[idx+2].startswith(self.mark * 3):
                 # chapter
-                chapter = ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(self.text[idx + 1][len(self.mark)+1:]).split()])
+                chapter = self.captialize(self.m_recode(self.text[idx + 1][len(self.mark)+1:]))
                 cnt_chapter += 1
                 self.dtoc['chapter_{}'.format(cnt_chapter)] = chapter
                 self.text[idx] = ''
@@ -1017,7 +1021,7 @@ class LogToHtml(TexParser):
                 continue
             if self.text[idx].startswith(self.mark * 3) and self.text[idx+1].startswith(self.mark) and (not self.text[idx+1].startswith(self.mark * 2)) and self.text[idx+2].startswith(self.mark * 3):
                 # section
-                section = ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') for x in self.m_recode(self.text[idx + 1][len(self.mark):]).split()])
+                section = self.capitalize(self.m_recode(self.text[idx + 1][len(self.mark):]))
                 cnt_section += 1
                 self.dtoc['section_{}'.format(cnt_section)] = section
                 self.text[idx] = ''
