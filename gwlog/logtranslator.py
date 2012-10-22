@@ -13,13 +13,13 @@ SYNTAX = {'r':'r',
           'c':'c',
           'cpp':'cpp',
           'h':'c',
-          'sqlite':'sql'
+          'sqlite':'sql',
+          'php':'php'
           }
 
 # base class
 class TexParser:
     def __init__(self, title, author, fname):
-        # self.title = self.captialize(self.m_recode(title))
         self.title = title.replace('\\n', '\n')
         self.author = author.replace('\\n', '\n')
         self.fn = '-'.join(fname)
@@ -1014,7 +1014,7 @@ class LogToHtml(TexParser):
                 continue
             if self.text[idx].startswith(self.mark * 3) and self.text[idx+1].startswith(self.mark + '!') and self.text[idx+2].startswith(self.mark * 3):
                 # chapter
-                chapter = self.captialize(self.m_recode(self.text[idx + 1][len(self.mark)+1:]))
+                chapter = self.capitalize(self.m_recode(self.text[idx + 1][len(self.mark)+1:]))
                 cnt_chapter += 1
                 self.dtoc['chapter_{}'.format(cnt_chapter)] = chapter
                 self.text[idx] = ''
