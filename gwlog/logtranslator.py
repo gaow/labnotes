@@ -20,8 +20,8 @@ SYNTAX = {'r':'r',
 class TexParser:
     def __init__(self, title, author, fname):
         # self.title = self.captialize(self.m_recode(title))
-        self.title = self.m_recode(title)
-        self.author = self.m_recode(author)
+        self.title = title.replace('\\n', '\n')
+        self.author = author.replace('\\n', '\n')
         self.fn = '-'.join(fname)
         self.mark = '#'
         self.text = []
@@ -346,7 +346,7 @@ class TexParser:
             text = text.replace('\\item -', '\\pause \\item ')
         return text
 
-    def m_blockizeTable(self, text, k):
+    def m_blockizeTable(self, text, k, label = None):
         self._checknest(text)
         table = [[self.m_recode(iitem) for iitem in item.split('\t')] for item in text.split('\n') if item]
         ncols = list(set([len(x) for x in table]))
@@ -557,7 +557,7 @@ class LogToBeamer(TexParser):
                 self.text.extend(lines)
             except IOError as e:
                 sys.exit(e)
-        self.institute = institute
+        self.institute = institute.replace('\\n', '\n')
         self.toc = toc
         # section toc
         self.stoc = stoc
@@ -694,11 +694,14 @@ class LogToBeamer(TexParser):
             if self.text[idx].startswith(self.mark + '!'):
                 # frame
                 prefix = '\\begin{frame}[fragile, shrink]\n'
+                title = self.m_recode(self.text[idx][len(self.mark)+1:])
+                # skip acknowledge slide section ID
+                if title.lower() == 'acknowledgment':
+                    prefix = '\\section*{Acknowledgment}\n' + prefix
                 if framestart > frameend:
                     prefix = '\\end{frame}\n\n' + prefix
                     frameend += 1
                 framestart += 1
-                title = self.m_recode(self.text[idx][len(self.mark)+1:])
                 self.text[idx] = prefix + ('' if title == '.' else  '\\frametitle{' + title + '}')
                 idx += 1
                 continue
@@ -756,10 +759,10 @@ class LogToBeamer(TexParser):
         otext = '{}'.format(MODE[self.mode]) + \
                 CONFIG + '{}'.format(THEME[self.theme.lower()]) + TITLE
         if self.title or self.author:
-            otext += '\n\\title[%s]{%s}\n%% \\subtitle\n\\author{%s}\n' % \
-                (self.m_stitle(35), self.title, self.author)
+            otext += '\n\\title[%s]{%s}\n%% \\subtitle\n\\author[%s]{%s}\n' % \
+                (self.m_stitle(35), self.title, re.sub(r'\\inst{(.*?)}', '', self.author).strip().split(r'\and')[0].strip(), self.author)
         if self.institute:
-            otext += '\\institute[%s]{%s}\n' % (self.institute, self.institute)
+            otext += '\\institute[%s]{%s}\n' % (re.sub(r'\\inst{(.*?)}', '', self.institute).strip().split(r'\and')[0].strip(), self.institute)
         otext += '\\date{\\today}\n%s\\begin{document}\n%s\n%s' % (
                 sectiontoc if self.toc else '',
                 titlepage if self.title or self.author else '',

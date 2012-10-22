@@ -671,6 +671,7 @@ CONFIG = '''
 \\usepackage{pgfpages}
 \\usepackage{longtable}
 \\usepackage{subfigure}
+\\usepackage{multicol}
 \\usepackage[numbered]{bookmark}
 %%Make sure it comes last of your loaded packages
 \\usepackage{hyperref}
