@@ -1,7 +1,7 @@
 import sys, argparse, shutil, os
 import codecs
 from .utils import getfname, pdflatex, indexhtml
-from .logtranslator import LogToTex, LogToBeamer, LogToHtml
+from .logtranslator import LogToTex, LogToBeamer, LogToHtml, LogToDokuwiki
 
 def doc(args):
     tex = LogToTex(args.title, args.author, args.toc, args.footnote, args.filename, no_num = args.no_section_number, no_ref = False)
@@ -31,6 +31,12 @@ def html(args):
     woff = os.path.join(os.path.dirname(sys.modules['gwlog'].__file__), 'PTSans.woff')
     if os.path.exists(woff):
         shutil.copy2(woff, '.')
+    return
+
+def dokuwiki(args):
+    htm = LogToDokuwiki(args.filename)
+    lite = 1 if args.lite else 0
+    print(htm.get(lite))
     return
 
 def admin(args):
@@ -68,6 +74,10 @@ class LogOpts:
         self.getTexArguments(parser)
         self.getHtmlArguments(parser)
         parser.set_defaults(func=html)
+        # dokuwiki
+        parser = subparsers.add_parser('dokuwiki', help='Generate dokuwiki text from log file(s)')
+        self.getDokuwikiArguments(parser)
+        parser.set_defaults(func=dokuwiki)
         # admin
         parser = subparsers.add_parser('admin', help='A collection of utility features')
         self.getAdminArguments(parser)
@@ -174,3 +184,14 @@ class LogOpts:
                         metavar='name',
                         type=str,
                         help='''name of output file''')
+
+    def getDokuwikiArguments(self, parser):
+            parser.add_argument('filename',
+                        metavar = 'FN',
+                        nargs = '+',
+                        help='''name of the input file(s)''')
+            parser.add_argument('--lite',
+                        action='store_true',
+                        default = '',
+                        help='''mask commented-out text from output''')
+

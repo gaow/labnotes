@@ -255,6 +255,8 @@ class TexParser:
             except ValueError:
                 fig = line.split()[0]
                 width = 0.9
+            if tag != 'dokuwiki' and width > 1:
+                width = 0.9
             fname = os.path.split(fig)[-1]
             if not '.' in fname:
                 self.quit("Cannot determine graphic file format for '{}'. Valid extensions are {}".format(fname, ' '.join(support)))
@@ -265,8 +267,12 @@ class TexParser:
             # syntax images
             if tag == 'tex':
                 lines[idx] = '\\includegraphics[width=%s\\textwidth]{%s}\n' % (width, os.path.abspath(fig))
-            else:
+            elif tag == 'html':
                 lines[idx] = '<p><center><img src="{}" alt="{}" width="{}%" /></center></p>'.format(fig, os.path.split(fig)[-1], int(width * 100))
+            elif tag == "dokuwiki":
+                lines[idx] = '{{%s:%s?%s}}' % (os.path.split(fig)[-2], os.path.split(fig)[-1], width)
+            else:
+                self.quit('Unknown tag for figure {}'.format(tag))
         if tag == 'tex':
             if len(lines) > 1:
                 w_minipage = int(1.0 / (1.0 * len(lines)) * 90) / 100.0
@@ -772,8 +778,8 @@ class LogToBeamer(TexParser):
         return otext
 
 
-class LogToHtml(TexParser):
-    def __init__(self, title, author, toc, filename, columns):
+class HtmlParser(TexParser):
+    def __init__(self, title, author, filename):
         TexParser.__init__(self, title, author, filename)
         self.text = []
         for fn in filename:
@@ -784,26 +790,13 @@ class LogToHtml(TexParser):
                 self.text.extend(lines)
             except IOError as e:
                 sys.exit(e)
-        self.toc = toc
-        if columns == 2:
-            self.frame = 'two-col'
-        elif columns == 3:
-            self.frame = 'three-col'
-        else:
-            self.frame = 'frame'
-        self.dtoc = OrderedDict()
         self.alertbox = ['warning', 'tip', 'important', 'note']
         self.keywords = list(set(SYNTAX.values())) + self.alertbox + ['err', 'out', 'list', 'table']
         self.wrap_width = 90
         self.tablefont = 'small'
         self.anchor_id = 0
         self.fig_support = ['jpg','tif','png']
-        self.fig_tag = 'html'
-        self.text = self.m_parseBlocks(self.text)
-        self.m_parseComments()
-        self.m_parseText()
-        self.m_parseBib()
-        self.text.append(self.textbib)
+        self.html_tag = False
 
     def _parseUrlPrefix(self, text):
         prefix = re.search(r'^(.+?)://', text)
@@ -914,8 +907,12 @@ class LogToHtml(TexParser):
         # handle 1st level indentation
         text = '\n'.join([x if x.startswith(self.blockph) else  re.sub(r'^{0}'.format(self.mark), '<li>', x + '</li>') for x in text])
         text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
-        return '<ul>\n%s\n</ul>\n' % text
-
+        text = '<ul>\n%s\n</ul>\n' % text
+        if self.html_tag:
+            return '<HTML>\n' + text + '</HTML>'
+        else:
+            return text
+        
     def m_blockizeTable(self, text, k, label = None):
         self._checknest(text)
         table = [[self.m_recode(iitem) for iitem in item.split('\t')] for item in text.split('\n') if item]
@@ -946,27 +943,45 @@ class LogToHtml(TexParser):
             else:
                 body[idx] = '<tr class="dark">' + item + '</tr>'
         tail = '</tbody></table></center>\n'
-        return head + '\n'.join(body) + tail
+        text = head + '\n'.join(body) + tail
+        if self.html_tag:
+            return '<HTML>\n' + text + '</HTML>'
+        else:
+            return text
+
 
     def _parsecmd(self, text, serial, numbered = False):
         head = '<div><div id="highlighter_{}" class="syntaxhighlighter bash"><table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="gutter">'.format(serial)
         numbers = ''.join(['<div class="line number{0} index{1} alt{2}">{0}</div>'.format(j+1 if numbered else ' ', j, 2 - j % 2) for j in range(len(text))]) + '</td><td class="code"><div class="container">'
         lines = ''.join(['<div class="line number{0} index{1} alt{2}"><code class="bash plain">{3}</code></div>'.format(j+1, j, 2 - j % 2, line) for j, line in enumerate(text)])
         tail = '</div></td></tr></tbody></table></div></div>'
-        return head + numbers + lines + tail
+        text = head + numbers + lines + tail
+        if self.html_tag:
+            return '<HTML>\n' + text + '</HTML>'
+        else:
+            return text
 
+        
     def m_blockizeIn(self, text, k, label = None):
         self._checknest(text)
         self.anchor_id += 1
-        return '<div style="color:rgb(220, 20, 60);font-weight:bold;text-align:right;padding-right:2em;"><span class="textborder">' + \
+        text = '<div style="color:rgb(220, 20, 60);font-weight:bold;text-align:right;padding-right:2em;"><span class="textborder">' + \
                         (k.capitalize() if not label else self.m_recode(label)) + '</span></div>' + \
                         self._parsecmd(wraptxt(text, '', int(self.wrap_width), rmblank = True).split('\n'), str(self.anchor_id), numbered = True)
+        if self.html_tag:
+            return '<HTML>\n' + text + '</HTML>'
+        else:
+            return text
 
     def m_blockizeOut(self, text, k, label = None):
         self._checknest(text)
         nrow = len(text.split('\n'))
-        return '<center><textarea rows="{}", wrap="off">{}</textarea></center>'.format(max(min(nrow, 30), 1), text)
-
+        text = '<center><textarea rows="{}", wrap="off">{}</textarea></center>'.format(max(min(nrow, 30), 1), text)
+        if self.html_tag:
+            return '<HTML>\n' + text + '</HTML>'
+        else:
+            return text
+        
     def m_blockizeAlert(self, text, k, label = None):
         self._checknest(text, kw = [r'id="wrapper"'])
         text = self._holdfigureplace(text)
@@ -974,8 +989,30 @@ class LogToHtml(TexParser):
         self._checkblockprefix(text)
         text = '\n'.join([item if item.startswith(self.blockph) else self.m_recode(re.sub(r'^{0}'.format(self.mark), '', item)) for item in text.split('\n')])
         text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
-        return '<center><div id="wrapper"><div class="{0}"><div style="font-family:\'PT Sans\', comic sans ms;text-align:center;text-decoration:underline{3}; margin-bottom:3px">{1}</div>{2}</div></div></center>'.\
+        text = '<center><div id="wrapper"><div class="{0}"><div style="font-family:\'PT Sans\', comic sans ms;text-align:center;text-decoration:underline{3}; margin-bottom:3px">{1}</div>{2}</div></div></center>'.\
                         format(k.lower(), k.capitalize() if not label else self.m_recode(label), text, ';color:red' if k.lower() == 'warning' else '')
+        if self.html_tag:
+            return '<HTML>\n' + text + '</HTML>'
+        else:
+            return text
+
+class LogToHtml(HtmlParser):
+    def __init__(self, title, author, toc, filename, columns):
+        HtmlParser.__init__(self, title, author, filename)
+        self.toc = toc
+        if columns == 2:
+            self.frame = 'two-col'
+        elif columns == 3:
+            self.frame = 'three-col'
+        else:
+            self.frame = 'frame'
+        self.dtoc = OrderedDict()
+        self.fig_tag = 'html'
+        self.text = self.m_parseBlocks(self.text)
+        self.m_parseComments()
+        self.m_parseText()
+        self.m_parseBib()
+        self.text.append(self.textbib)
 
     def m_parseText(self):
         skip = []
@@ -1148,3 +1185,177 @@ class LogToHtml(TexParser):
         tail = '\n</ul>'
         body = '\n'.join(['<li><span style="{}">{}</span><a href="#{}">{}</a></li>'.format(self._isize(k), self._csize(v,k),k,'&clubs;') for k, v in dtoc.items()])
         return '<div class="frame">' + head + body + tail + '</div>'
+
+
+class LogToDokuwiki(HtmlParser):
+    def __init__(self, fname):
+        HtmlParser.__init__(self, 'wikititle', 'authortitle', fname)
+        self.html_tag = True
+        self.fig_tag = "dokuwiki"
+        self.text = self.m_parseBlocks(self.text)
+        self.m_parseComments()
+        self.m_parseText()
+
+    def m_recode_dokuwiki(self, line):
+        # the use of ? is very important
+        #>>> re.sub(r'@@(.*)@@', r'\\texttt{\1}', line)
+        #'\\texttt{aa@@, @@aabb}'
+        #>>> re.sub(r'@@(.*?)@@', r'\\texttt{\1}', line)
+        #'\\texttt{aa}, \\texttt{aabb}'
+        if not line:
+            return ''
+        line = line.strip()
+        raw = []
+        # support for raw latex syntax
+        pattern = re.compile(r'@@@(.*?)@@@')
+        for m in re.finditer(pattern, line):
+            line = line.replace(m.group(0), self.latexph + str(len(raw)))
+            raw.append(m.group(1))
+        line = re.sub(r'"""(.*?)"""', r"**//\1//**", line)
+        line = re.sub(r'""(.*?)""', r'**\1**', line)
+        line = re.sub(r'"(.*?)"', r'//\1//', line)
+        line = re.sub(r'@@(.*?)@@', r"''\1''", line)
+        # link
+        # have to flip this for doku wiki [reference|note] (or [link|link name])
+        pattern = re.compile('\[(\s*)(?P<a>.+?)(\s*)\|(\s*)@(?P<b>.+?)@(\s*)\]')
+        for m in re.finditer(pattern, line):
+            line = '[{1}|{0}]'.format(m.group('a'), m.group('b'))
+        # footnote
+        pattern = re.compile('\[(?P<a>.+?)\|(?P<b>.+?)\]')
+        for m in re.finditer(pattern, line):
+            line = line.replace(m.group(0), m.group('a') + '(({0}))'.format(m.group('b')))
+        # url
+        pattern = re.compile('@(.*?)@')
+        for m in re.finditer(pattern, line):
+            line = line.replace(m.group(0), m.group(1))
+        # recover raw latex syntax
+        for i in range(len(raw)):
+            line = line.replace(self.latexph + str(i), raw[i])
+        return line
+
+    def m_blockizeList(self, text, k, label = None):
+        text = self._holdfigureplace(text)
+        text, mapping = self._holdblockplace(text, mode = 'hold')
+        self._checkblockprefix(text)
+        text = text.split('\n')
+        text = '\n'.join([x if x.startswith(self.blockph) else self.m_recode_dokuwiki(re.sub(r'^{0}'.format(self.mark), '*\t', re.sub(r'^{0}'.format(self.mark*2), '\t*\t', x))) for x in text])
+        text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
+        return text
+
+    # def m_blockizeTable(self, text, k, label = None):
+    #     self._checknest(text)
+    #     table = [[self.m_recode(iitem) for iitem in item.split('\t')] for item in text.split('\n') if item]
+    #     ncols = list(set([len(x) for x in table]))
+    #     if len(ncols) > 1:
+    #         self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(text))
+    #     body = '^' + '^'.join(table[0]) + '^\n' + '\n'.join(['|' + '|'.join(item) + '|' for item in table[1:]]) + '\n'
+    #     return body
+
+    def _parsecmd(self, text, serial, numbered = False):
+        head = '<code>'
+        lines = '\n'.join(text)
+        tail = '</code>'
+        return head + lines + tail
+
+        
+    def m_blockizeIn(self, text, k, label = None):
+        # require sxh3 plugin
+        self._checknest(text)
+        text = '<sxh {0}>'.format(k.lower()) +  wraptxt(text, '', int(self.wrap_width), rmblank = True) + '</sxh>'
+        return text
+    
+
+    def m_parseText(self):
+        skip = []
+        for idx, item in enumerate(self.text):
+            if self.blockph in item:
+                self.text[idx] = self._holdblockplace(item, mode = 'remove')[0]
+                skip.append(idx)
+        idx = 0
+        while idx < len(self.text):
+            if idx in skip or self.text[idx] == '':
+                # no need to process
+                idx += 1
+                continue
+            if not self.text[idx].startswith(self.mark):
+                # regular cmd text, or with syntax
+                if idx + 1 < len(self.text):
+                    for i in range(idx + 1, len(self.text) + 1):
+                        try:
+                            if self.text[i].startswith(self.mark) or i in skip or self.text[i] == '':
+                                break
+                        except IndexError:
+                            pass
+                else:
+                    i = idx + 1
+                #
+                cmd = '\n'.join([wraptxt(x, '\\', int(self.wrap_width)) for x in self.text[idx:i]])
+                cmd = cmd.split('\n')
+                if len(cmd) == 1:
+                    self.text[idx] = self._parsecmd(cmd, idx)
+                else:
+                    self.text[idx] = self._parsecmd(cmd, idx)
+                    for j in range(idx + 1, i):
+                        self.text[j] = ''
+                idx = i
+                continue
+            if self.text[idx].startswith(self.mark * 3) and self.text[idx+1].startswith(self.mark + '!') and self.text[idx+2].startswith(self.mark * 3):
+                # chapter
+                chapter = self.capitalize(self.m_recode_dokuwiki(self.text[idx + 1][len(self.mark)+1:]))
+                self.text[idx] = ''
+                self.text[idx + 1] = '===== ' + chapter + ' ====='
+                self.text[idx + 2] = ''
+                idx += 3
+                continue
+            if self.text[idx].startswith(self.mark * 3) and self.text[idx+1].startswith(self.mark) and (not self.text[idx+1].startswith(self.mark * 2)) and self.text[idx+2].startswith(self.mark * 3):
+                # section
+                section = self.capitalize(self.m_recode_dokuwiki(self.text[idx + 1][len(self.mark):]))
+                self.text[idx] = ''
+                self.text[idx + 1] = '====' + section + '===='
+                self.text[idx + 2] = ''
+                idx += 3
+                continue
+            if self.text[idx].startswith(self.mark * 2):
+                # too many #'s
+                self.quit("You have so many urgly '{0}' symbols in a regular line. Please clear them up in this line: '{1}'".format(self.mark, self.text[idx]))
+            if self.text[idx].startswith(self.mark + '!!!'):
+                # box
+                self.text[idx] = '<html><span style="color:red;background:yellow;font-weight:bold">' + self.m_recode(self.text[idx][len(self.mark)+3:]) + '</span></html>'
+                idx += 1
+                continue
+            if self.text[idx].startswith(self.mark + '!!'):
+                # subsection, subsubsection ...
+                self.text[idx] = '== ' + self.m_recode_dokuwiki(self.text[idx][len(self.mark)+2:]) + ' =='
+                idx += 1
+                continue
+            if self.text[idx].startswith(self.mark + '!'):
+                # subsection, subsubsection ...
+                subsection = self.m_recode_dokuwiki(self.text[idx][len(self.mark)+1:])
+                self.text[idx] = '=== ' + subsection + ' ==='
+                idx += 1
+                continue
+            if self.text[idx].startswith(self.mark + '*'):
+                # fig: figure.png 0.9
+                self.text[idx] = self._parseFigure(self.text[idx], self.fig_support, self.fig_tag)
+                idx += 1
+                continue
+            if self.text[idx].startswith(self.mark):
+                # a plain line here
+                self.text[idx] = self.m_recode_dokuwiki(self.text[idx][len(self.mark):])
+                idx += 1
+                continue
+        return
+
+    def get(self, include_comment):
+        if include_comment and len(self.comments) > 0:
+            for idx in range(len(self.text)):
+                for item in self.comments:
+                    if idx in range(item[0], item[1]):
+                        self.text[idx] = ''
+                        break
+        self.text = [x.strip() for x in self.text if x and x.strip()]
+        # mathjax support
+        otext = '<HTML><script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><link href="style.css" rel="stylesheet" type="text/css"><script LANGUAGE="JavaScript" src="style.js"></script></HTML>\n'
+        otext += '\n'.join(self.text)
+        return otext
+
