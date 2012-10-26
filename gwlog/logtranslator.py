@@ -50,7 +50,12 @@ class TexParser:
 
     def capitalize(self, text):
         omit = ["a", "an", "the", "and", "but", "or", "nor", "as", "at", "by", "for", "in", "of", "on", "to", "but", "cum", "mid", "off", "per", "qua", "re", "up", "via", "to", "from", "into", "onto", "with", "within", "without"]
-        return ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') if x not in omit else x for x in text.split()])
+        text = text.split()
+        out = text[0].capitalize() 
+        if len(text) > 1:
+            out += ' ' + ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') if x not in omit else x for x in text[1:]])
+
+        return out
 
     def m_recode(self, line):
         # the use of ? is very important
@@ -909,7 +914,7 @@ class HtmlParser(TexParser):
         text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
         text = '<ul>\n%s\n</ul>\n' % text
         if self.html_tag:
-            return '<HTML>\n' + text + '</HTML>'
+            return '<HTML>\n' + text + '\n</HTML>\n'
         else:
             return text
         
@@ -945,7 +950,7 @@ class HtmlParser(TexParser):
         tail = '</tbody></table></center>\n'
         text = head + '\n'.join(body) + tail
         if self.html_tag:
-            return '<HTML>\n' + text + '</HTML>'
+            return '<HTML>\n' + text + '\n</HTML>\n'
         else:
             return text
 
@@ -957,7 +962,7 @@ class HtmlParser(TexParser):
         tail = '</div></td></tr></tbody></table></div></div>'
         text = head + numbers + lines + tail
         if self.html_tag:
-            return '<HTML>\n' + text + '</HTML>'
+            return '<HTML>\n' + text + '\n</HTML>\n'
         else:
             return text
 
@@ -969,7 +974,7 @@ class HtmlParser(TexParser):
                         (k.capitalize() if not label else self.m_recode(label)) + '</span></div>' + \
                         self._parsecmd(wraptxt(text, '', int(self.wrap_width), rmblank = True).split('\n'), str(self.anchor_id), numbered = True)
         if self.html_tag:
-            return '<HTML>\n' + text + '</HTML>'
+            return '<HTML>\n' + text + '\n</HTML>\n'
         else:
             return text
 
@@ -978,7 +983,7 @@ class HtmlParser(TexParser):
         nrow = len(text.split('\n'))
         text = '<center><textarea rows="{}", wrap="off">{}</textarea></center>'.format(max(min(nrow, 30), 1), text)
         if self.html_tag:
-            return '<HTML>\n' + text + '</HTML>'
+            return '<HTML>\n' + text + '\n</HTML>\n'
         else:
             return text
         
@@ -992,7 +997,7 @@ class HtmlParser(TexParser):
         text = '<center><div id="wrapper"><div class="{0}"><div style="font-family:\'PT Sans\', comic sans ms;text-align:center;text-decoration:underline{3}; margin-bottom:3px">{1}</div>{2}</div></div></center>'.\
                         format(k.lower(), k.capitalize() if not label else self.m_recode(label), text, ';color:red' if k.lower() == 'warning' else '')
         if self.html_tag:
-            return '<HTML>\n' + text + '</HTML>'
+            return '<HTML>\n' + text + '\n</HTML>\n'
         else:
             return text
 
@@ -1204,7 +1209,7 @@ class LogToDokuwiki(HtmlParser):
         #'\\texttt{aa}, \\texttt{aabb}'
         if not line:
             return ''
-        line = line.strip()
+        line = line.rstrip()
         raw = []
         # support for raw latex syntax
         pattern = re.compile(r'@@@(.*?)@@@')
@@ -1215,15 +1220,15 @@ class LogToDokuwiki(HtmlParser):
         line = re.sub(r'""(.*?)""', r'**\1**', line)
         line = re.sub(r'"(.*?)"', r'//\1//', line)
         line = re.sub(r'@@(.*?)@@', r"''\1''", line)
-        # link
-        # have to flip this for doku wiki [reference|note] (or [link|link name])
-        pattern = re.compile('\[(\s*)(?P<a>.+?)(\s*)\|(\s*)@(?P<b>.+?)@(\s*)\]')
+        # footnote and link
+        pattern = re.compile('\[(\s*)(?P<a>.+?)(\s*)\|(\s*)(?P<b>.+?)(\s*)\]')
         for m in re.finditer(pattern, line):
-            line = '[{1}|{0}]'.format(m.group('a'), m.group('b'))
-        # footnote
-        pattern = re.compile('\[(?P<a>.+?)\|(?P<b>.+?)\]')
-        for m in re.finditer(pattern, line):
-            line = line.replace(m.group(0), m.group('a') + '(({0}))'.format(m.group('b')))
+            if m.group('b').strip().startswith('@') and m.group('b').strip().endswith('@'):
+                # is a link. have to flip this for doku wiki [reference|note] (or [link|link name])
+                line = '[[{1}|{0}]]'.format(m.group('a'), m.group('b'))
+            else:
+                # is footnote
+                line = line.replace(m.group(0), m.group('b') + '(({0}))'.format(m.group('a')))
         # url
         pattern = re.compile('@(.*?)@')
         for m in re.finditer(pattern, line):
@@ -1238,7 +1243,7 @@ class LogToDokuwiki(HtmlParser):
         text, mapping = self._holdblockplace(text, mode = 'hold')
         self._checkblockprefix(text)
         text = text.split('\n')
-        text = '\n'.join([x if x.startswith(self.blockph) else self.m_recode_dokuwiki(re.sub(r'^{0}'.format(self.mark), '*\t', re.sub(r'^{0}'.format(self.mark*2), '\t*\t', x))) for x in text])
+        text = '\n'.join([x if x.startswith(self.blockph) else self.m_recode_dokuwiki(re.sub(r'^{0}'.format(self.mark), '\t*\t', re.sub(r'^{0}'.format(self.mark*2), '\t\t*\t', x))) for x in text])
         text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
         return text
 
@@ -1261,7 +1266,7 @@ class LogToDokuwiki(HtmlParser):
     def m_blockizeIn(self, text, k, label = None):
         # require sxh3 plugin
         self._checknest(text)
-        text = '<sxh {0}>'.format(k.lower()) +  wraptxt(text, '', int(self.wrap_width), rmblank = True) + '</sxh>'
+        text = '<sxh {0}>\n\n'.format(k.lower()) +  wraptxt(text, '', 1000, rmblank = True) + '\n\n</sxh>'
         return text
     
 
@@ -1320,7 +1325,7 @@ class LogToDokuwiki(HtmlParser):
                 self.quit("You have so many urgly '{0}' symbols in a regular line. Please clear them up in this line: '{1}'".format(self.mark, self.text[idx]))
             if self.text[idx].startswith(self.mark + '!!!'):
                 # box
-                self.text[idx] = '<html><span style="color:red;background:yellow;font-weight:bold">' + self.m_recode(self.text[idx][len(self.mark)+3:]) + '</span></html>'
+                self.text[idx] = '<html><span style="color:red;background:yellow;font-weight:bold">' + self.m_recode(self.text[idx][len(self.mark)+3:]) + '</span></html>\n'
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark + '!!'):
@@ -1353,9 +1358,9 @@ class LogToDokuwiki(HtmlParser):
                     if idx in range(item[0], item[1]):
                         self.text[idx] = ''
                         break
-        self.text = [x.strip() for x in self.text if x and x.strip()]
+        # use rstrip(), not strip(), for dokuwiki lists
+        self.text = [x.rstrip() for x in self.text if x and x.rstrip()]
         # mathjax support
         otext = '<HTML><script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><link href="style.css" rel="stylesheet" type="text/css"><script LANGUAGE="JavaScript" src="style.js"></script></HTML>\n'
         otext += '\n'.join(self.text)
         return otext
-
