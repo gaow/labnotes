@@ -1,7 +1,7 @@
 import sys, argparse, shutil, os
 import codecs
 from .utils import getfname, pdflatex, indexhtml
-from .logtranslator import LogToTex, LogToBeamer, LogToHtml, LogToDokuwiki
+from .logtranslator import LogToTex, LogToBeamer, LogToHtml, LogToDokuwiki, LogToPmwiki
 
 def doc(args):
     tex = LogToTex(args.title, args.author, args.toc, args.footnote, args.filename, no_num = args.no_section_number, no_ref = False)
@@ -35,6 +35,12 @@ def html(args):
 
 def dokuwiki(args):
     htm = LogToDokuwiki(args.filename)
+    lite = 1 if args.lite else 0
+    print(htm.get(lite))
+    return
+
+def pmwiki(args):
+    htm = LogToPmwiki(args.filename)
     lite = 1 if args.lite else 0
     print(htm.get(lite))
     return
@@ -78,6 +84,10 @@ class LogOpts:
         parser = subparsers.add_parser('dokuwiki', help='Generate dokuwiki text from log file(s)')
         self.getDokuwikiArguments(parser)
         parser.set_defaults(func=dokuwiki)
+        # pmwiki
+        parser = subparsers.add_parser('pmwiki', help='Generate pmwiki text from log file(s)')
+        self.getDokuwikiArguments(parser)
+        parser.set_defaults(func=pmwiki)
         # admin
         parser = subparsers.add_parser('admin', help='A collection of utility features')
         self.getAdminArguments(parser)

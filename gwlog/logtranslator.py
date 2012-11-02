@@ -274,7 +274,8 @@ class TexParser:
                 lines[idx] = '\\includegraphics[width=%s\\textwidth]{%s}\n' % (width, os.path.abspath(fig))
             elif tag == 'html':
                 lines[idx] = '<p><center><img src="{}" alt="{}" width="{}%" /></center></p>'.format(fig, os.path.split(fig)[-1], int(width * 100))
-            elif tag == "dokuwiki":
+            elif tag.endswith("wiki"):
+                # dokuwiki style as a place holder ...
                 lines[idx] = '{{%s:%s?%s}}' % (os.path.split(fig)[-2], os.path.split(fig)[-1], width)
             else:
                 self.quit('Unknown tag for figure {}'.format(tag))
@@ -1191,7 +1192,6 @@ class LogToHtml(HtmlParser):
         body = '\n'.join(['<li><span style="{}">{}</span><a href="#{}">{}</a></li>'.format(self._isize(k), self._csize(v,k),k,'&clubs;') for k, v in dtoc.items()])
         return '<div class="frame">' + head + body + tail + '</div>'
 
-
 class LogToDokuwiki(HtmlParser):
     def __init__(self, fname):
         HtmlParser.__init__(self, 'wikititle', 'authortitle', fname)
@@ -1225,7 +1225,7 @@ class LogToDokuwiki(HtmlParser):
         for m in re.finditer(pattern, line):
             if m.group('b').strip().startswith('@') and m.group('b').strip().endswith('@'):
                 # is a link. have to flip this for doku wiki [reference|note] (or [link|link name])
-                line = '[[{1}|{0}]]'.format(m.group('a'), m.group('b'))
+                line = line.replace(m.group(0), '[[{1}|{0}]]'.format(m.group('a'), m.group('b')))
             else:
                 # is footnote
                 line = line.replace(m.group(0), m.group('b') + '(({0}))'.format(m.group('a')))
@@ -1359,6 +1359,185 @@ class LogToDokuwiki(HtmlParser):
                         self.text[idx] = ''
                         break
         # use rstrip(), not strip(), for dokuwiki lists
+        self.text = [x.rstrip() for x in self.text if x and x.rstrip()]
+        # mathjax support
+        otext = '<HTML><script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><link href="style.css" rel="stylesheet" type="text/css"><script LANGUAGE="JavaScript" src="style.js"></script></HTML>\n'
+        otext += '\n'.join(self.text)
+        return otext
+
+
+
+class LogToPmwiki(HtmlParser):
+    def __init__(self, fname):
+        HtmlParser.__init__(self, 'wikititle', 'authortitle', fname)
+        self.html_tag = True
+        self.fig_tag = "pmwiki"
+        self.text = self.m_parseBlocks(self.text)
+        self.m_parseComments()
+        self.m_parseText()
+
+    def m_recode_pmwiki(self, line):
+        if not line:
+            return ''
+        line = line.rstrip()
+        raw = []
+        # support for raw latex syntax
+        pattern = re.compile(r'@@@(.*?)@@@')
+        for m in re.finditer(pattern, line):
+            line = line.replace(m.group(0), self.latexph + str(len(raw)))
+            raw.append(m.group(1))
+        line = re.sub(r'"""(.*?)"""', r"''''\1''''", line)
+        line = re.sub(r'""(.*?)""', r"'''\1'''", line)
+        line = re.sub(r'"(.*?)"', r"''\1''", line)
+        # footnote and link
+        pattern = re.compile('\[(\s*)(?P<a>.+?)(\s*)\|(\s*)(?P<b>.+?)(\s*)\]')
+        for m in re.finditer(pattern, line):
+            if m.group('b').strip().startswith('@') and m.group('b').strip().endswith('@'):
+                # is a link. have to flip this for doku wiki [reference|note] (or [link|link name])
+                line = line.replace(m.group(0), '[[{1}|{0}]]'.format(m.group('a'), m.group('b')))
+            else:
+                # is footnote
+                line = line.replace(m.group(0), m.group('b') + '[^{0}^]'.format(m.group('a')))
+        # url
+        pattern = re.compile('@(.*?)@')
+        for m in re.finditer(pattern, line):
+            line = line.replace(m.group(0), m.group(1))
+        # recover raw latex syntax
+        for i in range(len(raw)):
+            line = line.replace(self.latexph + str(i), raw[i])
+        return line
+
+    def m_blockizeList(self, text, k, label = None):
+        text = self._holdfigureplace(text)
+        text, mapping = self._holdblockplace(text, mode = 'hold')
+        self._checkblockprefix(text)
+        text = text.split('\n')
+        text = '\n'.join([x if x.startswith(self.blockph) else self.m_recode_pmwiki(re.sub(r'^{0}'.format(self.mark), '\t*\t', re.sub(r'^{0}'.format(self.mark*2), '\t\t*\t', x))) for x in text])
+        text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
+        return text
+
+    # def m_blockizeTable(self, text, k, label = None):
+    #     self._checknest(text)
+    #     table = [[self.m_recode(iitem) for iitem in item.split('\t')] for item in text.split('\n') if item]
+    #     ncols = list(set([len(x) for x in table]))
+    #     if len(ncols) > 1:
+    #         self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(text))
+    #     body = '^' + '^'.join(table[0]) + '^\n' + '\n'.join(['|' + '|'.join(item) + '|' for item in table[1:]]) + '\n'
+    #     return body
+
+    def _parsecmd(self, text, serial, numbered = False):
+        return '>>cmd<<\n{0}\n>><<'.format('\n'.join(text))
+
+    def m_blockizeIn(self, text, k, label = None):
+        self._checknest(text)
+        text = '(:codestart {0}:)\n{1}\n(:codeend:)\n'.format(k.lower(), wraptxt(text, '', 1000, rmblank = True))
+        return text
+    
+    def m_blockizeOut(self, text, k, label = None):
+        self._checknest(text)
+        nrow = len(text.split('\n'))
+        text = '>>frame<<\n{0}\n>><<\n'.format(text)
+        return text
+        
+    def m_blockizeAlert(self, text, k, label = None):
+        self._checknest(text, kw = [r'id="wrapper"'])
+        text = self._holdfigureplace(text)
+        text, mapping = self._holdblockplace(text, mode = 'hold')
+        self._checkblockprefix(text)
+        text = '\n'.join([item if item.startswith(self.blockph) else self.m_recode_pmwiki(re.sub(r'^{0}'.format(self.mark), '', item)) for item in text.split('\n')])
+        text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
+        text = '>>{0}<<\n{1}\n>><<'.format(k.lower(), text)
+        return text
+
+    def m_parseText(self):
+        skip = []
+        for idx, item in enumerate(self.text):
+            if self.blockph in item:
+                self.text[idx] = self._holdblockplace(item, mode = 'remove')[0]
+                skip.append(idx)
+        idx = 0
+        while idx < len(self.text):
+            if idx in skip or self.text[idx] == '':
+                # no need to process
+                idx += 1
+                continue
+            if not self.text[idx].startswith(self.mark):
+                # regular cmd text, or with syntax
+                if idx + 1 < len(self.text):
+                    for i in range(idx + 1, len(self.text) + 1):
+                        try:
+                            if self.text[i].startswith(self.mark) or i in skip or self.text[i] == '':
+                                break
+                        except IndexError:
+                            pass
+                else:
+                    i = idx + 1
+                #
+                cmd = '\n'.join([wraptxt(x, '\\', int(self.wrap_width)) for x in self.text[idx:i]])
+                cmd = cmd.split('\n')
+                if len(cmd) == 1:
+                    self.text[idx] = self._parsecmd(cmd, idx)
+                else:
+                    self.text[idx] = self._parsecmd(cmd, idx)
+                    for j in range(idx + 1, i):
+                        self.text[j] = ''
+                idx = i
+                continue
+            if self.text[idx].startswith(self.mark * 3) and self.text[idx+1].startswith(self.mark + '!') and self.text[idx+2].startswith(self.mark * 3):
+                # chapter
+                chapter = self.capitalize(self.m_recode_pmwiki(self.text[idx + 1][len(self.mark)+1:]))
+                self.text[idx] = ''
+                self.text[idx + 1] = '!! ' + chapter
+                self.text[idx + 2] = ''
+                idx += 3
+                continue
+            if self.text[idx].startswith(self.mark * 3) and self.text[idx+1].startswith(self.mark) and (not self.text[idx+1].startswith(self.mark * 2)) and self.text[idx+2].startswith(self.mark * 3):
+                # section
+                section = self.capitalize(self.m_recode_pmwiki(self.text[idx + 1][len(self.mark):]))
+                self.text[idx] = ''
+                self.text[idx + 1] = '!!!' + section
+                self.text[idx + 2] = ''
+                idx += 3
+                continue
+            if self.text[idx].startswith(self.mark * 2):
+                # too many #'s
+                self.quit("You have so many urgly '{0}' symbols in a regular line. Please clear them up in this line: '{1}'".format(self.mark, self.text[idx]))
+            if self.text[idx].startswith(self.mark + '!!!'):
+                # box
+                self.text[idx] = '<html><span style="color:red;background:yellow;font-weight:bold">' + self.m_recode(self.text[idx][len(self.mark)+3:]) + '</span></html>\n'
+                idx += 1
+                continue
+            if self.text[idx].startswith(self.mark + '!!'):
+                # subsection, subsubsection ...
+                self.text[idx] = '!!!!!' + self.m_recode_pmwiki(self.text[idx][len(self.mark)+2:])
+                idx += 1
+                continue
+            if self.text[idx].startswith(self.mark + '!'):
+                # subsection, subsubsection ...
+                subsection = self.m_recode_pmwiki(self.text[idx][len(self.mark)+1:])
+                self.text[idx] = '!!!!' + subsection
+                idx += 1
+                continue
+            if self.text[idx].startswith(self.mark + '*'):
+                # fig: figure.png 0.9
+                self.text[idx] = self._parseFigure(self.text[idx], self.fig_support, self.fig_tag)
+                idx += 1
+                continue
+            if self.text[idx].startswith(self.mark):
+                # a plain line here
+                self.text[idx] = self.m_recode_pmwiki(self.text[idx][len(self.mark):])
+                idx += 1
+                continue
+        return
+
+    def get(self, include_comment):
+        if include_comment and len(self.comments) > 0:
+            for idx in range(len(self.text)):
+                for item in self.comments:
+                    if idx in range(item[0], item[1]):
+                        self.text[idx] = ''
+                        break
+        # use rstrip(), not strip(), for pmwiki lists
         self.text = [x.rstrip() for x in self.text if x and x.rstrip()]
         # mathjax support
         otext = '<HTML><script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><link href="style.css" rel="stylesheet" type="text/css"><script LANGUAGE="JavaScript" src="style.js"></script></HTML>\n'
