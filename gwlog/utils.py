@@ -47,6 +47,10 @@ def wraptxt(line, sep, by, rmblank = True):
             sline += item
     return sline
 
+def multispace2tab(line):
+    p = re.compile(r' \s+|\t\s+')
+    return p.sub('\t', line)
+
 import stat
 def pdflatex(fname, text, vanilla=False, beamer = False):
     # setup temp dir

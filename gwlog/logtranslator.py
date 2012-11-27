@@ -2,7 +2,7 @@ import os, sys, re
 from time import strftime, localtime
 from collections import OrderedDict
 import codecs
-from utils import wraptxt
+from utils import wraptxt, multispace2tab
 from ltheme import MODE, CONFIG, TITLE, THANK, THEME, DOC_PACKAGES, DOC_CONFIG
 from htheme import HTML_STYLE, JS_SCRIPT
 
@@ -360,7 +360,7 @@ class TexParser:
 
     def m_blockizeTable(self, text, k, label = None):
         self._checknest(text)
-        table = [[self.m_recode(iitem) for iitem in item.split('\t')] for item in text.split('\n') if item]
+        table = [[self.m_recode(iitem) for iitem in multispace2tab(item).split('\t')] for item in text.split('\n') if item]
         ncols = list(set([len(x) for x in table]))
         if len(ncols) > 1:
             self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(text))
@@ -394,7 +394,7 @@ class TexParser:
 
 # derived classes
 class LogToTex(TexParser):
-    def __init__(self, title, author, toc, footnote, filename, no_num = False, no_ref = False):
+    def __init__(self, title, author, toc, footnote, filename, no_num = False, no_page = False, no_ref = False):
         TexParser.__init__(self, title, author, filename)
         if sum([x.split('.')[-1].lower() in ['c','cpp','h'] for x in filename]) == len(filename):
             self.mark = '//'
@@ -419,6 +419,7 @@ class LogToTex(TexParser):
         self.doctype = 'article'
         self.footnote = footnote
         self.no_num = no_num
+        self.no_page = no_page
         self.bclogo = {'warning':'\\bcattention', 'tip':'\\bclampe', 'important':'\\bctakecare', 'note':'\\bccrayon'}
         self.keywords = list(set(SYNTAX.values())) + self.bclogo.keys() + ['out', 'list', 'table']
         self.text = self.m_parseBlocks(self.text)
@@ -551,7 +552,8 @@ class LogToTex(TexParser):
         return '\\documentclass[oneside, 10pt]{%s}' % self.doctype + DOC_PACKAGES + \
                 ('\\usepackage[Lenny]{fncychap}' if self.doctype == 'report' else '') + \
                 '\\renewcommand\\%s{References}' % ('bibname' if self.doctype == 'report' else 'refname') + \
-                DOC_CONFIG + '\\title{%s}\n' % self.title + '\\author{%s}\n' % self.author + \
+                DOC_CONFIG + ('\\pagestyle{empty}\n' if self.no_page else '') + \
+                '\\title{%s}\n' % self.title + '\\author{%s}\n' % self.author + \
                 '\\date{Last updated: \\today}\n\\raggedbottom\n\\begin{document}\n' + \
                 '%s\n%s\n\\bigskip\n%s' % ('\\maketitle' if self.title or self.author else '', '\\tableofcontents' if self.toc else '', '\n'.join(self.text)) + \
                 '\n\\end{document}'
@@ -921,7 +923,7 @@ class HtmlParser(TexParser):
         
     def m_blockizeTable(self, text, k, label = None):
         self._checknest(text)
-        table = [[self.m_recode(iitem) for iitem in item.split('\t')] for item in text.split('\n') if item]
+        table = [[self.m_recode(iitem) for iitem in multispace2tab(item).split('\t')] for item in text.split('\n') if item]
         ncols = list(set([len(x) for x in table]))
         if len(ncols) > 1:
             self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(text))
@@ -1249,7 +1251,7 @@ class LogToDokuwiki(HtmlParser):
 
     # def m_blockizeTable(self, text, k, label = None):
     #     self._checknest(text)
-    #     table = [[self.m_recode(iitem) for iitem in item.split('\t')] for item in text.split('\n') if item]
+    #     table = [[self.m_recode(iitem) for iitem in multispace2tab(item).split('\t')] for item in text.split('\n') if item]
     #     ncols = list(set([len(x) for x in table]))
     #     if len(ncols) > 1:
     #         self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(text))
@@ -1418,7 +1420,7 @@ class LogToPmwiki(HtmlParser):
 
     # def m_blockizeTable(self, text, k, label = None):
     #     self._checknest(text)
-    #     table = [[self.m_recode(iitem) for iitem in item.split('\t')] for item in text.split('\n') if item]
+    #     table = [[self.m_recode(iitem) for iitem in multispace2tab(item).split('\t')] for item in text.split('\n') if item]
     #     ncols = list(set([len(x) for x in table]))
     #     if len(ncols) > 1:
     #         self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(text))

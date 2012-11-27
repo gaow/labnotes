@@ -22,6 +22,7 @@ DOC Example
 gw_log doc -h
 gw_log doc demo.notes --author "John Doe" --title "Example log documentation" -f --lite --output d1.pdf
 gw_log doc demo.notes --author "John Doe" --title "Example log documentation" --toc --output d2.pdf
+gw_log doc demo.notes --no_page_number --no_section_number --output d3.pdf
 
 SLIDES Example
 --------------

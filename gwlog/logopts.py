@@ -4,7 +4,7 @@ from .utils import getfname, pdflatex, indexhtml
 from .logtranslator import LogToTex, LogToBeamer, LogToHtml, LogToDokuwiki, LogToPmwiki
 
 def doc(args):
-    tex = LogToTex(args.title, args.author, args.toc, args.footnote, args.filename, no_num = args.no_section_number, no_ref = False)
+    tex = LogToTex(args.title, args.author, args.toc, args.footnote, args.filename, no_num = args.no_section_number, no_page = args.no_page_number, no_ref = False)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output)
     pdflatex(fname, tex.get(lite), vanilla=args.vanilla)
@@ -139,6 +139,9 @@ class LogOpts:
         parser.add_argument('--no_section_number',
                         action='store_true',
                         help='''generate un-numbered sections''')
+        parser.add_argument('--no_page_number',
+                        action='store_true',
+                        help='''generate un-numbered pages''')
         parser.add_argument('-v', '--vanilla',
                         action='store_true',
                         default = '',
