@@ -42,6 +42,11 @@ gw_log html demo.notes -o d2 --author "John Doe" --title "Example log documentat
 gw_log html demo.notes -o d3 --author "John Doe" --title "Example log documentation" --toc --separate
 gw_log admin *.html -o index -a index_html 
 
+DOKUWIKI Example
+----------------
+gw_log dokuwiki -h
+gw_log dokuwiki demo.notes 
+
 Syntax
 ------
 ###  ###				#{ ----------	#{out	#{table	#{ xxx (xxx = warning, important, tip, note)	#{list		#{ xxx (xxx = latex, bash, r, cpp, python, sql)

@@ -17,6 +17,16 @@ SYNTAX = {'r':'r',
           'php':'php'
           }
 
+INVSYNTAX = {'r':'R',
+          'bash':'sh',
+          'python':'py',
+          'latex':'tex',
+          'c':'c',
+          'cpp':'cpp',
+          'sql':'sqlite',
+          'php':'php'
+          }
+
 # base class
 class TexParser:
     def __init__(self, title, author, fname):
@@ -133,8 +143,8 @@ class TexParser:
                 # define block
                 bname = text[idx].split('{')[1].strip()
                 try:
-                    # blabel only applicable to BEAMER
-                    bname, blabel = bname.split()
+                    # blabel only applicable to some input boxes
+                    bname, blabel = bname.split(None, 1)
                 except:
                     blabel = None
                 if bname not in [x for x in self.keywords]:
@@ -1249,28 +1259,66 @@ class LogToDokuwiki(HtmlParser):
         text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
         return text
 
-    # def m_blockizeTable(self, text, k, label = None):
-    #     self._checknest(text)
-    #     table = [[self.m_recode(iitem) for iitem in multispace2tab(item).split('\t')] for item in text.split('\n') if item]
-    #     ncols = list(set([len(x) for x in table]))
-    #     if len(ncols) > 1:
-    #         self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(text))
-    #     body = '^' + '^'.join(table[0]) + '^\n' + '\n'.join(['|' + '|'.join(item) + '|' for item in table[1:]]) + '\n'
-    #     return body
+    def m_blockizeTable(self, text, k, label = None):
+        self._checknest(text)
+        table = [[self.m_recode(iitem) for iitem in multispace2tab(item).split('\t')] for item in text.split('\n') if item]
+        ncols = list(set([len(x) for x in table]))
+        if len(ncols) > 1:
+            self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(text))
+        body = '<WRAP center 80%>\n' + '^  ' + '  ^  '.join(table[0]) + '  ^\n' + '\n'.join(['|  ' + '  |  '.join(item) + '  |' for item in table[1:]]) + '\n</WRAP>\n' 
+        return body
 
     def _parsecmd(self, text, serial, numbered = False):
-        head = '<code>'
+        head = '<code bash>\n'
         lines = '\n'.join(text)
-        tail = '</code>'
+        tail = '\n</code>'
         return head + lines + tail
 
         
-    def m_blockizeIn(self, text, k, label = None):
-        # require sxh3 plugin
+    def m_blockizeIn(self, text, k, label = None, sxh3 = False):
         self._checknest(text)
-        text = '<sxh {0}>\n\n'.format(k.lower()) +  wraptxt(text, '', 1000, rmblank = True) + '\n\n</sxh>'
+        # no wrap, totally rely on dokuwiki
+        # text = wraptxt(text, '', 1000, rmblank = True)  
+        # require sxh3 plugin
+        if sxh3:
+            text = '\n<sxh {0}{1};gutter: false;>\n\n'.format(
+                k.lower() if k.lower() not in ['s', 'r'] else 'plain',
+                ';title: {0}'.format(label) if label else ''
+                ) +  text + '\n\n</sxh>\n'
+        # non-sxh3 version
+        else:
+            text = '\n<code {0} {1}>\n\n'.format(
+                k.lower(),
+                '{0}.{1}'.format('_'.join(label.split()) if label else 'download-source', INVSYNTAX[k.lower()])
+                ) +  text + '\n\n</code>\n'        
         return text
     
+    def m_blockizeOut(self, text, k, label = None):
+        self._checknest(text)
+        text = '\n'.join(['  ' + x for x in text.split('\n')])
+        return text
+
+    def _alertcolor(self, k):
+        if k.lower() == 'warning':
+            return 'red'
+        elif k.lower() == 'important':
+            return 'orange'
+        elif k.lower() == 'tip':
+            return 'green'
+        elif k.lower() == 'note':
+            return 'blue'
+        else:
+            return 'black'
+        
+    def m_blockizeAlert(self, text, k, label = None):
+        self._checknest(text, kw = [r'box 80'])
+        text = self._holdfigureplace(text)
+        text, mapping = self._holdblockplace(text, mode = 'hold')
+        self._checkblockprefix(text)
+        text = '\n'.join([item if item.startswith(self.blockph) else self.m_recode_dokuwiki(re.sub(r'^{0}'.format(self.mark), '', item)) for item in text.split('\n')])
+        text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
+        text = '<box 80% round {0}|**__{1}__**>\n{2}\n</box>'.format(self._alertcolor(k), k.lower().capitalize() if label is None else label, text)
+        return text
 
     def m_parseText(self):
         skip = []
@@ -1362,9 +1410,9 @@ class LogToDokuwiki(HtmlParser):
                         break
         # use rstrip(), not strip(), for dokuwiki lists
         self.text = [x.rstrip() for x in self.text if x and x.rstrip()]
+        otext = '\n'.join(self.text)
         # mathjax support
-        otext = '<HTML><script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><link href="style.css" rel="stylesheet" type="text/css"><script LANGUAGE="JavaScript" src="style.js"></script></HTML>\n'
-        otext += '\n'.join(self.text)
+        # otext = '<HTML><script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><link href="style.css" rel="stylesheet" type="text/css"><script LANGUAGE="JavaScript" src="style.js"></script></HTML>\n' + otext
         return otext
 
 
@@ -1437,7 +1485,6 @@ class LogToPmwiki(HtmlParser):
     
     def m_blockizeOut(self, text, k, label = None):
         self._checknest(text)
-        nrow = len(text.split('\n'))
         text = '>>frame<<\n{0}\n>><<\n'.format(text)
         return text
         
@@ -1541,7 +1588,7 @@ class LogToPmwiki(HtmlParser):
                         break
         # use rstrip(), not strip(), for pmwiki lists
         self.text = [x.rstrip() for x in self.text if x and x.rstrip()]
+        otext = '\n'.join(self.text)
         # mathjax support
-        otext = '<HTML><script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><link href="style.css" rel="stylesheet" type="text/css"><script LANGUAGE="JavaScript" src="style.js"></script></HTML>\n'
-        otext += '\n'.join(self.text)
+        # otext = '<HTML><script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><link href="style.css" rel="stylesheet" type="text/css"><script LANGUAGE="JavaScript" src="style.js"></script></HTML>\n' + otext
         return otext

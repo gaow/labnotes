@@ -140,6 +140,16 @@ WHERE
 
 GROUP BY kEntity, sTranType, sItemType
 #}
+#!! Alternative box names
+#{out screen output
+output
+#}
+#{python example.py
+print "hi"
+#}
+#{warning Careful!
+# a message
+#}
 
 #!Figures
 #Support pdf, png and jpg. This is bcm logo
@@ -268,3 +278,19 @@ print("HELLO WORLD")
 ###
 #! Another chapter
 ###
+###
+# dokuwiki specific 
+###
+#! hide stuff
+#++++ pmwiki hidden text |
+#In pmwiki these text will be hidden
+#++++
+#<hidden>
+#{ python map.py
+def map( fun, list ):
+    nlist = []
+    for item in list:
+        nlist.append( fun( item ) )
+    return nlist
+#}
+#</hidden>
