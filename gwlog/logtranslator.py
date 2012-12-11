@@ -821,7 +821,7 @@ class HtmlParser(TexParser):
         if prefix:
             return prefix.group(0), text.replace(prefix.group(0), '')
         else:
-            return '', text
+            return 'http://', text
 
     def m_recode(self, line):
         if not line:
@@ -836,49 +836,47 @@ class HtmlParser(TexParser):
         # html keywords
         # no need to convert most of them
         for item in [
-#                ('\\', '&#92;'),('$', '&#36;'),
-#                ('{', '&#123;'),('}', '&#125;'),
-#                ('%', '&#37;'),('--', '&mdash;'),
-#                ('-', '&ndash;'),('&', '&amp;'),
-#                ('~', '&tilde;'),('^', '&circ;'),
-#                ('``', '&ldquo;'),('`', '&lsquo;'),
-#                ('#', '&#35;'),
+               # ('\\', '&#92;'),('$', '&#36;'),
+               # ('{', '&#123;'),('}', '&#125;'),
+               # ('%', '&#37;'),('--', '&mdash;'),
+               # ('-', '&ndash;'),('&', '&amp;'),
+               # ('~', '&tilde;'),('^', '&circ;'),
+               # ('``', '&ldquo;'),('`', '&lsquo;'),
+               # ('#', '&#35;'),
                 ('<', '&lt;'),('>', '&gt;'),
                 ]:
             line = line.replace(item[0], item[1])
         line = re.sub(r'"""(.*?)"""', r'<strong><em>\1</em></strong>', line)
         line = re.sub(r'""(.*?)""', r'<strong>\1</strong>', line)
         line = re.sub(r'"(.*?)"', r'<em>\1</em>', line)
-#        line = re.sub(r'@@(.*?)@@', r'<span style="font-family: monospace">\1</span>', line)
+        # line = re.sub(r'@@(.*?)@@', r'<span style="font-family: monospace">\1</span>', line)
         line = re.sub(r'@@(.*?)@@', r'<kbd>\1</kbd>', line)
-        # hyperlink
-        # [text|@link@] defines the pattern for citation.
-        pattern = re.compile('\[(\s*)(?P<a>.+?)(\s*)\|(\s*)@(?P<b>.+?)@(\s*)\]')
-        for m in re.finditer(pattern, line):
-            prefix, address = self._parseUrlPrefix(m.group('b'))
-            line = line.replace(m.group(0), '<a style="text-shadow: 1px 1px 1px #999;" href="{0}{1}">{2}</a>'.format(prefix, address, m.group('a')))
-        # url
-        pattern = re.compile('@(.*?)@')
-        for m in re.finditer(pattern, line):
-            prefix, address = self._parseUrlPrefix(m.group(1))
-            line = line.replace(m.group(0), '<a href="{0}{1}">{1}</a>'.format(prefix, address, address))
-        # footnote
+        # single/double quotes translated from latex syntax
+        line = re.sub(r"``(.*?)''", r'"\1"', line)
+        line = re.sub(r"`(.*?)'", r"'\1'", line)
+        # footnote and hyperlink
         # [note|reference] defines the pattern for citation.
         pattern = re.compile('\[(\s*)(?P<a>.+?)(\s*)\|(\s*)(?P<b>.+?)(\s*)\]')
         # re.compile('\[(.+?)\|(.+?)\]')
         for m in re.finditer(pattern, line):
-            k = re.sub('\W', '', m.group('a'))
-            if not k:
-                self.quit("Invalid citation keyword for reference item '{}'.".format(m.group('b')))
-            if k in self.bib.keys():
-                if self.bib[k] != [m.group('a'), m.group('b')]:
-                    k += str(len(self.bib.keys()))
-            self.bib[k] = [m.group('a'), m.group('b')]
-            line = line.replace(m.group(0), '<a href="#footnote-{}">{}</a>'.format(k, m.group('a')))
-        # more kw
-        line = line.replace("''", '"')
-        line = line.replace("``", '"')
-        line = line.replace("`", "'")
+            # [text|@link@] defines the pattern for direct URL.
+            if re.match(r'(\s*)@(.*?)@(\s*)', m.group('b')):
+                prefix, address = self._parseUrlPrefix(m.group('b').strip()[1:-1])
+                line = line.replace(m.group(0), '<a style="text-shadow: 1px 1px 1px #999;" href="{0}{1}">{2}</a>'.format(prefix, address, m.group('a')))
+            else:
+                k = re.sub('\W', '', m.group('a'))
+                if not k:
+                    self.quit("Invalid citation keyword for reference item '{}'.".format(m.group('b')))
+                if k in self.bib.keys():
+                    if self.bib[k] != [m.group('a'), m.group('b')]:
+                        k += str(len(self.bib.keys()))
+                self.bib[k] = [m.group('a'), m.group('b')]
+                line = line.replace(m.group(0), '<a href="#footnote-{}">{}</a>'.format(k, m.group('a')))
+        # standalone url
+        pattern = re.compile('@(.*?)@')
+        for m in re.finditer(pattern, line):
+            prefix, address = self._parseUrlPrefix(m.group(1))
+            line = line.replace(m.group(0), '<a href="{0}{1}">{1}</a>'.format(prefix, address, address))
         # recover raw html syntax
         for i in range(len(raw)):
             line = line.replace(self.htmlph + str(i), raw[i])
@@ -1205,8 +1203,9 @@ class LogToHtml(HtmlParser):
         return '<div class="frame">' + head + body + tail + '</div>'
 
 class LogToDokuwiki(HtmlParser):
-    def __init__(self, fname, show_all):
+    def __init__(self, fname, toc, show_all):
         HtmlParser.__init__(self, 'wikititle', 'authortitle', fname)
+        self.toc = toc
         self.show_all = show_all
         self.fig_tag = "dokuwiki"
         self.text = self.m_parseBlocks(self.text)
@@ -1232,11 +1231,14 @@ class LogToDokuwiki(HtmlParser):
         line = re.sub(r'""(.*?)""', r'**\1**', line)
         line = re.sub(r'"(.*?)"', r'//\1//', line)
         line = re.sub(r'@@(.*?)@@', r"''\1''", line)
+        # single/double quotes translated from latex syntax
+        line = re.sub(r"``(.*?)''", r'"\1"', line)
+        line = re.sub(r"`(.*?)'", r"'\1'", line)
         # footnote and link
         pattern = re.compile('\[(\s*)(?P<a>.+?)(\s*)\|(\s*)(?P<b>.+?)(\s*)\]')
         for m in re.finditer(pattern, line):
-            if m.group('b').strip().startswith('@') and m.group('b').strip().endswith('@'):
-                # is a link. have to flip this for doku wiki [reference|note] (or [link|link name])
+            if re.match(r'(\s*)@(.*?)@(\s*)', m.group('b')):
+                # is a link (internal or external). Have to flip this into [link|link name]
                 line = line.replace(m.group(0), '[[{1}|{0}]]'.format(m.group('a'), m.group('b')))
             else:
                 # is footnote
@@ -1421,6 +1423,8 @@ class LogToDokuwiki(HtmlParser):
         otext = '\n'.join(self.text)
         # mathjax support
         # otext = '<HTML><script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><link href="style.css" rel="stylesheet" type="text/css"><script LANGUAGE="JavaScript" src="style.js"></script></HTML>\n' + otext
+        if not self.toc:
+            otext = '~~NOTOC~~\n' + otext
         return otext
 
 
@@ -1451,7 +1455,7 @@ class LogToPmwiki(HtmlParser):
         pattern = re.compile('\[(\s*)(?P<a>.+?)(\s*)\|(\s*)(?P<b>.+?)(\s*)\]')
         for m in re.finditer(pattern, line):
             if m.group('b').strip().startswith('@') and m.group('b').strip().endswith('@'):
-                # is a link. have to flip this for doku wiki [reference|note] (or [link|link name])
+                # is a link. have to flip this into [link|link name]
                 line = line.replace(m.group(0), '[[{1}|{0}]]'.format(m.group('a'), m.group('b')))
             else:
                 # is footnote
