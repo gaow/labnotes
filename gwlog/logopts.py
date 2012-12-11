@@ -34,7 +34,7 @@ def html(args):
     return
 
 def dokuwiki(args):
-    htm = LogToDokuwiki(args.filename)
+    htm = LogToDokuwiki(args.filename, args.showall)
     lite = 1 if args.lite else 0
     print(htm.get(lite))
     return
@@ -207,4 +207,9 @@ class LogOpts:
                         action='store_true',
                         default = '',
                         help='''mask commented-out text from output''')
+            parser.add_argument('--showall',
+                        action='store_true',
+                        default = '',
+                        help='''unfold source code / output fields in page by default''')
+
 

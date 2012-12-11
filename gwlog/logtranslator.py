@@ -1205,9 +1205,9 @@ class LogToHtml(HtmlParser):
         return '<div class="frame">' + head + body + tail + '</div>'
 
 class LogToDokuwiki(HtmlParser):
-    def __init__(self, fname):
+    def __init__(self, fname, show_all):
         HtmlParser.__init__(self, 'wikititle', 'authortitle', fname)
-        self.html_tag = True
+        self.show_all = show_all
         self.fig_tag = "dokuwiki"
         self.text = self.m_parseBlocks(self.text)
         self.m_parseComments()
@@ -1281,21 +1281,29 @@ class LogToDokuwiki(HtmlParser):
         # text = wraptxt(text, '', 1000, rmblank = True)  
         # require sxh3 plugin
         if sxh3:
-            text = '\n<sxh {0}{1};gutter: false;>\n\n'.format(
+            text = '<sxh {0}{1};gutter: false;>\n\n'.format(
                 k.lower() if k.lower() not in ['s', 'r'] else 'plain',
                 ';title: {0}'.format(label) if label else ''
-                ) +  text + '\n\n</sxh>\n'
+                ) +  text + '\n\n</sxh>'
         # non-sxh3 version
         else:
-            text = '\n<code {0} {1}>\n\n'.format(
+            text = '<code {0} {1}>\n\n'.format(
                 k.lower(),
                 '{0}.{1}'.format('_'.join(label.split()) if label else 'download-source', INVSYNTAX[k.lower()])
-                ) +  text + '\n\n</code>\n'        
+                ) +  text + '\n\n</code>'        
+        if self.show_all:
+            text = '<hidden initialState="visible" -noprint>\n{0}\n</hidden>'.format(text)
+        else:
+            text = '<hidden -noprint>\n{0}\n</hidden>'.format(text)
         return text
     
     def m_blockizeOut(self, text, k, label = None):
         self._checknest(text)
         text = '\n'.join(['  ' + x for x in text.split('\n')])
+        if self.show_all:
+            text = '<hidden initialState="visible" -noprint>\n{0}\n</hidden>'.format(text)
+        else:
+            text = '<hidden -noprint>\n{0}\n</hidden>'.format(text)
         return text
 
     def _alertcolor(self, k):

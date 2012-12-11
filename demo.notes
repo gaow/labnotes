@@ -286,11 +286,5 @@ print("HELLO WORLD")
 #In pmwiki these text will be hidden
 #++++
 #<hidden>
-#{ python map.py
-def map( fun, list ):
-    nlist = []
-    for item in list:
-        nlist.append( fun( item ) )
-    return nlist
-#}
+# Usually I use this for codes folding
 #</hidden>
