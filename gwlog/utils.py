@@ -15,7 +15,12 @@ def getfname(innames, outname, suffix='.pdf'):
         fname = outname
     if fname.endswith(suffix):
         fname = fname.replace(suffix, '')
-    return os.path.split(fname)[-1]
+    directories = os.path.split(fname)[:-1]
+    for directory in directories:
+        if directory is not '':
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+    return fname 
 
 def wraptxt(line, sep, by, rmblank = True):
     # will also remove blank lines, if any

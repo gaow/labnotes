@@ -251,11 +251,11 @@ class TexParser:
     def _holdfigureplace(self, text):
         pattern = re.compile('#\*(.*?)(\n|$)')
         for m in re.finditer(pattern, text):
-            fig = 'BEGIN' + self.blockph + self._parseFigure(m.group(1), self.fig_support, self.fig_tag) + 'END' + self.blockph + '\n'
+            fig = 'BEGIN' + self.blockph + self._parseFigure(m.group(1), support = self.fig_support, tag = self.fig_tag) + 'END' + self.blockph + '\n'
             text = text.replace(m.group(0), fig, 1)
         return text
 
-    def _parseFigure(self, text, support = ['jpg','pdf','png'], tag = 'tex'):
+    def _parseFigure(self, text, support = ['jpg','pdf','png'], tag = 'tex', remote_path = ''):
         if text.startswith(self.mark + '*'):
             text = text[len(self.mark)+1:].strip()
         else:
@@ -286,7 +286,7 @@ class TexParser:
                 lines[idx] = '<p><center><img src="{}" alt="{}" width="{}%" /></center></p>'.format(fig, os.path.split(fig)[-1], int(width * 100))
             elif tag.endswith("wiki"):
                 # dokuwiki style as a place holder ...
-                lines[idx] = '{{%s:%s?%s}}' % (os.path.split(fig)[-2], os.path.split(fig)[-1], width)
+                lines[idx] = '{{%s:%s?%s}}' % (remote_path, os.path.split(fig)[-1], width)
             else:
                 self.quit('Unknown tag for figure {}'.format(tag))
         if tag == 'tex':
@@ -541,7 +541,7 @@ class LogToTex(TexParser):
                 continue
             if self.text[idx].startswith(self.mark + '*'):
                 # fig: figure.pdf 0.9
-                self.text[idx] = self._parseFigure(self.text[idx], self.fig_support, self.fig_tag)
+                self.text[idx] = self._parseFigure(self.text[idx], support = self.fig_support, tag = self.fig_tag)
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark):
@@ -731,7 +731,7 @@ class LogToBeamer(TexParser):
                 continue
             if self.text[idx].startswith(self.mark + '*'):
                 # fig: figure.pdf 0.9
-                self.text[idx] = self._parseFigure(self.text[idx], self.fig_support, self.fig_tag)
+                self.text[idx] = self._parseFigure(self.text[idx], support = self.fig_support, tag = self.fig_tag)
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark):
@@ -1110,7 +1110,7 @@ class LogToHtml(HtmlParser):
                 continue
             if self.text[idx].startswith(self.mark + '*'):
                 # fig: figure.png 0.9
-                self.text[idx] = self._parseFigure(self.text[idx], self.fig_support, self.fig_tag)
+                self.text[idx] = self._parseFigure(self.text[idx], support = self.fig_support, tag = self.fig_tag)
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark):
@@ -1203,11 +1203,15 @@ class LogToHtml(HtmlParser):
         return '<div class="frame">' + head + body + tail + '</div>'
 
 class LogToDokuwiki(HtmlParser):
-    def __init__(self, fname, toc, show_all):
+    def __init__(self, fname, toc, show_all, img_path):
         HtmlParser.__init__(self, 'wikititle', 'authortitle', fname)
         self.toc = toc
         self.show_all = show_all
         self.fig_tag = "dokuwiki"
+        if img_path is None:
+            self.img_path = ''
+        else:
+            self.img_path = img_path
         self.text = self.m_parseBlocks(self.text)
         self.m_parseComments()
         self.m_parseText()
@@ -1242,7 +1246,7 @@ class LogToDokuwiki(HtmlParser):
                 line = line.replace(m.group(0), '[[{1}|{0}]]'.format(m.group('a'), m.group('b')))
             else:
                 # is footnote
-                line = line.replace(m.group(0), m.group('b') + '(({0}))'.format(m.group('a')))
+                line = line.replace(m.group(0), m.group('a') + '(({0}))'.format(m.group('b')))
         # url
         pattern = re.compile('@(.*?)@')
         for m in re.finditer(pattern, line):
@@ -1290,7 +1294,7 @@ class LogToDokuwiki(HtmlParser):
         # non-sxh3 version
         else:
             text = '<code {0} {1}>\n\n'.format(
-                k.lower(),
+                k.lower() if k.lower() not in ['s', 'r'] else 'rsplus',
                 '{0}.{1}'.format('_'.join(label.split()) if label else 'download-source', INVSYNTAX[k.lower()])
                 ) +  text + '\n\n</code>'        
         if self.show_all:
@@ -1401,7 +1405,7 @@ class LogToDokuwiki(HtmlParser):
                 continue
             if self.text[idx].startswith(self.mark + '*'):
                 # fig: figure.png 0.9
-                self.text[idx] = self._parseFigure(self.text[idx], self.fig_support, self.fig_tag)
+                self.text[idx] = self._parseFigure(self.text[idx], support = self.fig_support, tag = self.fig_tag, remote_path = self.img_path)
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark):
@@ -1581,7 +1585,7 @@ class LogToPmwiki(HtmlParser):
                 continue
             if self.text[idx].startswith(self.mark + '*'):
                 # fig: figure.png 0.9
-                self.text[idx] = self._parseFigure(self.text[idx], self.fig_support, self.fig_tag)
+                self.text[idx] = self._parseFigure(self.text[idx], support = self.fig_support, tag = self.fig_tag)
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark):

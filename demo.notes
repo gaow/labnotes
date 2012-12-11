@@ -52,7 +52,7 @@ gw_log doc demo.notes --author "John Doe" --title "Example log documentation" --
 #Display math: @@@\[\hat{\beta} = (\frac{1}{n}\sum_i^n \mathbf{x}_i\mathbf{x}_i^T)^{-1} (\frac{1}{n}\sum_i^n\mathbf{x}_iy_i)\]@@@
 #Inline math: @@@\(\hat{\beta} = (\frac{1}{n}\sum_i^n \mathbf{x}_i\mathbf{x}_i^T)^{-1} (\frac{1}{n}\sum_i^n\mathbf{x}_iy_i)\)@@@
 #!! Reference note
-# I visit the [BCM website|Baylor College of Medicine] daily, [BCM|@www.bcm.edu@]
+# I visit the [BCM website|Baylor College of Medicine, @@www.bcm.edu@@] daily, [BCM|@http://www.bcm.edu@]
 #!! Blocks
 #{ list
 #this

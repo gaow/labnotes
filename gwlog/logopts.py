@@ -34,9 +34,11 @@ def html(args):
     return
 
 def dokuwiki(args):
-    htm = LogToDokuwiki(args.filename, args.toc, args.showall)
+    htm = LogToDokuwiki(args.filename, args.toc, args.showall, args.img)
     lite = 1 if args.lite else 0
-    print(htm.get(lite))
+    fname = getfname(args.filename, args.output, suffix='.txt')
+    with codecs.open(fname + '.txt', 'w', encoding='UTF-8', errors='ignore') as f:
+        f.writelines(htm.get(lite))
     return
 
 def pmwiki(args):
@@ -184,25 +186,19 @@ class LogOpts:
                         action='store_true',
                         help='''use separate files for css and js scripts''')
 
-    def getAdminArguments(self, parser):
-            parser.add_argument('filename',
-                        metavar = 'FN',
-                        nargs = '+',
-                        help='''name of the input file(s)''')
-            parser.add_argument('-a', '--action',
-                        type=str,
-                        choices=['index_html'],
-                        help='''action to be applied to input files''')
-            parser.add_argument('-o', '--output',
-                        metavar='name',
-                        type=str,
-                        help='''name of output file''')
-
     def getDokuwikiArguments(self, parser):
             parser.add_argument('filename',
                         metavar = 'FN',
                         nargs = '+',
                         help='''name of the input file(s)''')
+            parser.add_argument('-o', '--output',
+                        metavar='name',
+                        type=str,
+                        help='''name of output file''')
+            parser.add_argument('--img',
+                        metavar='PATH',
+                        type=str,
+                        help='''remote relative path for image, usually is the namespace a dokuwiki page belongs to''')
             parser.add_argument('--lite',
                         action='store_true',
                         default = '',
@@ -216,4 +212,16 @@ class LogOpts:
                         default = '',
                         help='''unfold source code / output fields in page by default''')
 
-
+    def getAdminArguments(self, parser):
+            parser.add_argument('filename',
+                        metavar = 'FN',
+                        nargs = '+',
+                        help='''name of the input file(s)''')
+            parser.add_argument('-a', '--action',
+                        type=str,
+                        choices=['index_html'],
+                        help='''action to be applied to input files''')
+            parser.add_argument('-o', '--output',
+                        metavar='name',
+                        type=str,
+                        help='''name of output file''')
