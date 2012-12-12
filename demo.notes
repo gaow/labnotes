@@ -14,7 +14,7 @@
 # Dependencies
 ###
 #On Debian GNU/Linux based computer:
-sudo apt-get install texlive texlive-xetex texlive-latex-extra python-pygments latexmk
+sudo apt-get install texlive texlive-xetex texlive-latex-extra texlive-fonts-extra texlive-extra-utils texlive-font-utils latex-beamer pgf latexmk latex-xcolor texlive-pstricks python-pygments 
 ###
 # Installation
 ###
@@ -140,11 +140,14 @@ WHERE
 
 GROUP BY kEntity, sTranType, sItemType
 #}
+#{text
+this is plain text
+#}
 #!! Alternative box names
 #{out screen output
 output
 #}
-#{python example.py
+#{python an example
 print "hi"
 #}
 #{warning Careful!
@@ -282,9 +285,9 @@ print("HELLO WORLD")
 # dokuwiki specific 
 ###
 #! hide stuff
-#++++ pmwiki hidden text |
-#In pmwiki these text will be hidden
+#++++ dokuwiki hidden text |
+# these text will be hidden, via ``folded'' plugin
 #++++
 #<hidden>
-# Usually I use this for codes folding
+# these will be hidden via ``hidden'' plugin. Usually I use this for codes folding
 #</hidden>

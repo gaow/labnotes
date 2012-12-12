@@ -14,7 +14,8 @@ SYNTAX = {'r':'r',
           'cpp':'cpp',
           'h':'c',
           'sqlite':'sql',
-          'php':'php'
+          'php':'php',
+          'txt':'text'
           }
 
 INVSYNTAX = {'r':'R',
@@ -24,7 +25,8 @@ INVSYNTAX = {'r':'R',
           'c':'c',
           'cpp':'cpp',
           'sql':'sqlite',
-          'php':'php'
+          'php':'php',
+          'text':'txt'
           }
 
 # base class
@@ -38,7 +40,7 @@ class TexParser:
         self.PARSER_RULE = {
                 'list':'self.m_blockizeList',
                 'table':'self.m_blockizeTable',
-                'out':'self.m_blockizeOut',
+                'out':'self.m_blockizeOut'
                 }
         for item in list(set(SYNTAX.values())):
             self.PARSER_RULE[item] = 'self.m_blockizeIn'
@@ -64,7 +66,6 @@ class TexParser:
         out = text[0] if text[0] == text[0].upper() else text[0].capitalize() 
         if len(text) > 1:
             out += ' ' + ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') if x not in omit else x for x in text[1:]])
-
         return out
 
     def m_recode(self, line):
@@ -1277,9 +1278,8 @@ class LogToDokuwiki(HtmlParser):
     def _parsecmd(self, text, serial, numbered = False):
         head = '<code bash>\n'
         lines = '\n'.join(text)
-        tail = '\n</code>'
+        tail = '\n</code>\\\\'
         return head + lines + tail
-
         
     def m_blockizeIn(self, text, k, label = None, sxh3 = False):
         self._checknest(text)
@@ -1293,23 +1293,23 @@ class LogToDokuwiki(HtmlParser):
                 ) +  text + '\n\n</sxh>'
         # non-sxh3 version
         else:
-            text = '<code {0} {1}>\n\n'.format(
+            text = '<code {0} {1}>\n'.format(
                 k.lower() if k.lower() not in ['s', 'r'] else 'rsplus',
-                '{0}.{1}'.format('_'.join(label.split()) if label else 'download-source', INVSYNTAX[k.lower()])
-                ) +  text + '\n\n</code>'        
+                '{0}{1}'.format('_'.join(label.split()) if label else 'download-source', ('.' + INVSYNTAX[k.lower()]) if k.lower() != 'text' else '')
+                ) +  text + '\n</code>'        
         if self.show_all:
-            text = '<hidden initialState="visible" -noprint>\n{0}\n</hidden>'.format(text)
+            text = '<hidden initialState="visible" -noprint>\n{0}\n</hidden>\\\\'.format(text)
         else:
-            text = '<hidden -noprint>\n{0}\n</hidden>'.format(text)
+            text = '<hidden -noprint>\n{0}\n</hidden>\\\\'.format(text)
         return text
     
     def m_blockizeOut(self, text, k, label = None):
         self._checknest(text)
         text = '\n'.join(['  ' + x for x in text.split('\n')])
         if self.show_all:
-            text = '<hidden initialState="visible" -noprint>\n{0}\n</hidden>'.format(text)
+            text = '<hidden initialState="visible" -noprint>\n{0}\n</hidden>\\\\'.format(text)
         else:
-            text = '<hidden -noprint>\n{0}\n</hidden>'.format(text)
+            text = '<hidden -noprint>\n{0}\n</hidden>\\\\'.format(text)
         return text
 
     def _alertcolor(self, k):
@@ -1389,7 +1389,7 @@ class LogToDokuwiki(HtmlParser):
                 self.quit("You have so many urgly '{0}' symbols in a regular line. Please clear them up in this line: '{1}'".format(self.mark, self.text[idx]))
             if self.text[idx].startswith(self.mark + '!!!'):
                 # box
-                self.text[idx] = '<html><span style="color:red;background:yellow;font-weight:bold">' + self.m_recode(self.text[idx][len(self.mark)+3:]) + '</span></html>\n'
+                self.text[idx] = '<WRAP em hi>\n' + self.m_recode_dokuwiki(self.text[idx][len(self.mark)+3:]) + '\n</WRAP>\n'
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark + '!!'):

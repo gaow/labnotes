@@ -45,11 +45,11 @@ gw_log admin *.html -o index -a index_html
 DOKUWIKI Example
 ----------------
 gw_log dokuwiki -h
-gw_log dokuwiki demo.notes 
+gw_log dokuwiki demo.notes -o ~/html/data/pages/demo.txt --toc 
 
 Syntax
 ------
-###  ###				#{ ----------	#{out	#{table	#{ xxx (xxx = warning, important, tip, note)	#{list		#{ xxx (xxx = latex, bash, r, cpp, python, sql)
+###  ###				#{ ----------	#{out	#{table	#{ xxx (xxx = warning, important, tip, note)	#{list		#{ xxx (xxx = latex, bash, r, cpp, python, sql, php, text)
 #!   #									#						#(or ##)
 ###, ###, #!, #!!, #!!!, #, #*, 	#} ----------,  #}	#}	#}     						#} 		#}
 
