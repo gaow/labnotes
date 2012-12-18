@@ -1410,7 +1410,7 @@ class LogToDokuwiki(HtmlParser):
                 continue
             if self.text[idx].startswith(self.mark):
                 # a plain line here
-                self.text[idx] = self.m_recode_dokuwiki(self.text[idx][len(self.mark):])
+                self.text[idx] = self.m_recode_dokuwiki(self.text[idx][len(self.mark):]) + '\n'
                 idx += 1
                 continue
         return
@@ -1422,8 +1422,8 @@ class LogToDokuwiki(HtmlParser):
                     if idx in range(item[0], item[1]):
                         self.text[idx] = ''
                         break
-        # use rstrip(), not strip(), for dokuwiki lists
-        self.text = [x.rstrip() for x in self.text if x and x.rstrip()]
+        # do not use strip at all, for dokuwiki
+        self.text = [x for x in self.text if x]
         otext = '\n'.join(self.text)
         # mathjax support
         # otext = '<HTML><script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><link href="style.css" rel="stylesheet" type="text/css"><script LANGUAGE="JavaScript" src="style.js"></script></HTML>\n' + otext
