@@ -105,7 +105,7 @@ class TexParser:
             if not self.footnote:
                 k = re.sub('\W', '', m.group('a'))
                 if not k:
-                    self.quit("Invalid citation keyword for reference item '{}'.".format(m.group('b')))
+                    self.quit("Invalid citation keyword for reference item '{0}'.".format(m.group('b')))
                 if k in self.bib.keys():
                     if self.bib[k] != [m.group('a'), m.group('b')]:
                         k += str(len(self.bib.keys()))
@@ -219,7 +219,7 @@ class TexParser:
         # there should be better way to make sure the existing block not to be modified but will use this solution for now
         mapping = {}
         if mode == 'hold':
-            text = re.split('({}|{})'.format('BEGIN' + self.blockph, 'END' + self.blockph), text)
+            text = re.split('({0}|{1})'.format('BEGIN' + self.blockph, 'END' + self.blockph), text)
             idxes = [0]
             i = 1
             while i < len(text):
@@ -275,16 +275,16 @@ class TexParser:
                 width = 0.9
             fname = os.path.split(fig)[-1]
             if not '.' in fname:
-                self.quit("Cannot determine graphic file format for '{}'. Valid extensions are {}".format(fname, ' '.join(support)))
+                self.quit("Cannot determine graphic file format for '{0}'. Valid extensions are {1}".format(fname, ' '.join(support)))
             if fname.split('.')[-1] not in support:
-                self.quit("Input file format '{}' not supported. Valid extensions are {}".format(fname.split('.')[-1], ' '.join(support)))
+                self.quit("Input file format '{0}' not supported. Valid extensions are {1}".format(fname.split('.')[-1], ' '.join(support)))
             if not os.path.exists(fig):
                 self.quit("Cannot find file %s" % fig)
             # syntax images
             if tag == 'tex':
                 lines[idx] = '\\includegraphics[width=%s\\textwidth]{%s}\n' % (width, os.path.abspath(fig))
             elif tag == 'html':
-                lines[idx] = '<p><center><img src="{}" alt="{}" width="{}%" /></center></p>'.format(fig, os.path.split(fig)[-1], int(width * 100))
+                lines[idx] = '<p><center><img src="{0}" alt="{1}" width="{2}%" /></center></p>'.format(fig, os.path.split(fig)[-1], int(width * 100))
             elif tag.endswith("wiki"):
                 if tag == 'dokuwiki':
                     # dokuwiki style 
@@ -292,7 +292,7 @@ class TexParser:
                 if tag == 'pmwiki':
                     lines[idx] = '%center% Attach:%s' % (os.path.split(fig)[-1])
             else:
-                self.quit('Unknown tag for figure {}'.format(tag))
+                self.quit('Unknown tag for figure {0}'.format(tag))
         if tag == 'tex':
             if len(lines) > 1:
                 w_minipage = int(1.0 / (1.0 * len(lines)) * 90) / 100.0
@@ -305,7 +305,7 @@ class TexParser:
         return '\n'.join(lines)
 
     def _checknest(self, text, kw=None):
-        pattern = re.compile('{}(.*?){}'.format('BEGIN' + self.blockph, 'END' + self.blockph), re.DOTALL)
+        pattern = re.compile('{0}(.*?){1}'.format('BEGIN' + self.blockph, 'END' + self.blockph), re.DOTALL)
         # re.match() will not work here
         # will not work without re.DOTALL
         for m in re.finditer(pattern, text):
@@ -377,7 +377,7 @@ class TexParser:
         table = [[self.m_recode(iitem) for iitem in multispace2tab(item).split('\t')] for item in text.split('\n') if item]
         ncols = list(set([len(x) for x in table]))
         if len(ncols) > 1:
-            self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(text))
+            self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {0}".format(text))
         try:
             cols = 'c' * ncols[0]
             head = '\\begin{center}\n{\\%s\\begin{longtable}{%s}\n\\hline\n' % (self.tablefont, cols)
@@ -404,7 +404,7 @@ class TexParser:
         return 'None'
 
     def quit(self, msg):
-        sys.exit('\033[91mAn ERROR has occured while processing input text "{}":\033[0m\n\t '.format(self.fn) + msg)
+        sys.exit('\033[91mAn ERROR has occured while processing input text "{0}":\033[0m\n\t '.format(self.fn) + msg)
 
 # derived classes
 class LogToTex(TexParser):
@@ -619,7 +619,7 @@ class LogToBeamer(TexParser):
 
     def m_blockizeOut(self, text, k, label = None):
         self._checknest(text)
-        return '\\begin{exampleblock}{}\\tiny\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{exampleblock}\n' % \
+        return '\\begin{exampleblock}{0}\\tiny\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{exampleblock}\n' % \
                     wraptxt(text, '', int(105 * self.wrap_adjust), rmblank = False)
 
     def m_blockizeAlert(self, text, k, label = None):
@@ -770,7 +770,7 @@ class LogToBeamer(TexParser):
             frame = re.sub(r'\\\\frametitle{(.*?)}', '', frame)
             frame = re.sub(r'\\\\framesubtitle{(.*?)}', '', frame)
             if len(re.sub(r'\s', '', frame.encode().decode('unicode_escape'))) == 0:
-                self.quit("Empty slides not allowed, near '{}'".format(frametitle))
+                self.quit("Empty slides not allowed, near '{0}'".format(frametitle))
         return
 
     def get(self, include_comment):
@@ -784,8 +784,8 @@ class LogToBeamer(TexParser):
                         self.text[idx] = ''
                         break
         self.text = filter(None, self.text)
-        otext = '{}'.format(MODE[self.mode]) + \
-                CONFIG + '{}'.format(THEME[self.theme.lower()]) + TITLE
+        otext = '{0}'.format(MODE[self.mode]) + \
+                CONFIG + '{0}'.format(THEME[self.theme.lower()]) + TITLE
         if self.title or self.author:
             otext += '\n\\title[%s]{%s}\n%% \\subtitle\n\\author[%s]{%s}\n' % \
                 (self.m_stitle(35), self.title, re.sub(r'\\inst{(.*?)}', '', self.author).strip().split(r'\and')[0].strip(), self.author)
@@ -870,12 +870,12 @@ class HtmlParser(TexParser):
             else:
                 k = re.sub('\W', '', m.group('a'))
                 if not k:
-                    self.quit("Invalid citation keyword for reference item '{}'.".format(m.group('b')))
+                    self.quit("Invalid citation keyword for reference item '{0}'.".format(m.group('b')))
                 if k in self.bib.keys():
                     if self.bib[k] != [m.group('a'), m.group('b')]:
                         k += str(len(self.bib.keys()))
                 self.bib[k] = [m.group('a'), m.group('b')]
-                line = line.replace(m.group(0), '<a href="#footnote-{}">{}</a>'.format(k, m.group('a')))
+                line = line.replace(m.group(0), '<a href="#footnote-{0}">{1}</a>'.format(k, m.group('a')))
         # standalone url
         pattern = re.compile('@(.*?)@')
         for m in re.finditer(pattern, line):
@@ -938,9 +938,9 @@ class HtmlParser(TexParser):
         table = [[self.m_recode(iitem) for iitem in multispace2tab(item).split('\t')] for item in text.split('\n') if item]
         ncols = list(set([len(x) for x in table]))
         if len(ncols) > 1:
-            self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(text))
-        start = '<td style="vertical-align: top;"><{}>'.format(self.tablefont)
-        end = '<br /></{}></td>'.format(self.tablefont)
+            self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {0}".format(text))
+        start = '<td style="vertical-align: top;"><{0}>'.format(self.tablefont)
+        end = '<br /></{0}></td>'.format(self.tablefont)
         head = '<center><table><tbody>'
         body = []
         line = ''
@@ -971,7 +971,7 @@ class HtmlParser(TexParser):
 
 
     def _parsecmd(self, text, serial, numbered = False):
-        head = '<div><div id="highlighter_{}" class="syntaxhighlighter bash"><table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="gutter">'.format(serial)
+        head = '<div><div id="highlighter_{0}" class="syntaxhighlighter bash"><table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="gutter">'.format(serial)
         numbers = ''.join(['<div class="line number{0} index{1} alt{2}">{0}</div>'.format(j+1 if numbered else ' ', j, 2 - j % 2) for j in range(len(text))]) + '</td><td class="code"><div class="container">'
         lines = ''.join(['<div class="line number{0} index{1} alt{2}"><code class="bash plain">{3}</code></div>'.format(j+1, j, 2 - j % 2, line) for j, line in enumerate(text)])
         tail = '</div></td></tr></tbody></table></div></div>'
@@ -996,7 +996,7 @@ class HtmlParser(TexParser):
     def m_blockizeOut(self, text, k, label = None):
         self._checknest(text)
         nrow = len(text.split('\n'))
-        text = '<center><textarea rows="{}", wrap="off">{}</textarea></center>'.format(max(min(nrow, 30), 1), text)
+        text = '<center><textarea rows="{0}", wrap="off">{1}</textarea></center>'.format(max(min(nrow, 30), 1), text)
         if self.html_tag:
             return '<HTML>\n' + text + '\n</HTML>\n'
         else:
@@ -1073,7 +1073,7 @@ class LogToHtml(HtmlParser):
                 # chapter
                 chapter = self.capitalize(self.m_recode(self.text[idx + 1][len(self.mark)+1:]))
                 cnt_chapter += 1
-                self.dtoc['chapter_{}'.format(cnt_chapter)] = chapter
+                self.dtoc['chapter_{0}'.format(cnt_chapter)] = chapter
                 self.text[idx] = ''
                 self.text[idx + 1] = self.m_chapter(chapter, cnt_chapter)
                 self.text[idx + 2] = ''
@@ -1083,7 +1083,7 @@ class LogToHtml(HtmlParser):
                 # section
                 section = self.capitalize(self.m_recode(self.text[idx + 1][len(self.mark):]))
                 cnt_section += 1
-                self.dtoc['section_{}'.format(cnt_section)] = section
+                self.dtoc['section_{0}'.format(cnt_section)] = section
                 self.text[idx] = ''
                 self.text[idx + 1] = self.m_section(section, cnt_section)
                 self.text[idx + 2] = ''
@@ -1108,7 +1108,7 @@ class LogToHtml(HtmlParser):
                 # subsection, subsubsection ...
                 subsection = self.m_recode(self.text[idx][len(self.mark)+1:])
                 cnt_subsection += 1
-                self.dtoc['subsection_{}'.format(cnt_subsection)] = subsection
+                self.dtoc['subsection_{0}'.format(cnt_subsection)] = subsection
                 self.text[idx] = self.m_ssection(subsection, cnt_subsection)
                 idx += 1
                 continue
@@ -1134,7 +1134,7 @@ class LogToHtml(HtmlParser):
             bibkeys.extend([m.group(1) for m in re.finditer(re.compile('"#footnote-(.*?)"'), line)])
         seen = set()
         for k in [x for x in bibkeys if x not in seen and not seen.add(x)]:
-            self.textbib += '<p id="footnote-{}">[{}]: {}</p>\n'.format(k, self.bib[k][0], self.bib[k][1])
+            self.textbib += '<p id="footnote-{0}">[{1}]: {2}</p>\n'.format(k, self.bib[k][0], self.bib[k][1])
 
     def get(self, include_comment, separate):
         if include_comment and len(self.comments) > 0:
@@ -1144,11 +1144,11 @@ class LogToHtml(HtmlParser):
                         self.text[idx] = ''
                         break
         self.text = [x.strip() for x in self.text if x and x.strip()]
-        otext = '<!DOCTYPE html><html><head><title>{}</title>\n'.format((self.title + ' | ' + self.author) if self.title or self.author else '')
+        otext = '<!DOCTYPE html><html><head><title>{0}</title>\n'.format((self.title + ' | ' + self.author) if self.title or self.author else '')
         if separate:
             otext += '<link href="style.css" rel="stylesheet" type="text/css"><script LANGUAGE="JavaScript" src="style.js"></script>'
         else:
-            otext += '<style type="text/css">\n{}</style><script LANGUAGE="JavaScript">\n{}\n</script>'.format(HTML_STYLE, JS_SCRIPT)
+            otext += '<style type="text/css">\n{0}</style><script LANGUAGE="JavaScript">\n{1}\n</script>'.format(HTML_STYLE, JS_SCRIPT)
         # mathjax support
         otext += '\n<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>\n'
         otext += '</head><body><a name="top"></a>{1}{2}<div class="{0}"><div class="content">{3}</div></div></body></html>'.\
@@ -1158,37 +1158,37 @@ class LogToHtml(HtmlParser):
     def m_title(self, title, author):
         return '''
         <div class="top">
-        {}{}
+        {0}{1}
         </div>
-        '''.format('<h1 class="title">{}</h1>'.format(title) if title else '', '<div class="author" >Edited by {}, on {}</div>'.format(author, strftime("%a %d %b %Y %H:%M:%S", localtime())) if author else '')
+        '''.format('<h1 class="title">{0}</h1>'.format(title) if title else '', '<div class="author" >Edited by {0}, on {1}</div>'.format(author, strftime("%a %d %b %Y %H:%M:%S", localtime())) if author else '')
 
     def m_chapter(self, text, i):
         return '''
-        <h1 class="superheading" id="chapter_{}">{}</h1><hr size="5" noshade>
+        <h1 class="superheading" id="chapter_{0}">{1}</h1><hr size="5" noshade>
         '''.format(i, text)
 
     def m_section(self, text, i):
         return '''
-        <h2 class="heading" id="section_{}">{}</h2>
+        <h2 class="heading" id="section_{0}">{1}</h2>
         '''.format(i, text)
 
     def m_ssection(self, text, i):
         return '''
-        <h3 class="subheading" id="subsection_{}">{}</h3>
+        <h3 class="subheading" id="subsection_{0}">{1}</h3>
         '''.format(i, text)
 
     def m_sssection(self, text):
         return '''
-        <h3 class="subsubheading">&#9642; {}</h3>
+        <h3 class="subsubheading">&#9642; {0}</h3>
         '''.format(text)
 
     def _csize(self, v, k):
         if k.startswith('chapter'):
-            return '<big>{}</big>'.format(v)
+            return '<big>{0}</big>'.format(v)
         elif k.startswith('section'):
-            return '{}'.format(v)
+            return '{0}'.format(v)
         else:
-            return '<small>{}</small>'.format(v)
+            return '<small>{0}</small>'.format(v)
 
     def _isize(self, k):
         if k.startswith('chapter'):
@@ -1203,7 +1203,7 @@ class LogToHtml(HtmlParser):
             return ''
         head = '<b>Contents:</b><ul id="toc">\n'
         tail = '\n</ul>'
-        body = '\n'.join(['<li><span style="{}">{}</span><a href="#{}">{}</a></li>'.format(self._isize(k), self._csize(v,k),k,'&clubs;') for k, v in dtoc.items()])
+        body = '\n'.join(['<li><span style="{0}">{1}</span><a href="#{2}">{3}</a></li>'.format(self._isize(k), self._csize(v,k),k,'&clubs;') for k, v in dtoc.items()])
         return '<div class="frame">' + head + body + tail + '</div>'
 
 
@@ -1275,7 +1275,7 @@ class LogToDokuwiki(HtmlParser):
         table = [[self.m_recode(iitem) for iitem in multispace2tab(item).split('\t')] for item in text.split('\n') if item]
         ncols = list(set([len(x) for x in table]))
         if len(ncols) > 1:
-            self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(text))
+            self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {0}".format(text))
         body = '<WRAP center 80%>\n' + '^  ' + '  ^  '.join(table[0]) + '  ^\n' + '\n'.join(['|  ' + '  |  '.join(item) + '  |' for item in table[1:]]) + '\n</WRAP>\n' 
         return body
 
@@ -1505,7 +1505,7 @@ class LogToPmwiki(HtmlParser):
         table = [[self.m_recode(iitem) for iitem in multispace2tab(item).split('\t')] for item in text.split('\n') if item]
         ncols = list(set([len(x) for x in table]))
         if len(ncols) > 1:
-            self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(text))
+            self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {0}".format(text))
         body = '|| border=1 align=center width=80%\n' + '||! ' + ' ||! '.join(table[0]) + ' ||\n' + '\n'.join(['|| ' + ' || '.join(item) + ' ||' for item in table[1:]]) + '\n' 
         return body
 
