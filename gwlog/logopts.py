@@ -1,4 +1,8 @@
-import sys, argparse, shutil, os
+import sys, shutil, os
+try:
+    from argparse import ArgumentParser
+except:
+    from .argparse import ArgumentParser
 import codecs
 from .utils import getfname, pdflatex, indexhtml
 from .logtranslator import LogToTex, LogToBeamer, LogToHtml, LogToDokuwiki, LogToPmwiki
@@ -59,7 +63,7 @@ def admin(args):
 
 class LogOpts:
     def __init__(self):
-        self.master_parser = argparse.ArgumentParser(
+        self.master_parser = ArgumentParser(
         description = '''Compile formatted log notes into pdf file''',
         prog = 'gw_log',
         fromfile_prefix_chars = '@',
