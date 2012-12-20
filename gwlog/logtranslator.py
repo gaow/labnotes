@@ -1496,7 +1496,7 @@ class LogToPmwiki(HtmlParser):
         text, mapping = self._holdblockplace(text, mode = 'hold')
         self._checkblockprefix(text)
         text = text.split('\n')
-        text = '\n'.join([x if x.startswith(self.blockph) else self.m_recode_dokuwiki(re.sub(r'^{0}'.format(self.mark), '\t*\t', re.sub(r'^{0}'.format(self.mark*2), '\t\t*\t', x))) for x in text])
+        text = '\n'.join([x if x.startswith(self.blockph) else self.m_recode_pmwiki(re.sub(r'^{0}'.format(self.mark), '\t*\t', re.sub(r'^{0}'.format(self.mark*2), '\t\t*\t', x))) for x in text])
         text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
         return text
 
@@ -1506,7 +1506,7 @@ class LogToPmwiki(HtmlParser):
         ncols = list(set([len(x) for x in table]))
         if len(ncols) > 1:
             self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {}".format(text))
-        body = '<WRAP center 80%>\n' + '^  ' + '  ^  '.join(table[0]) + '  ^\n' + '\n'.join(['|  ' + '  |  '.join(item) + '  |' for item in table[1:]]) + '\n</WRAP>\n' 
+        body = '|| border=1 align=center width=80%\n' + '||! ' + ' ||! '.join(table[0]) + ' ||\n' + '\n'.join(['|| ' + ' || '.join(item) + ' ||' for item in table[1:]]) + '\n' 
         return body
 
     def _parsecmd(self, text, serial, numbered = False):
@@ -1625,7 +1625,7 @@ class LogToPmwiki(HtmlParser):
                         self.text[idx] = ''
                         break
         # do not use strip at all, for pmwiki
-        self.text = [x for x in self.text if x]
+        self.text = [x.lstrip() for x in self.text if x.lstrip()]
         otext = '\n'.join(self.text)
         if not self.toc:
             otext = otext.replace('(:toc:)', '')

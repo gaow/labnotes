@@ -46,9 +46,11 @@ def dokuwiki(args):
     return
 
 def pmwiki(args):
-    htm = LogToPmwiki(args.filename)
+    htm = LogToPmwiki(args.filename, args.toc, args.img)
     lite = 1 if args.lite else 0
-    print(htm.get(lite))
+    fname = getfname(args.filename, args.output, suffix='.txt')
+    with codecs.open(fname + '.txt', 'w', encoding='UTF-8', errors='ignore') as f:
+        f.writelines(htm.get(lite))
     return
 
 def admin(args):
