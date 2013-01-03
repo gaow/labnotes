@@ -1,4 +1,4 @@
-gw_log
+tigernotes
 ==========================
 Gao Wang (*) 2012, GNU GPL
 
@@ -9,43 +9,43 @@ sudo apt-get install texlive texlive-xetex texlive-latex-extra texlive-fonts-ext
 Installation
 ------------
 cd path/to/some/folder
-svn co svn+ssh://usrname@csg.bcmd.bcm.edu/nfs/usr/local/svn/gw_log ./
+svn co svn+ssh://usrname@csg.bcmd.bcm.edu/nfs/usr/local/svn/tigernotes ./
 svn up
 sudo python3 setup.py install
 
 Help
 ----
-gw_log -h
+tigernotes -h
 
 DOC Example
 -----------
-gw_log doc -h
-gw_log doc demo.notes --author "John Doe" --title "Example log documentation" -f --lite --output d1.pdf
-gw_log doc demo.notes --author "John Doe" --title "Example log documentation" --toc --output d2.pdf
-gw_log doc demo.notes --no_page_number --no_section_number --output d3.pdf
+tigernotes doc -h
+tigernotes doc demo.notes --author "John Doe" --title "Example log documentation" -f --lite --output d1.pdf
+tigernotes doc demo.notes --author "John Doe" --title "Example log documentation" --toc --output d2.pdf
+tigernotes doc demo.notes --no_page_number --no_section_number --output d3.pdf
 
 SLIDES Example
 --------------
-gw_log slides -h
-gw_log slides demo.snotes -o d3
-gw_log slides demo.snotes --theme plain -o d4
-gw_log slides demo.snotes -a "John Doe" -t "Example log slides" -i "McDonald's" --toc -o d5
-gw_log slides demo.snotes -a "John Doe" -t "Example log slides" -i "McDonald's" --toc --theme heavy -o d6
-gw_log slides demo.snotes -a "John Doe" -t "Example log slides" --toc --mode handout -o d7
-gw_log slides demo.snotes -a "John Doe" -t "Example log slides" --toc --mode notes -o d8
+tigernotes slides -h
+tigernotes slides demo.snotes -o d3
+tigernotes slides demo.snotes --theme plain -o d4
+tigernotes slides demo.snotes -a "John Doe" -t "Example log slides" -i "McDonald's" --toc -o d5
+tigernotes slides demo.snotes -a "John Doe" -t "Example log slides" -i "McDonald's" --toc --theme heavy -o d6
+tigernotes slides demo.snotes -a "John Doe" -t "Example log slides" --toc --mode handout -o d7
+tigernotes slides demo.snotes -a "John Doe" -t "Example log slides" --toc --mode notes -o d8
 
 HTML Example
 ------------
-gw_log html -h
-gw_log html demo.notes -o d1 --author "John Doe" --title "Example log documentation" --lite
-gw_log html demo.notes -o d2 --author "John Doe" --title "Example log documentation" --lite --columns 2
-gw_log html demo.notes -o d3 --author "John Doe" --title "Example log documentation" --toc --separate
-gw_log admin *.html -o index -a index_html 
+tigernotes html -h
+tigernotes html demo.notes -o d1 --author "John Doe" --title "Example log documentation" --lite
+tigernotes html demo.notes -o d2 --author "John Doe" --title "Example log documentation" --lite --columns 2
+tigernotes html demo.notes -o d3 --author "John Doe" --title "Example log documentation" --toc --separate
+tigernotes admin *.html -o index -a index_html 
 
 DOKUWIKI Example
 ----------------
-gw_log dokuwiki -h
-gw_log dokuwiki demo.notes -o ~/html/data/pages/demo.txt --toc 
+tigernotes dokuwiki -h
+tigernotes dokuwiki demo.notes -o ~/html/data/pages/demo.txt --toc 
 
 Syntax
 ------

@@ -32,7 +32,7 @@ def html(args):
         with open('style.css', 'w') as f: f.writelines(css)
     if js:
         with open('script.js', 'w') as f: f.writelines(js)
-    woff = os.path.join(os.path.dirname(sys.modules['gwlog'].__file__), 'PTSans.woff')
+    woff = os.path.join(os.path.dirname(sys.modules['libtigernotes'].__file__), 'PTSans.woff')
     if os.path.exists(woff):
         shutil.copy2(woff, '.')
     return
@@ -66,34 +66,33 @@ def admin(args):
 class LogOpts:
     def __init__(self):
         self.master_parser = ArgumentParser(
-        description = '''Compile formatted log notes into pdf file''',
-        prog = 'gw_log',
+        description = '''Compile formatted notes into various publishable formats''',
+        prog = 'tigernotes',
         fromfile_prefix_chars = '@',
-        epilog = '''gw_log, motivated by documenting the workflow for the ESP6900 data analysis.
-        Contact: Gao Wang <gaow@bcm.edu>''')
+        epilog = '''Copyright (*) 2012 Gao Wang <ewanggao@gmail.com>''')
         self.master_parser.add_argument('--version', action='version', version='%(prog)s 1.0alpha')
         subparsers = self.master_parser.add_subparsers()
         # latex
-        parser = subparsers.add_parser('doc', help='Generate text document from log file(s)')
+        parser = subparsers.add_parser('doc', help='Generate text document from notes file(s)')
         self.getTexArguments(parser)
         self.getDocArguments(parser)
         parser.set_defaults(func=doc)
         # beamer
-        parser = subparsers.add_parser('slides', help='Generate slides from log file(s)')
+        parser = subparsers.add_parser('slides', help='Generate slides from notes file(s)')
         self.getTexArguments(parser)
         self.getSlidesArguments(parser)
         parser.set_defaults(func=slides)
         # html
-        parser = subparsers.add_parser('html', help='Generate HTML page from log file(s)')
+        parser = subparsers.add_parser('html', help='Generate HTML page from notes file(s)')
         self.getTexArguments(parser)
         self.getHtmlArguments(parser)
         parser.set_defaults(func=html)
         # dokuwiki
-        parser = subparsers.add_parser('dokuwiki', help='Generate dokuwiki text from log file(s)')
+        parser = subparsers.add_parser('dokuwiki', help='Generate dokuwiki text from notes file(s)')
         self.getDokuwikiArguments(parser)
         parser.set_defaults(func=dokuwiki)
         # pmwiki
-        parser = subparsers.add_parser('pmwiki', help='Generate pmwiki text from log file(s)')
+        parser = subparsers.add_parser('pmwiki', help='Generate pmwiki text from notes file(s)')
         self.getDokuwikiArguments(parser)
         parser.set_defaults(func=pmwiki)
         # admin
@@ -114,7 +113,7 @@ class LogOpts:
         parser.add_argument('filename',
                         metavar = 'FN',
                         nargs = '+',
-                        help='''name of the input log file(s)''')
+                        help='''name of the input notes file(s)''')
         parser.add_argument('-a', '--author',
                         action='store',
                         default = '',

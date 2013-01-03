@@ -20,7 +20,7 @@ sudo apt-get install texlive texlive-xetex texlive-latex-extra texlive-fonts-ext
 ###
 # compile & install the program:
 cd path/to/some/folder
-svn co svn+ssh://usrname@csg.bcmd.bcm.edu/nfs/usr/local/svn/gw_log ./
+svn co svn+ssh://usrname@csg.bcmd.bcm.edu/nfs/usr/local/svn/tigernotes ./
 svn up
 sudo python3 setup.py install
 
@@ -29,11 +29,11 @@ sudo python3 setup.py install
 ###
 # Run the following script and read the output
 #{bash
-gw_log -h
-gw_log doc -h
-gw_log slides -h
-gw_log doc demo.notes --author "John Doe" --title "Example log documentation" -f --lite --output d1.pdf
-gw_log doc demo.notes --author "John Doe" --title "Example log documentation" --toc --output d2.pdf
+tigernotes -h
+tigernotes doc -h
+tigernotes slides -h
+tigernotes doc demo.notes --author "John Doe" --title "Example log documentation" -f --lite --output d1.pdf
+tigernotes doc demo.notes --author "John Doe" --title "Example log documentation" --toc --output d2.pdf
 #}
 
 ###

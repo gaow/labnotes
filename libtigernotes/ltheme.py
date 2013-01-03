@@ -705,7 +705,7 @@ CONFIG = '''
 \\hypersetup{
 	pdftitle={Beamer Presentation},
 	pdfsubject={Beamer Presentation},
-	pdfauthor={gw_log},
+	pdfauthor={tigernotes},
 %%	pdfpagemode={FullScreen},
 	pdfkeywords={acrobat, Beamer}%%,
 %%	colorlinks={true},

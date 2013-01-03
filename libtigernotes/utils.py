@@ -60,7 +60,7 @@ import stat
 def pdflatex(fname, text, vanilla=False, beamer = False):
     # setup temp dir
     tmp_dir = None
-    pattern = re.compile(r'gw_log_cache_*(.*)')
+    pattern = re.compile(r'tigernotes_cache_*(.*)')
     for fn in os.listdir(tempfile.gettempdir()):
         if pattern.match(fn):
             tmp_dir = os.path.join(tempfile.gettempdir(), fn)
@@ -68,12 +68,12 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
     if tmp_dir and vanilla:
         os.system('rm -rf {0}'.format(tmp_dir))
         sys.stderr.write('INFO: cache folder {0} is removed\n'.format(tmp_dir))
-        tmp_dir = tempfile.mkdtemp(prefix='gw_log_cache_')
+        tmp_dir = tempfile.mkdtemp(prefix='tigernotes_cache_')
     if not tmp_dir:
-        tmp_dir = tempfile.mkdtemp(prefix='gw_log_cache_')
+        tmp_dir = tempfile.mkdtemp(prefix='tigernotes_cache_')
     if (not os.access(tmp_dir, os.R_OK)) or (not os.access(tmp_dir, os.W_OK)) or (os.stat(tmp_dir).st_mode & stat.S_ISVTX == 512):
             home_dir = os.getenv("HOME")
-            tmp_dir = os.path.join(home_dir, 'gw_log_cache')
+            tmp_dir = os.path.join(home_dir, 'tigernotes_cache')
             if not os.path.exists(tmp_dir): os.makedirs(tmp_dir)
     dest_dir = os.getcwd()
     os.chdir(tmp_dir)
