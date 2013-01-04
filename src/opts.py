@@ -106,7 +106,7 @@ class LogOpts:
         parser.set_defaults(func=dokuwiki)
         # pmwiki
         parser = subparsers.add_parser('pmwiki', help='Generate pmwiki text from notes file(s)')
-        self.getDokuwikiArguments(parser)
+        self.getPmwikiArguments(parser)
         parser.set_defaults(func=pmwiki)
         # admin
         parser = subparsers.add_parser('admin', help='A collection of utility features')
@@ -205,42 +205,48 @@ class LogOpts:
                         action='store_true',
                         help='''use separate files for css and js scripts''')
 
-    def getDokuwikiArguments(self, parser):
-            parser.add_argument('filename',
+    def getPmwikiArguments(self, parser):
+        parser.add_argument('filename',
                         metavar = 'FN',
                         nargs = '+',
                         help='''name of the input file(s)''')
-            parser.add_argument('-o', '--output',
+        parser.add_argument('-o', '--output',
                         metavar='name',
                         type=str,
                         help='''name of output file''')
-            parser.add_argument('--img',
+        parser.add_argument('--img',
                         metavar='PATH',
                         type=str,
                         help='''remote relative path for image, usually is the namespace a dokuwiki page belongs to''')
-            parser.add_argument('--lite',
+        parser.add_argument('--lite',
                         action='store_true',
                         default = '',
                         help='''mask commented-out text from output''')
-            parser.add_argument('--toc',
+        parser.add_argument('--toc',
                         action='store_true',
                         default = '',
                         help='''generate table of contents''')
-            parser.add_argument('--showall',
+
+    def getDokuwikiArguments(self, parser):
+        self.getPmwikiArguments(parser)
+        parser.add_argument('--showall',
                         action='store_true',
                         default = '',
                         help='''unfold source code / output fields in page by default''')
 
+
+
+
     def getAdminArguments(self, parser):
-            parser.add_argument('filename',
+        parser.add_argument('filename',
                         metavar = 'FN',
                         nargs = '+',
                         help='''name of the input file(s)''')
-            parser.add_argument('-a', '--action',
+        parser.add_argument('-a', '--action',
                         type=str,
                         choices=['index_html'],
                         help='''action to be applied to input files''')
-            parser.add_argument('-o', '--output',
+        parser.add_argument('-o', '--output',
                         metavar='name',
                         type=str,
                         help='''name of output file''')

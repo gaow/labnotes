@@ -10,7 +10,7 @@
 ###
 #{list
 # ""2013.01.03"" Automatic DOI conversion to publishable citation, via [CrossRef|@http://crossref.org@] API
-# ""2012.12.11"" Initial upload
+# ""2012.12.12"" Initial upload
 #}
 ###
 # Dependencies
@@ -81,6 +81,11 @@ tigernotes admin *.html -o index -a index_html
 tigernotes dokuwiki -h
 tigernotes dokuwiki example.notes -o ~/html/data/pages/example.txt --toc 
 #}
+#! PMWIKI Example
+#{bash pmwiki
+tigernotes pmwiki -h
+tigernotes pmwiki example.notes --toc 
+#}
 ###
 # Known Issues
 ###
@@ -94,10 +99,11 @@ tigernotes dokuwiki example.notes -o ~/html/data/pages/example.txt --toc
 #{-----
 gw_log dokuwiki tigernotes.notes --lite --showall
 scp tigernotes.txt tigerwang@tigerwang.org:./html/data/pages/software
+rm -rf ~/tmp/tigernotes* 
 svn export ~/Dropbox/Programs/tigernotes ~/tmp/tigernotes
+echo "Last updated:" `date` > ~/tmp/tigernotes/VERSION
 cd ~/tmp; tar -zcvf tigernotes-latest.tar.gz tigernotes
 scp ~/tmp/tigernotes-latest.tar.gz tigerwang@tigerwang.org:./html/downloads/
-rm -rf ~/tmp/tigernotes* 
 cd -
 #}-----
 
