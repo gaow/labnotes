@@ -26,13 +26,27 @@ tigernotes -h
 ###
 # Syntax
 ###
-#FIXME this section needs more editing
+#FIXME Need more explanations to @@tigernotes@@ syntax
 #{out syntax
-###  ###				#{ ----------	#{out	#{table	#{ xxx (xxx = warning, important, tip, note)	#{list		#{ xxx (xxx = latex, bash, r, cpp, python, sql, php, text)
-#!   #									#						#(or ##)
-###, ###, #!, #!!, #!!!, #, #*, 	#} ----------,  #}	#}	#}     						#} 		#}
+      ###   ###
+      #!    #
+      ###   ###	#!	#!!	#!!!	#
 
-Emphasis: ``double quote'', `single quote',  "italics", ""bold"", """bold italics""", @@@raw \LaTeXe syntax@@@, @@monospaced@@, @url@, [keyword|footnote]
+      #{ ----------	#{out	#{table	#{list		
+      #} ----------	#}	#}	#}
+
+      #{ xxx (xxx = warning, important, tip, note) [name]	
+      #
+      #}
+
+      #{ xxx (xxx = latex, bash, r, cpp, python, sql, php, text) [Name]
+
+      #}
+
+      #* figure1 size; figure2 size ...
+
+      ``double quote'', `single quote', "italics", ""bold"", """bold italics""", @@monospaced@@
+      @url@, [keyword|footnote], [text|@url@], [text|@DOI://<doi number>@], @@@raw \LaTeXe syntax@@@
 #}
 ###
 # Examples
