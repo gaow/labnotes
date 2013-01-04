@@ -12,6 +12,12 @@ class Pmwiki(HtmlParser):
         self.m_parseComments()
         self.m_parseText()
 
+    def _parseUrl(self, line):
+        pattern = re.compile('@(.*?)@')
+        for m in re.finditer(pattern, line):
+            line = '[[' + line.replace(m.group(0), m.group(1)) + ']]'
+        return line
+        
     def m_recode_pmwiki(self, line):
         # the use of ? is very important
         #>>> re.sub(r'@@(.*)@@', r'\\texttt{\1}', line)
@@ -27,6 +33,10 @@ class Pmwiki(HtmlParser):
         for m in re.finditer(pattern, line):
             line = line.replace(m.group(0), self.latexph + str(len(raw)))
             raw.append(m.group(1))
+        # DOI online lookup
+        pattern = re.compile('@DOI://(.*?)@')
+        for m in re.finditer(pattern, line):
+            line = line.replace(m.group(0), getPaper(m.group(1)))
         line = re.sub(r'"""(.*?)"""', r"''''\1''''", line)
         line = re.sub(r'""(.*?)""', r"'''\1'''", line)
         line = re.sub(r'"(.*?)"', r"''\1''", line)
@@ -42,11 +52,9 @@ class Pmwiki(HtmlParser):
                 line = line.replace(m.group(0), '[[{1}|{0}]]'.format(m.group('a'), m.group('b')))
             else:
                 # is footnote
-                line = line.replace(m.group(0), m.group('b') + '[^{0}^]'.format(m.group('a')))
+                line = line.replace(m.group(0), self._parseUrl(m.group('b')) + '[^{0}^]'.format(m.group('a')))
         # url
-        pattern = re.compile('@(.*?)@')
-        for m in re.finditer(pattern, line):
-            line = '[[' + line.replace(m.group(0), m.group(1)) + ']]'
+        line = self._parseUrl(line)
         # recover monospace
         line = re.sub(r'MONOSPACEPLACEHOLDERSTART(.*?)MONOSPACEPLACEHOLDEREND', r'@@(.*?)@@', line)
         # recover raw latex syntax

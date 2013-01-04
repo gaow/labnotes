@@ -13,6 +13,12 @@ class Dokuwiki(HtmlParser):
         self.m_parseComments()
         self.m_parseText()
 
+    def _parseUrl(self, line):
+        pattern = re.compile('@(.*?)@')
+        for m in re.finditer(pattern, line):
+            line = line.replace(m.group(0), m.group(1))
+        return line
+
     def m_recode_dokuwiki(self, line):
         # the use of ? is very important
         #>>> re.sub(r'@@(.*)@@', r'\\texttt{\1}', line)
@@ -28,6 +34,10 @@ class Dokuwiki(HtmlParser):
         for m in re.finditer(pattern, line):
             line = line.replace(m.group(0), self.latexph + str(len(raw)))
             raw.append(m.group(1))
+        # DOI online lookup
+        pattern = re.compile('@DOI://(.*?)@')
+        for m in re.finditer(pattern, line):
+            line = line.replace(m.group(0), getPaper(m.group(1)))
         line = re.sub(r'"""(.*?)"""', r"**//\1//**", line)
         line = re.sub(r'""(.*?)""', r'**\1**', line)
         line = re.sub(r'"(.*?)"', r'//\1//', line)
@@ -43,11 +53,9 @@ class Dokuwiki(HtmlParser):
                 line = line.replace(m.group(0), '[[{1}|{0}]]'.format(m.group('a'), m.group('b')))
             else:
                 # is footnote
-                line = line.replace(m.group(0), m.group('a') + '(({0}))'.format(m.group('b')))
+                line = line.replace(m.group(0), m.group('a') + '(({0}))'.format(self._parseUrl(m.group('b'))))
         # url
-        pattern = re.compile('@(.*?)@')
-        for m in re.finditer(pattern, line):
-            line = line.replace(m.group(0), m.group(1))
+        line = self._parseUrl(line)
         # recover raw latex syntax
         for i in range(len(raw)):
             line = line.replace(self.latexph + str(i), raw[i])

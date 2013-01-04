@@ -2,7 +2,7 @@ import os, sys, re
 from time import strftime, localtime
 from collections import OrderedDict
 import codecs
-from .utils import wraptxt, multispace2tab
+from .utils import wraptxt, multispace2tab, getPaper
 from .style import MODE, CONFIG, TITLE, THANK, THEME, DOC_PACKAGES, DOC_CONFIG, HTML_STYLE, JS_SCRIPT
 
 SYNTAX = {'r':'r',
@@ -82,6 +82,10 @@ class TexParser:
         for m in re.finditer(pattern, line):
             line = line.replace(m.group(0), self.latexph + str(len(raw)))
             raw.append(m.group(1))
+        # DOI online lookup
+        pattern = re.compile('@DOI://(.*?)@')
+        for m in re.finditer(pattern, line):
+            line = line.replace(m.group(0), getPaper(m.group(1)))
         # latex keywords
         for item in [('\\', '!!\\backslash!!'),('$', '\$'),('!!\\backslash!!', '$\\backslash$'),
                 ('{', '\{'),('}', '\}'),('%', '\%'), ('_', '\-\_'),('|', '$|$'),('&', '\&'),('<', '$<$'),
@@ -433,6 +437,13 @@ class HtmlParser(TexParser):
         else:
             return 'http://', text
 
+    def _parseUrl(self, line):
+        pattern = re.compile('@(.*?)@')
+        for m in re.finditer(pattern, line):
+            prefix, address = self._parseUrlPrefix(m.group(1))
+            line = line.replace(m.group(0), '<a href="{0}{1}">{1}</a>'.format(prefix, address, address))      
+        return line
+        
     def m_recode(self, line):
         if not line:
             return ''
@@ -443,6 +454,10 @@ class HtmlParser(TexParser):
         for m in re.finditer(pattern, line):
             line = line.replace(m.group(0), self.htmlph + str(len(raw)))
             raw.append(m.group(1))
+        # DOI online lookup
+        pattern = re.compile('@DOI://(.*?)@')
+        for m in re.finditer(pattern, line):
+            line = line.replace(m.group(0), getPaper(m.group(1)))
         # html keywords
         # no need to convert most of them
         for item in [
@@ -480,13 +495,10 @@ class HtmlParser(TexParser):
                 if k in self.bib.keys():
                     if self.bib[k] != [m.group('a'), m.group('b')]:
                         k += str(len(self.bib.keys()))
-                self.bib[k] = [m.group('a'), m.group('b')]
+                self.bib[k] = [m.group('a'), self._parseUrl(m.group('b'))]
                 line = line.replace(m.group(0), '<a href="#footnote-{0}">{1}</a>'.format(k, m.group('a')))
         # standalone url
-        pattern = re.compile('@(.*?)@')
-        for m in re.finditer(pattern, line):
-            prefix, address = self._parseUrlPrefix(m.group(1))
-            line = line.replace(m.group(0), '<a href="{0}{1}">{1}</a>'.format(prefix, address, address))
+        line = self._parseUrl(line)
         # recover raw html syntax
         for i in range(len(raw)):
             line = line.replace(self.htmlph + str(i), raw[i])

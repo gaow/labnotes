@@ -38,20 +38,23 @@ class PaperList:
         self.db_ext = ext
         self.filename = db if db.endswith(self.db_ext) else db + self.db_ext
         self.db = self.loadDB(self.filename)
+        self.updated = True
 
     def loadDB(self, fn):
-        # load data if database file exists, otherwise create a new one
+        '''load data if database file exists, otherwise create a new one'''
         try:
             return json.load(open(fn))
         except:
             return json.loads(json.dumps({}))
 
-    # add a new paper (json format) into paperlist, return a pair of boolean: frist to say if sucess to add; second to say if find a existing one
     def addPaper(self, doi, paper = None, overwrite = False):
+        ''' add a new paper (json format) into paperlist, return a pair of boolean:
+        first to say if sucess to add; second to say if find a existing one'''
         if doi in self.getDoi():
             if overwrite:
                 try:
                     self.db[doi] = doi2papers(doi) if not paper else paper
+                    self.updated = True
                     return ('found', 'exists')
                 except:
                     return ('not found', 'exists')
@@ -60,6 +63,7 @@ class PaperList:
         else:
             try:
                 self.db[doi] = doi2papers(doi) if not paper else paper
+                self.updated = True
                 return ('found', 'not exist')
             except:
                 return ('not found', 'not exist')
@@ -73,8 +77,11 @@ class PaperList:
     def getAuthors(self, paper):
         try:
             info = paper['doi_record']['crossref']['journal']['journal_article']['contributors']
-            info = [x['given_name'] + ' ' + x['surname'] for x in info]
-            info = ', '.join(info[:-1]) + ' and ' + info[-1]
+            info = [x['given_name'] + ' ' + x['surname'] for x in info if x['contributor_role'] == 'author']
+            if len(info) == 1:
+                info = info[0]
+            else:
+                info = ', '.join(info[:-1]) + ' and ' + info[-1]
         except:
             info = ''
         return info
@@ -108,7 +115,7 @@ class PaperList:
         try:
             info = paper['doi_record']['crossref']['journal']['journal_article']['doi_data']['resource']
         except:
-            info = ''
+            info = '-'
         return info        
         
     def getInfo(self, paper, info):
@@ -126,8 +133,9 @@ class PaperList:
         return info
 
     def dump(self):
-        with open(self.filename, 'w') as f:
-            f.write(json.dumps(self.db))
+        if self.updated == True:
+            with open(self.filename, 'w') as f:
+                f.write(json.dumps(self.db))
 
 class PapersDB:
     def __init__(self, tblname, fields):
@@ -150,15 +158,3 @@ class PapersDB:
         cur.executemany(self.insert_query, data)
         writer.commit()
         print("\n".join(writer.iterdump()))
-
-def getPaper(doi, database):
-    finder = PaperList(database)
-    status = finder.addPaper(doi)
-    sys.stderr.write('{0}: {1} {3}, {2} in database\n'.format(doi,
-		status[0].upper(), status[1].upper(), 'online'))
-    print(finder.extract(doi))
-    finder.dump()
-
-getPaper("10.1002/gepi.21662", "test")
-getPaper("10.1016/j.ajhg.2010.10.012", "test")
-getPaper("10.1038/nrg3046", "test")

@@ -3,6 +3,7 @@ from subprocess import PIPE, Popen
 import tempfile
 from .minted import minted
 from .style import btheme, HTML_INDEX
+from .doi import PaperList
 from collections import OrderedDict
 import codecs
 import stat
@@ -72,7 +73,7 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
         tmp_dir = tempfile.mkdtemp(prefix='tigernotes_cache_')
     if (not os.access(tmp_dir, os.R_OK)) or (not os.access(tmp_dir, os.W_OK)) or (os.stat(tmp_dir).st_mode & stat.S_ISVTX == 512):
             home_dir = os.getenv("HOME")
-            tmp_dir = os.path.join(home_dir, 'tigernotes_cache')
+            tmp_dir = os.path.join(home_dir, '.tigernotes/cache')
             if not os.path.exists(tmp_dir): os.makedirs(tmp_dir)
     dest_dir = os.getcwd()
     os.chdir(tmp_dir)
@@ -162,3 +163,28 @@ def indexhtml(fnames):
         else:
             otext += v + '\n'
     return HTML_INDEX['head'] + otext + HTML_INDEX['tail']
+
+def getPaper(doi):
+    datadir = os.path.expanduser('~/.tigernotes')
+    if not os.path.isdir(datadir):
+        os.makedirs(datadir)
+    database = os.path.join(datadir, 'references.json')
+    finder = PaperList(database)
+    sys.stderr.write('Searching for {0} ...\r'.format(doi))
+    sys.stderr.flush()
+    # update database
+    status = finder.addPaper(doi)
+    sys.stderr.write('{0}: {1} {3}, {2} in database\n'.format(doi,
+		status[0].upper(), status[1].upper(), 'online'))
+    finder.dump()
+    # format citation
+    info = finder.extract(doi)
+    for k, value in info.items():
+        if len(info[k]) == 0:
+            return doi
+    info = '{0} ({2}) ""{1}"". "{3}" doi:@@{4}@@. @{5}@'.\
+        format(info['authors'],
+               info['title'], info['date'],
+               info['journal'], info['DOI'],
+               info['link'])
+    return info 

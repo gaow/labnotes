@@ -9,7 +9,7 @@
 # ChangeLog
 ###
 #{list
-# ""2013.01.03"" Automatic DOI conversion to publishable citation, via @@zotero@@ API
+# ""2013.01.03"" Automatic DOI conversion to publishable citation, via [CrossRef|@http://crossref.org@] API
 # ""2012.12.11"" Initial upload
 #}
 ###
