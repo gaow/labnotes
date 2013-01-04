@@ -1,0 +1,623 @@
+import os, sys, re
+from time import strftime, localtime
+from collections import OrderedDict
+import codecs
+from .utils import wraptxt, multispace2tab
+from .style import MODE, CONFIG, TITLE, THANK, THEME, DOC_PACKAGES, DOC_CONFIG, HTML_STYLE, JS_SCRIPT
+
+SYNTAX = {'r':'r',
+          'sh':'bash',
+          'py':'python',
+          'tex':'latex',
+          'c':'c',
+          'cpp':'cpp',
+          'h':'c',
+          'sqlite':'sql',
+          'php':'php',
+          'txt':'text'
+          }
+
+INVSYNTAX = {'r':'R',
+          'bash':'sh',
+          'python':'py',
+          'latex':'tex',
+          'c':'c',
+          'cpp':'cpp',
+          'sql':'sqlite',
+          'php':'php',
+          'text':'txt'
+          }
+
+# base class
+class TexParser:
+    def __init__(self, title, author, fname):
+        self.title = title.replace('\\n', '\n')
+        self.author = author.replace('\\n', '\n')
+        self.fn = '-'.join(fname)
+        self.mark = '#'
+        self.text = []
+        self.PARSER_RULE = {
+                'list':'self.m_blockizeList',
+                'table':'self.m_blockizeTable',
+                'out':'self.m_blockizeOut'
+                }
+        for item in list(set(SYNTAX.values())):
+            self.PARSER_RULE[item] = 'self.m_blockizeIn'
+        for item in ['warning', 'tip', 'important', 'note']:
+            self.PARSER_RULE[item] = 'self.m_blockizeAlert'
+        self.comments = []
+        self.keywords = ['list', 'table']
+        self.bib = {}
+        self.textbib = ''
+        self.footnote = False
+        self.tablefont = 'footnotesize'
+        # dirty place holders ....
+        self.blockph = 'ABLOCKBLOODYPLACEHOLDER'
+        self.latexph = 'ALATEXBLOODYRAWPATTERNPLACEHOLDER'
+        self.htmlph = 'AHTMLBLOODYRAWPATTERNPLACEHOLDER'
+        self.pause = False
+        self.fig_support = ['jpg','pdf','png', 'eps']
+        self.fig_tag = 'tex'
+
+    def capitalize(self, text):
+        omit = ["a", "an", "the", "and", "but", "or", "nor", "as", "at", "by", "for", "in", "of", "on", "to", "but", "cum", "mid", "off", "per", "qua", "re", "up", "via", "to", "from", "into", "onto", "with", "within", "without"]
+        text = text.split()
+        out = text[0] if text[0] == text[0].upper() else text[0].capitalize() 
+        if len(text) > 1:
+            out += ' ' + ' '.join([x[0].upper() + (x[1:] if len(x) > 1 else '') if x not in omit else x for x in text[1:]])
+        return out
+
+    def m_recode(self, line):
+        # the use of ? is very important
+        #>>> re.sub(r'@@(.*)@@', r'\\texttt{\1}', line)
+        #'\\texttt{aa@@, @@aabb}'
+        #>>> re.sub(r'@@(.*?)@@', r'\\texttt{\1}', line)
+        #'\\texttt{aa}, \\texttt{aabb}'
+        if not line:
+            return ''
+        line = line.strip()
+        raw = []
+        # support for raw latex syntax
+        pattern = re.compile(r'@@@(.*?)@@@')
+        for m in re.finditer(pattern, line):
+            line = line.replace(m.group(0), self.latexph + str(len(raw)))
+            raw.append(m.group(1))
+        # latex keywords
+        for item in [('\\', '!!\\backslash!!'),('$', '\$'),('!!\\backslash!!', '$\\backslash$'),
+                ('{', '\{'),('}', '\}'),('%', '\%'), ('_', '\-\_'),('|', '$|$'),('&', '\&'),('<', '$<$'),
+                ('>', '$>$'),('~', '$\sim$'), ('^', '\^{}'), ('#', '\#')]:
+            line = line.replace(item[0], item[1])
+        line = re.sub(r'"""(.*?)"""', r'\\textbf{\\textit{\1}}', line)
+        line = re.sub(r'""(.*?)""', r'\\textbf{\1}', line)
+        line = re.sub(r'"(.*?)"', r'\\textit{\1}', line)
+        line = re.sub(r'@@(.*?)@@', r'\\texttt{\1}', line)
+        # url
+        pattern = re.compile('@(.*?)@')
+        for m in re.finditer(pattern, line):
+            line = line.replace(m.group(0), '\\url{%s}' % m.group(1).replace('\-\_', '\_').replace('$\sim$', '~'))
+        # citation
+        # [note|reference] defines the pattern for citation.
+        # Will have to use [note$|$reference] here since '|' was previously replaced by $|$
+        pattern = re.compile('\[(?P<a>.+?)\$\|\$(?P<b>.+?)\]')
+        # re.compile('\[(.+?)\|(.+?)\]')
+        for m in re.finditer(pattern, line):
+            if not self.footnote:
+                k = re.sub('\W', '', m.group('a'))
+                if not k:
+                    self.quit("Invalid citation keyword for reference item '{0}'.".format(m.group('b')))
+                if k in self.bib.keys():
+                    if self.bib[k] != [m.group('a'), m.group('b')]:
+                        k += str(len(self.bib.keys()))
+                self.bib[k] = [m.group('a'), m.group('b')]
+                #line = line.replace(m.group(0), '\\cite[%s]{%s}' % (m.group('a'), k))
+                line = line.replace(m.group(0), '{\\color{MidnightBlue}%s}~\\cite{%s}' % (m.group('a'), k))
+            else:
+                line = line.replace(m.group(0), '{\\color{MidnightBlue}%s}~\\footnote{%s}' % (m.group('a'), '\\underline{' + m.group('a') + '} ' + m.group('b')))
+        # recover raw latex syntax
+        for i in range(len(raw)):
+            line = line.replace(self.latexph + str(i), raw[i])
+        return line
+
+    def _bulkreplace(self, text, start, end, nestedtext):
+        end += 1
+        if (end - start) > len(nestedtext):
+            for i in range(start, end):
+                j = i - start
+                if j < len(nestedtext):
+                    text[i] = nestedtext[j]
+                else:
+                    text[i] = None
+        else:
+            self.quit('This is a bug in _bulkreplace() function. Please report it to Gao Wang.')
+        return [x for x in text if x is not None]
+
+    def m_parseBlocks(self, text):
+        idx = 0
+        while True:
+            if idx >= len(text):
+                break
+            if text[idx].startswith(self.mark + '}') and '--' not in text[idx]:
+                self.quit("Invalid use of '%s' without previous %s{, near %s" % \
+                        (text[idx], self.mark, text[idx+1] if idx + 1 < len(text) else "end of document"))
+            if text[idx].startswith(self.mark + '{') and '--' not in text[idx]:
+                # define block
+                bname = text[idx].split('{')[1].strip()
+                try:
+                    # blabel only applicable to some input boxes
+                    bname, blabel = bname.split(None, 1)
+                except:
+                    blabel = None
+                if bname not in [x for x in self.keywords]:
+                    self.quit("Invalid block definition '%s{ %s'" % (self.mark, bname))
+                # find block end
+                endidx = None
+                text[idx] = ''
+                base = 0
+                for i in range(idx + 1, len(text)):
+                    # nested block identified
+                    if text[i].startswith(self.mark + '{'):
+                        if '--' in text[i]:
+                            self.quit('Invalid use of "%s{----" within block environment, near %') %\
+                                (self.mark, self.text[i+1] if i + 1 < len(self.text) else "end of document")
+                        base += 1
+                    # block end identified
+                    if text[i].startswith(self.mark + '}'):
+                        if text[i].rstrip() == self.mark + '}':
+                            if base == 0:
+                                endidx = i
+                                break
+                            else:
+                                base -= 1
+                        else:
+                            self.quit("Invalid %s '%s', near %s" % \
+                                    ('nested use of' if '--' in text[i] else 'symbol', text[i], text[i+1] if idx + 1 < len(text) else "end of document"))
+                if not endidx:
+                    # end of block not found
+                    self.quit("'%s{ %s' and '%s}' must pair properly, near %s" % \
+                            (self.mark, bname, self.mark, text[idx+1] if idx + 1 < len(text) else "end of document"))
+                if idx + 1 == endidx:
+                    # trivial block
+                    text.insert(endidx, '\n')
+                    endidx += 1
+                # block end found, take out this block as new text
+                # and apply the recursion
+                nestedtext = self.m_parseBlocks(text[idx+1:endidx])
+                text = self._bulkreplace(text, idx, endidx, nestedtext)
+                newend = idx + len(nestedtext) - 1
+                # combine block values
+                for i in range(idx + 1, newend + 1):
+                    text[idx] += '\n' + text[i]
+                del text[(idx + 1) : (newend + 1)]
+                # parse the block
+                text[idx] = 'BEGIN' + self.blockph + eval(self.PARSER_RULE[bname])(text[idx], bname, blabel) + 'END' + self.blockph
+            #
+            idx += 1
+        return text
+
+    def m_parseComments(self):
+        for idx, item in enumerate(self.text):
+            # define comment
+            if self.text[idx].startswith(self.mark + '}') and '--' in self.text[idx]:
+                self.quit("Invalid use of '%s}----' without previous '%s{----', near %s" % (self.mark, self.mark, self.text[idx+1] if idx + 1 < len(self.text) else "end of document") )
+            if item.startswith(self.mark + '{') and '--' in item:
+                endidx = None
+                for i in range(idx+1, len(self.text)):
+                    if self.text[i].startswith(self.mark + '{') and '--' in self.text[i]:
+                        self.quit("Nested use of blocks is disallowed: '{0}', near {1}".format(self.text[i], self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
+                    if self.text[i].startswith(self.mark + '}') and '--' in self.text[i]:
+                        endidx = i
+                        break
+                if not endidx:
+                    self.quit('Comment blocks must appear in pairs, near {0}'.format(self.text[i+1] if idx + 1 < len(self.text) else "end of document"))
+                self.comments.append([idx, endidx])
+                self.text[idx] = ''
+                self.text[endidx] = ''
+        return
+
+    def _holdblockplace(self, text, mode = 'remove', rule = {}):
+        # there should be better way to make sure the existing block not to be modified but will use this solution for now
+        mapping = {}
+        if mode == 'hold':
+            text = re.split('({0}|{1})'.format('BEGIN' + self.blockph, 'END' + self.blockph), text)
+            idxes = [0]
+            i = 1
+            while i < len(text):
+                if text[i] == 'BEGIN' + self.blockph:
+                    # block identified
+                    try:
+                        flag = self.blockph not in text[i+1] and text[i+2] == 'END' + self.blockph
+                        if not flag: raise ValueError("invalid block flag found")
+                    except:
+                        self.quit("This is a bug in _holdblockplace() function. Please report it to Gao Wang.")
+                    # block checked
+                    text[i] = self.blockph + str(i) + 'E'
+                    mapping[text[i]] = text[i+1]
+                    idxes.append(i)
+                    # block skipped
+                    i += 3
+                else:
+                    # no block identified
+                    idxes.append(i)
+                    i += 1
+            text = ''.join([item for idx, item in enumerate(text) if idx in idxes])
+        elif mode == 'release':
+            mapping = rule
+            for k, item in mapping.items():
+                text = text.replace(k, item)
+        elif mode == 'remove':
+            text = re.sub(r'{0}|{1}'.format('BEGIN' + self.blockph, 'END' + self.blockph), '', text)
+        return text, mapping
+
+    def _holdfigureplace(self, text):
+        pattern = re.compile('#\*(.*?)(\n|$)')
+        for m in re.finditer(pattern, text):
+            fig = 'BEGIN' + self.blockph + self.insertFigure(m.group(1), support = self.fig_support, tag = self.fig_tag) + 'END' + self.blockph + '\n'
+            text = text.replace(m.group(0), fig, 1)
+        return text
+
+    def insertFigure(self, text, support = ['jpg','pdf','png'], tag = 'tex', remote_path = ''):
+        if text.startswith(self.mark + '*'):
+            text = text[len(self.mark)+1:].strip()
+        else:
+            text = text.strip()
+        if not text:
+            return ''
+        lines = [x.strip() for x in text.split(';') if x.strip()]
+        for idx, line in enumerate(lines):
+            try:
+                fig, width = line.split()
+                width = float(width)
+            except ValueError:
+                fig = line.split()[0]
+                width = 0.9
+            if (not tag.endswith('wiki')) and width > 1:
+                width = 0.9
+            fname = os.path.split(fig)[-1]
+            if not '.' in fname:
+                self.quit("Cannot determine graphic file format for '{0}'. Valid extensions are {1}".format(fname, ' '.join(support)))
+            if fname.split('.')[-1] not in support:
+                self.quit("Input file format '{0}' not supported. Valid extensions are {1}".format(fname.split('.')[-1], ' '.join(support)))
+            if not os.path.exists(fig):
+                self.quit("Cannot find file %s" % fig)
+            # syntax images
+            if tag == 'tex':
+                lines[idx] = '\\includegraphics[width=%s\\textwidth]{%s}\n' % (width, os.path.abspath(fig))
+            elif tag == 'html':
+                lines[idx] = '<p><center><img src="{0}" alt="{1}" width="{2}%" /></center></p>'.format(fig, os.path.split(fig)[-1], int(width * 100))
+            elif tag.endswith("wiki"):
+                if tag == 'dokuwiki':
+                    # dokuwiki style 
+                    lines[idx] = '{{%s:%s?%s}}' % (remote_path, os.path.split(fig)[-1], width)
+                if tag == 'pmwiki':
+                    lines[idx] = '%center% Attach:%s' % (os.path.split(fig)[-1])
+            else:
+                self.quit('Unknown tag for figure {0}'.format(tag))
+        if tag == 'tex':
+            if len(lines) > 1:
+                w_minipage = int(1.0 / (1.0 * len(lines)) * 90) / 100.0
+                lines = ['\\subfigure{' + x + '}\n' for x in lines]
+                lines[0] = '\\begin{figure}[H]\n\\centering\n\\mbox{\n' + lines[0]
+                lines[-1] += '\n}\n\\end{figure}\n'
+            else:
+                lines[0] = '\\begin{figure}[H]\n\\centering\n' + lines[0]
+                lines[-1] += '\\end{figure}\n'
+        return '\n'.join(lines)
+
+    def _checknest(self, text, kw=None):
+        pattern = re.compile('{0}(.*?){1}'.format('BEGIN' + self.blockph, 'END' + self.blockph), re.DOTALL)
+        # re.match() will not work here
+        # will not work without re.DOTALL
+        for m in re.finditer(pattern, text):
+            if m:
+                e = m.group(1)
+                if kw is None:
+                    self.quit('Cannot nest this blocks here:\n{0}'.format(e[:max(200, len(e))]))
+                else:
+                    for k in kw:
+                        if re.search(k, '%r' % e):
+                            self.quit('Cannot nest this blocks here:\n{0}'.format(e[:max(200, len(e))]))
+        return
+
+    def _checkblockprefix(self, text):
+        for item in text.split('\n'):
+            if item.strip() and (not (item.startswith(self.blockph) or item.startswith(self.mark))):
+                self.quit('Items must start with "{0}" in this block. Problematic text is: "{1}"'.format(self.mark, item))
+        return
+
+    def m_blockizeList(self, text, k, label = None):
+        # handle 2nd level indentation first
+        # in the mean time take care of recoding
+        text = self._holdfigureplace(text)
+        text, mapping = self._holdblockplace(text, mode = 'hold')
+        self._checkblockprefix(text)
+        text = text.split('\n')
+        idx = 0
+        while idx < len(text):
+            if text[idx].startswith(self.blockph):
+                idx += 1
+                continue
+            if text[idx].startswith(self.mark * 2):
+                start = idx
+                end = idx
+                text[idx] = self.mark * 2 + self.m_recode(text[idx][2:])
+                text[idx] = re.sub(r'^{0}'.format(self.mark * 2), '\\item ', text[idx])
+                if idx + 1 < len(text):
+                    for j in range(idx + 1, len(text) + 1):
+                        try:
+                            if not text[j].startswith(self.mark * 2):
+                                break
+                            else:
+                                text[j] = self.mark * 2 + self.m_recode(text[j][2:])
+                                text[j] = re.sub(r'^{0}'.format(self.mark * 2), '\\item ', text[j])
+                                end = j
+                        except IndexError:
+                            pass
+                #
+                text[start] = '\\begin{itemize}\n' + text[start]
+                text[end] = text[end] + '\n\\end{itemize}'
+                idx = end + 1
+            elif text[idx].startswith(self.mark):
+                text[idx] = self.mark + self.m_recode(text[idx][1:])
+                idx += 1
+            else:
+                text[idx] = self.m_recode(text[idx])
+                idx += 1
+        # handle 1st level indentation
+        text = '\n'.join([x if x.startswith(self.blockph) else re.sub(r'^{0}'.format(self.mark), '\\item ', x) for x in text])
+        text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
+        text = '\\begin{itemize}\n%s\n\\end{itemize}\n' % text
+        # this is for beamer \pause option
+        if self.pause:
+            text = text.replace('\\item -', '\\pause \\item ')
+        return text
+
+    def m_blockizeTable(self, text, k, label = None):
+        self._checknest(text)
+        table = [[self.m_recode(iitem) for iitem in multispace2tab(item).split('\t')] for item in text.split('\n') if item]
+        ncols = list(set([len(x) for x in table]))
+        if len(ncols) > 1:
+            self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {0}".format(text))
+        try:
+            cols = 'c' * ncols[0]
+            head = '\\begin{center}\n{\\%s\\begin{longtable}{%s}\n\\hline\n' % (self.tablefont, cols)
+            body = '&'.join(table[0]) + '\\\\\n' + '\\hline\n' + '\\\\\n'.join(['&'.join(item) for item in table[1:]]) + '\\\\\n'
+            tail = '\\hline\n\\end{longtable}}\n\\end{center}\n'
+        except IndexError:
+            return ''
+        return head + body + tail
+
+    def m_parseBib(self):
+        if not self.bib:
+            return
+        self.textbib = '\\begin{thebibliography}{9}\n'
+        bibkeys = []
+        #unique, ordered reference list
+        for line in self.text:
+            bibkeys.extend([m.group(1) for m in re.finditer(re.compile('\\cite{(.*?)}'), line)])
+        seen = set()
+        for k in [x for x in bibkeys if x not in seen and not seen.add(x)]:
+            self.textbib += '\\bibitem{%s}\n[%s]\\\\%s\n' % (k, self.bib[k][0], self.bib[k][1])
+        self.textbib += '\\end{thebibliography}'
+
+    def get(self, include_comment):
+        return 'None'
+
+    def quit(self, msg):
+        sys.exit('\033[91mAn ERROR has occured while processing input text "{0}":\033[0m\n\t '.format(self.fn) + msg)
+
+
+class HtmlParser(TexParser):
+    def __init__(self, title, author, filename):
+        TexParser.__init__(self, title, author, filename)
+        self.text = []
+        for fn in filename:
+            try:
+                with codecs.open(fn, 'r', encoding='UTF-8', errors='ignore') as f:
+                    #lines = [l.rstrip() for l in f.readlines() if l.rstrip()]
+                    lines = [l.rstrip() for l in f.readlines()]
+                self.text.extend(lines)
+            except IOError as e:
+                sys.exit(e)
+        self.alertbox = ['warning', 'tip', 'important', 'note']
+        self.keywords = list(set(SYNTAX.values())) + self.alertbox + ['err', 'out', 'list', 'table']
+        self.wrap_width = 90
+        self.tablefont = 'small'
+        self.anchor_id = 0
+        self.fig_support = ['jpg','tif','png']
+        self.html_tag = False
+
+    def _parseUrlPrefix(self, text):
+        prefix = re.search(r'^(.+?)://', text)
+        if prefix:
+            return prefix.group(0), text.replace(prefix.group(0), '')
+        else:
+            return 'http://', text
+
+    def m_recode(self, line):
+        if not line:
+            return ''
+        line = line.strip()
+        raw = []
+        # support for raw html syntax/symbols
+        pattern = re.compile(r'@@@(.*?)@@@')
+        for m in re.finditer(pattern, line):
+            line = line.replace(m.group(0), self.htmlph + str(len(raw)))
+            raw.append(m.group(1))
+        # html keywords
+        # no need to convert most of them
+        for item in [
+               # ('\\', '&#92;'),('$', '&#36;'),
+               # ('{', '&#123;'),('}', '&#125;'),
+               # ('%', '&#37;'),('--', '&mdash;'),
+               # ('-', '&ndash;'),('&', '&amp;'),
+               # ('~', '&tilde;'),('^', '&circ;'),
+               # ('``', '&ldquo;'),('`', '&lsquo;'),
+               # ('#', '&#35;'),
+                ('<', '&lt;'),('>', '&gt;'),
+                ]:
+            line = line.replace(item[0], item[1])
+        line = re.sub(r'"""(.*?)"""', r'<strong><em>\1</em></strong>', line)
+        line = re.sub(r'""(.*?)""', r'<strong>\1</strong>', line)
+        line = re.sub(r'"(.*?)"', r'<em>\1</em>', line)
+        # line = re.sub(r'@@(.*?)@@', r'<span style="font-family: monospace">\1</span>', line)
+        line = re.sub(r'@@(.*?)@@', r'<kbd>\1</kbd>', line)
+        # single/double quotes translated from latex syntax
+        line = re.sub(r"``(.*?)''", r'"\1"', line)
+        line = re.sub(r"`(.*?)'", r"'\1'", line)
+        # footnote and hyperlink
+        # [note|reference] defines the pattern for citation.
+        pattern = re.compile('\[(\s*)(?P<a>.+?)(\s*)\|(\s*)(?P<b>.+?)(\s*)\]')
+        # re.compile('\[(.+?)\|(.+?)\]')
+        for m in re.finditer(pattern, line):
+            # [text|@link@] defines the pattern for direct URL.
+            if re.match(r'(\s*)@(.*?)@(\s*)', m.group('b')):
+                prefix, address = self._parseUrlPrefix(m.group('b').strip()[1:-1])
+                line = line.replace(m.group(0), '<a style="text-shadow: 1px 1px 1px #999;" href="{0}{1}">{2}</a>'.format(prefix, address, m.group('a')))
+            else:
+                k = re.sub('\W', '', m.group('a'))
+                if not k:
+                    self.quit("Invalid citation keyword for reference item '{0}'.".format(m.group('b')))
+                if k in self.bib.keys():
+                    if self.bib[k] != [m.group('a'), m.group('b')]:
+                        k += str(len(self.bib.keys()))
+                self.bib[k] = [m.group('a'), m.group('b')]
+                line = line.replace(m.group(0), '<a href="#footnote-{0}">{1}</a>'.format(k, m.group('a')))
+        # standalone url
+        pattern = re.compile('@(.*?)@')
+        for m in re.finditer(pattern, line):
+            prefix, address = self._parseUrlPrefix(m.group(1))
+            line = line.replace(m.group(0), '<a href="{0}{1}">{1}</a>'.format(prefix, address, address))
+        # recover raw html syntax
+        for i in range(len(raw)):
+            line = line.replace(self.htmlph + str(i), raw[i])
+        return line.strip()
+
+    def m_blockizeList(self, text, k, label = None):
+        # handle 2nd level indentation first
+        # in the mean time take care of recoding
+        text = self._holdfigureplace(text)
+        text, mapping = self._holdblockplace(text, mode = 'hold')
+        self._checkblockprefix(text)
+        text = text.split('\n')
+        idx = 0
+        while idx < len(text):
+            if text[idx].startswith(self.blockph):
+                idx += 1
+                continue
+            if text[idx].startswith(self.mark * 2):
+                start = idx
+                end = idx
+                text[idx] = self.mark * 2 + self.m_recode(text[idx][2:])
+                text[idx] = re.sub(r'^{0}'.format(self.mark * 2), '<li>', text[idx]) + '</li>'
+                if idx + 1 < len(text):
+                    for j in range(idx + 1, len(text) + 1):
+                        try:
+                            if not text[j].startswith(self.mark * 2):
+                                break
+                            else:
+                                text[j] = self.mark * 2 + self.m_recode(text[j][2:])
+                                text[j] = re.sub(r'^{0}'.format(self.mark * 2), '<li>', text[j]) + '</li>'
+                                end = j
+                        except IndexError:
+                            pass
+                #
+                text[start] = '<ol>\n' + text[start]
+                text[end] = text[end] + '\n</ol>'
+                idx = end + 1
+            elif text[idx].startswith(self.mark):
+                text[idx] = self.mark + self.m_recode(text[idx][1:])
+                idx += 1
+            else:
+                text[idx] = self.m_recode(text[idx])
+                idx += 1
+        # handle 1st level indentation
+        text = '\n'.join([x if x.startswith(self.blockph) else  re.sub(r'^{0}'.format(self.mark), '<li>', x + '</li>') for x in text])
+        text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
+        text = '<ul>\n%s\n</ul>\n' % text
+        if self.html_tag:
+            return '<HTML>\n' + text + '\n</HTML>\n'
+        else:
+            return text
+        
+    def m_blockizeTable(self, text, k, label = None):
+        self._checknest(text)
+        table = [[self.m_recode(iitem) for iitem in multispace2tab(item).split('\t')] for item in text.split('\n') if item]
+        ncols = list(set([len(x) for x in table]))
+        if len(ncols) > 1:
+            self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {0}".format(text))
+        start = '<td style="vertical-align: top;"><{0}>'.format(self.tablefont)
+        end = '<br /></{0}></td>'.format(self.tablefont)
+        head = '<center><table><tbody>'
+        body = []
+        line = ''
+        try:
+            for cell in table[0]:
+                line += start + '<b>' + cell + '</b>' + end + '\n'
+            body.append(line)
+            for item in table[1:]:
+                line = ''
+                for cell in item:
+                    line += start + cell + end + '\n'
+                body.append(line)
+        except IndexError:
+            # emtpy table
+            pass
+        #
+        for idx, item in enumerate(body):
+            if idx % 2:
+                body[idx] = '<tr>' + item + '</tr>'
+            else:
+                body[idx] = '<tr class="dark">' + item + '</tr>'
+        tail = '</tbody></table></center>\n'
+        text = head + '\n'.join(body) + tail
+        if self.html_tag:
+            return '<HTML>\n' + text + '\n</HTML>\n'
+        else:
+            return text
+
+
+    def _parsecmd(self, text, serial, numbered = False):
+        head = '<div><div id="highlighter_{0}" class="syntaxhighlighter bash"><table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="gutter">'.format(serial)
+        numbers = ''.join(['<div class="line number{0} index{1} alt{2}">{0}</div>'.format(j+1 if numbered else ' ', j, 2 - j % 2) for j in range(len(text))]) + '</td><td class="code"><div class="container">'
+        lines = ''.join(['<div class="line number{0} index{1} alt{2}"><code class="bash plain">{3}</code></div>'.format(j+1, j, 2 - j % 2, line) for j, line in enumerate(text)])
+        tail = '</div></td></tr></tbody></table></div></div>'
+        text = head + numbers + lines + tail
+        if self.html_tag:
+            return '<HTML>\n' + text + '\n</HTML>\n'
+        else:
+            return text
+
+        
+    def m_blockizeIn(self, text, k, label = None):
+        self._checknest(text)
+        self.anchor_id += 1
+        text = '<div style="color:rgb(220, 20, 60);font-weight:bold;text-align:right;padding-right:2em;"><span class="textborder">' + \
+                        (k.capitalize() if not label else self.m_recode(label)) + '</span></div>' + \
+                        self._parsecmd(wraptxt(text, '', int(self.wrap_width), rmblank = True).split('\n'), str(self.anchor_id), numbered = True)
+        if self.html_tag:
+            return '<HTML>\n' + text + '\n</HTML>\n'
+        else:
+            return text
+
+    def m_blockizeOut(self, text, k, label = None):
+        self._checknest(text)
+        nrow = len(text.split('\n'))
+        text = '<center><textarea rows="{0}", wrap="off">{1}</textarea></center>'.format(max(min(nrow, 30), 1), text)
+        if self.html_tag:
+            return '<HTML>\n' + text + '\n</HTML>\n'
+        else:
+            return text
+        
+    def m_blockizeAlert(self, text, k, label = None):
+        self._checknest(text, kw = [r'id="wrapper"'])
+        text = self._holdfigureplace(text)
+        text, mapping = self._holdblockplace(text, mode = 'hold')
+        self._checkblockprefix(text)
+        text = '\n'.join([item if item.startswith(self.blockph) else self.m_recode(re.sub(r'^{0}'.format(self.mark), '', item)) for item in text.split('\n')])
+        text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
+        text = '<center><div id="wrapper"><div class="{0}"><div style="font-family:\'PT Sans\', comic sans ms;text-align:center;text-decoration:underline{3}; margin-bottom:3px">{1}</div>{2}</div></div></center>'.\
+                        format(k.lower(), k.capitalize() if not label else self.m_recode(label), text, ';color:red' if k.lower() == 'warning' else '')
+        if self.html_tag:
+            return '<HTML>\n' + text + '\n</HTML>\n'
+        else:
+            return text

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
 if __name__ == '__main__':
-	from libtigernotes.logopts import LogOpts as opts
+	from libtigernotes.opts import LogOpts as opts
 	p = opts()
 	p.run()

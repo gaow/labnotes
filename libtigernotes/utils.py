@@ -1,11 +1,11 @@
 import os, sys, re
 from subprocess import PIPE, Popen
 import tempfile
-from minted import minted
-from ltheme import btheme
-from htheme import HTML_INDEX
+from .minted import minted
+from .style import btheme, HTML_INDEX
 from collections import OrderedDict
 import codecs
+import stat
 
 # functions
 def getfname(innames, outname, suffix='.pdf'):
@@ -56,7 +56,6 @@ def multispace2tab(line):
     p = re.compile(r' \s+|\t\s+')
     return p.sub('\t', line)
 
-import stat
 def pdflatex(fname, text, vanilla=False, beamer = False):
     # setup temp dir
     tmp_dir = None
@@ -94,7 +93,7 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
         tc = Popen(["pdflatex", "-shell-escape", "-halt-on-error", "-file-line-error", fname + '.tex'],
             stdin = PIPE, stdout = PIPE, stderr = PIPE)
         out, error = tc.communicate()
-        if (tc.returncode) or error.decode(sys.getdefaultencoding()) or (not os.path.exists(fname + '.pdf')):
+        if visit == 2 and ((tc.returncode) or error.decode(sys.getdefaultencoding()) or (not os.path.exists(fname + '.pdf'))):
             with open(os.path.join(dest_dir, '{0}-ERROR.txt'.format(fname)), 'w', encoding='utf-8') as f:
                 f.writelines(out.decode(sys.getdefaultencoding()) + error.decode(sys.getdefaultencoding()))
             os.system('rm -f {0}.out {0}.toc {0}.aux {0}.log {0}.nav {0}.snm {0}.vrb'.format(fname))
@@ -103,16 +102,12 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
                     * * *
                     * Oops! One of the following problems occurred:
                     * 1. Missing required software / packages dependencies
-                    *   -> Install the dependencies documented in README
-                    * 2. LaTeX gives a warning message
-                    *   -> Did you get the pdf file? If so, ignore the warning
-                    *   -> Run the problem again to see if it goes away
-                    * 3. Invalid raw LaTeX syntax
+                    *   -> Install the required dependencies
+                    * 2. Invalid raw LaTeX syntax
                     *   -> Make sure text in between @@@ ... @@@ symbols is legal
-                    * 4. Cache files messed up
+                    * 3. Cache files messed up
                     *   -> Try to run the program with '--vanilla' option
-                    * 5. Other issues
-                    *   -> Tips above do not get rid of the problem
+                    * 4. Internal bugs
                     *   -> Report file "{0}-ERROR.txt" to Gao Wang
                     * * *\n\n'''.format(fname))
             sys.exit(1)

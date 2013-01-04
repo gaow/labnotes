@@ -5,24 +5,33 @@ except:
     from .argparse import ArgumentParser
 import codecs
 from .utils import getfname, pdflatex, indexhtml
-from .logtranslator import LogToTex, LogToBeamer, LogToHtml, LogToDokuwiki, LogToPmwiki
+from .doc import Tex
+from .slides import Beamer
+from .html import Html
+from .dokuwiki import Dokuwiki
+from .pmwiki import Pmwiki
 
 def doc(args):
-    tex = LogToTex(args.title, args.author, args.toc, args.footnote, args.filename, no_num = args.no_section_number, no_page = args.no_page_number, no_ref = False)
+    tex = Tex(args.title, args.author, args.toc, args.footnote,
+                   args.filename, no_num = args.no_section_number,
+                   no_page = args.no_page_number, no_ref = False)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output)
     pdflatex(fname, tex.get(lite), vanilla=args.vanilla)
     return
 
 def slides(args):
-    tex = LogToBeamer(args.title, args.author, args.institute, args.toc, args.stoc, args.mode, args.theme, args.thank, args.filename)
+    tex = Beamer(args.title, args.author, args.institute,
+                      args.toc, args.stoc, args.mode, args.theme,
+                      args.thank, args.filename)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output)
     pdflatex(fname, tex.get(lite), vanilla=args.vanilla, beamer = True)
     return
 
 def html(args):
-    htm = LogToHtml(args.title, args.author, args.toc, args.filename, args.columns)
+    htm = Html(args.title, args.author, args.toc,
+                    args.filename, args.columns)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output, suffix='.html')
     body, css, js = htm.get(lite, args.separate)
@@ -38,17 +47,21 @@ def html(args):
     return
 
 def dokuwiki(args):
-    htm = LogToDokuwiki(args.filename, args.toc, args.showall, args.img)
+    htm = Dokuwiki(args.filename, args.toc, args.showall, args.img)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output, suffix='.txt')
+    if args.filename == fname + '.txt':
+        raise ValueError('Cannot write output as "{0}": name conflict with source file. Please rename either of them')
     with codecs.open(fname + '.txt', 'w', encoding='UTF-8', errors='ignore') as f:
         f.writelines(htm.get(lite))
     return
 
 def pmwiki(args):
-    htm = LogToPmwiki(args.filename, args.toc, args.img)
+    htm = Pmwiki(args.filename, args.toc, args.img)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output, suffix='.txt')
+    if args.filename == fname + '.txt':
+        raise ValueError('Cannot write output as "{0}": name conflict with source file. Please rename either of them')
     with codecs.open(fname + '.txt', 'w', encoding='UTF-8', errors='ignore') as f:
         f.writelines(htm.get(lite))
     return
@@ -69,7 +82,7 @@ class LogOpts:
         description = '''Compile formatted notes into various publishable formats''',
         prog = 'tigernotes',
         fromfile_prefix_chars = '@',
-        epilog = '''Copyright (*) 2012 Gao Wang <ewanggao@gmail.com>''')
+        epilog = '''Gao Wang <ewanggao@gmail.com> (*) 2012 GNU GPL''')
         self.master_parser.add_argument('--version', action='version', version='%(prog)s 1.0alpha')
         subparsers = self.master_parser.add_subparsers()
         # latex
