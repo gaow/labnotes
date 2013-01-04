@@ -25,9 +25,9 @@ setup(name = 'tigernotes',
         'libtigernotes.pmwiki',
         'libtigernotes.argparse'
     ],
-    scripts = ['tigernotes'],
+    scripts = ['src/tigernotes'],
     cmdclass = {'build_py': build_py },
-    package_dir = {'libtigernotes': 'libtigernotes'},
+    package_dir = {'libtigernotes': 'src'},
     packages = ['libtigernotes'],
     package_data = {'libtigernotes': ['PTSans.woff']}
     )

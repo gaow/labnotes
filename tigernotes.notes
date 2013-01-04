@@ -84,5 +84,6 @@ svn export ~/Dropbox/Programs/tigernotes ~/tmp/tigernotes
 cd ~/tmp; tar -zcvf tigernotes-latest.tar.gz tigernotes
 scp ~/tmp/tigernotes-latest.tar.gz tigerwang@tigerwang.org:./html/downloads/
 rm -rf ~/tmp/tigernotes* 
+cd -
 #}-----
 
