@@ -1,5 +1,6 @@
 from .base import *
 from .style import MODE, CONFIG, TITLE, THANK, THEME
+import codecs
 class Beamer(TexParser):
     def __init__(self, title, author, institute, toc, stoc, mode, theme, thank, filename):
         TexParser.__init__(self, title, author, filename)

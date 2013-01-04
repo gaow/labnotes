@@ -1,5 +1,6 @@
 from .style import DOC_PACKAGES, DOC_CONFIG
 from .base import *
+import codecs
 class Tex(TexParser):
     def __init__(self, title, author, toc, footnote, filename, no_num = False, no_page = False, no_ref = False):
         TexParser.__init__(self, title, author, filename)

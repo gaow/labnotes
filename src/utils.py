@@ -4,7 +4,10 @@ import tempfile
 from .minted import minted
 from .style import btheme, HTML_INDEX
 from .doi import PaperList
-from collections import OrderedDict
+try:
+    from collections import OrderedDict
+except:
+    from .ordereddict import OrderedDict
 import codecs
 import stat
 
@@ -78,7 +81,7 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
     dest_dir = os.getcwd()
     os.chdir(tmp_dir)
     # write tex file
-    with open(fname + '.tex', 'w', encoding='utf-8') as f:
+    with codecs.open(fname + '.tex', 'w', encoding='utf-8') as f:
         f.writelines(text)
     # write sty file
     if not beamer:
@@ -95,7 +98,7 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
             stdin = PIPE, stdout = PIPE, stderr = PIPE)
         out, error = tc.communicate()
         if visit == 2 and ((tc.returncode) or error.decode(sys.getdefaultencoding()) or (not os.path.exists(fname + '.pdf'))):
-            with open(os.path.join(dest_dir, '{0}-ERROR.txt'.format(fname)), 'w', encoding='utf-8') as f:
+            with codecs.open(os.path.join(dest_dir, '{0}-ERROR.txt'.format(fname)), 'w', encoding='utf-8') as f:
                 f.writelines(out.decode(sys.getdefaultencoding()) + error.decode(sys.getdefaultencoding()))
             os.system('rm -f {0}.out {0}.toc {0}.aux {0}.log {0}.nav {0}.snm {0}.vrb'.format(fname))
             #sys.stderr.write('DEBUG:\n\t$ cd {0}\n\t$ pdflatex -shell-escape -halt-on-error -file-line-error {1}\n'.format(tmp_dir, fname + '.tex'))

@@ -1,12 +1,13 @@
 try:
     # python3
     from urllib.request import urlopen
+    from collections import OrderedDict
 except:
     # python2
     from urllib2 import urlopen
+    from .ordereddict import OrderedDict 
 import json
 import sys, os
-from collections import OrderedDict
 from time import sleep
 try:
     import sqlite3

@@ -1,6 +1,9 @@
 import os, sys, re
 from time import strftime, localtime
-from collections import OrderedDict
+try:
+    from collections import OrderedDict
+except:
+    from .ordereddict import OrderedDict
 import codecs
 from .utils import wraptxt, multispace2tab, getPaper
 from .style import MODE, CONFIG, TITLE, THANK, THEME, DOC_PACKAGES, DOC_CONFIG, HTML_STYLE, JS_SCRIPT

@@ -1,4 +1,4 @@
-import os
+import os, codecs
 class btheme:
     def __init__(self, outdir):
         self.outdir = outdir
@@ -623,17 +623,17 @@ class btheme:
         '''
 
     def put(self):
-        with open(os.path.join(self.outdir, 'beamercolorthemericeowl.sty'), 'w', encoding='UTF-8') as f:
+        with codecs.open(os.path.join(self.outdir, 'beamercolorthemericeowl.sty'), 'w', encoding='UTF-8') as f:
             f.write(self.beamercolorthemericeowl)
-        with open(os.path.join(self.outdir, 'beamerouterthemeinfolines.sty'), 'w', encoding='UTF-8') as f:
+        with codecs.open(os.path.join(self.outdir, 'beamerouterthemeinfolines.sty'), 'w', encoding='UTF-8') as f:
             f.write(self.beamerouterthemeinfolines)
-        with open(os.path.join(self.outdir, 'beamerthemeBoadilla.sty'), 'w', encoding='UTF-8') as f:
+        with codecs.open(os.path.join(self.outdir, 'beamerthemeBoadilla.sty'), 'w', encoding='UTF-8') as f:
             f.write(self.beamerthemeBoadilla)
-        with open(os.path.join(self.outdir, 'beamerouterthemerice.sty'), 'w', encoding='UTF-8') as f:
+        with codecs.open(os.path.join(self.outdir, 'beamerouterthemerice.sty'), 'w', encoding='UTF-8') as f:
             f.write(self.beamerouterthemerice)
-        with open(os.path.join(self.outdir, 'beamerouterthemerice2.sty'), 'w', encoding='UTF-8') as f:
+        with codecs.open(os.path.join(self.outdir, 'beamerouterthemerice2.sty'), 'w', encoding='UTF-8') as f:
             f.write(self.beamerouterthemerice2)
-        with open(os.path.join(self.outdir, 'beamerthemeRice.sty'), 'w', encoding='UTF-8') as f:
+        with codecs.open(os.path.join(self.outdir, 'beamerthemeRice.sty'), 'w', encoding='UTF-8') as f:
             f.write(self.beamerthemeRice)
         return
 
@@ -661,9 +661,9 @@ CONFIG = '''
 \\usepackage{beamerthemesplit}
 \\usepackage{pgf,pgfarrows,pgfnodes,pgfautomata,pgfheaps,pgfshade}
 \\usepackage{marvosym}
-\\usepackage{bm}         %% 数学粗体（命令 \\bm）
+\\usepackage{bm}
 \DeclareMathAlphabet{\mathbbm}{U}{bbm}{m}{n}
-\\usepackage{upgreek}    %% 直立体希腊字母（主要使用 \\uppi）
+\\usepackage{upgreek}
 \\urlstyle{tt}
 \\usepackage{lastpage}
 \\usepackage{ulem}
@@ -676,18 +676,18 @@ CONFIG = '''
 %%Make sure it comes last of your loaded packages
 \\usepackage{hyperref}
 %%%%%%%%%%%%%%%%%%
-%%%% 自定义命令
+%%%% 
 %%%%%%%%%%%%%%%%%%
 
-\\newcommand\\dif{\\mathrm{d}}     %% 无前导空格的微分算子 d （一般用于分式）
-\\newcommand\\diff{\\,\\dif}        %% 有前导空格的微分算子 d （一般用于积分式）
-\\newcommand\\me{\\mathrm{e}}      %% 自然对数的底 e
-\\newcommand\\mi{\\mathrm{i}}      %% 虚数单位 i
-\\newcommand{\\defeq}{\\xlongequal{\\text{def}}}    %% 定义为
-\\newcommand*{\\set}[1]{\\left\\{ #1 \\right\\}}                  %% 列举式集合
-\\newcommand*{\\Set}[2]{\\left\\{ \\, #1 \\colon #2 \\, \\right\\}}  %% 描述式集合（分号隔开）
-\\newcommand*{\\abs}[1]{\\left\\lvert #1 \\right\\rvert}          %% 绝对值
-\\newcommand*{\\p}[1]{\\Pr{\\left\\{ #1\\right\\}}}  %% Probability
+\\newcommand\\dif{\\mathrm{d}}
+\\newcommand\\diff{\\,\\dif}
+\\newcommand\\me{\\mathrm{e}}
+\\newcommand\\mi{\\mathrm{i}}
+\\newcommand{\\defeq}{\\xlongequal{\\text{def}}}
+\\newcommand*{\\set}[1]{\\left\\{ #1 \\right\\}}
+\\newcommand*{\\Set}[2]{\\left\\{ \\, #1 \\colon #2 \\, \\right\\}}
+\\newcommand*{\\abs}[1]{\\left\\lvert #1 \\right\\rvert}
+\\newcommand*{\\p}[1]{\\Pr{\\left\\{ #1\\right\\}}}
 
 \\newcommand{\\cc}[1]{\\textcolor{red}{#1}} %% New color
 \\newcommand{\\ie}{\\textit{i.e.}} %% i.e.

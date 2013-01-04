@@ -24,6 +24,7 @@ setup(name = 'tigernotes',
         'libtigernotes.html',
         'libtigernotes.dokuwiki',
         'libtigernotes.pmwiki',
+        'libtigernotes.ordereddict',
         'libtigernotes.argparse'
     ],
     scripts = ['src/tigernotes'],
