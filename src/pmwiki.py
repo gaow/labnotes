@@ -1,4 +1,10 @@
 from .base import *
+def mathjaxphp_convert(item):
+    item = re.sub(r'\$(.*?)\$', r'{$\1$}', item)
+    item = re.sub(r'\\\((.*?)\\\)', r'{$\1$}', item)
+    item = re.sub(r'\\\[(.*?)\\\]', r'{$$\1$$}', item)
+    return item
+    
 class Pmwiki(HtmlParser):
     def __init__(self, fname, toc, img_path):
         HtmlParser.__init__(self, 'wikititle', 'authortitle', fname)
@@ -8,6 +14,7 @@ class Pmwiki(HtmlParser):
             self.img_path = ''
         else:
             self.img_path = img_path
+        self.hasfn = False
         self.text = self.m_parseBlocks(self.text)
         self.m_parseComments()
         self.m_parseText()
@@ -15,7 +22,7 @@ class Pmwiki(HtmlParser):
     def _parseUrl(self, line):
         pattern = re.compile('@(.*?)@')
         for m in re.finditer(pattern, line):
-            line = '[[' + line.replace(m.group(0), m.group(1)) + ']]'
+            line = line.replace(m.group(0), '[[' + m.group(1) + ']]')
         return line
         
     def m_recode_pmwiki(self, line):
@@ -49,17 +56,22 @@ class Pmwiki(HtmlParser):
         for m in re.finditer(pattern, line):
             if re.match(r'(\s*)@(.*?)@(\s*)', m.group('b')):
                 # is a link (internal or external). Have to flip this into [link|link name]
-                line = line.replace(m.group(0), '[[{1}|{0}]]'.format(m.group('a'), m.group('b')))
+                line = line.replace(m.group(0), '[[{1}|{0}]]'.\
+                                        format(m.group('a'),
+                                               re.sub(r'^(\s*)@|@(\s*)$', '', m.group('b'))))
             else:
                 # is footnote
-                line = line.replace(m.group(0), self._parseUrl(m.group('b')) + '[^{0}^]'.format(m.group('a')))
+                self.hasfn = True
+                line = line.replace(m.group(0), m.group('a') + '[^{0}^]'.format(self._parseUrl(m.group('b'))))
         # url
         line = self._parseUrl(line)
         # recover monospace
-        line = re.sub(r'MONOSPACEPLACEHOLDERSTART(.*?)MONOSPACEPLACEHOLDEREND', r'@@(.*?)@@', line)
+        line = re.sub(r'MONOSPACEPLACEHOLDERSTART(.*?)MONOSPACEPLACEHOLDEREND', r'@@\1@@', line)
         # recover raw latex syntax
         for i in range(len(raw)):
-            line = line.replace(self.latexph + str(i), raw[i])
+            #  {$$ ... $$} and {$...$} for MathJax.php for pmwiki, have to replace to that
+            item = mathjaxphp_convert(raw[i])
+            line = line.replace(self.latexph + str(i), item)
         return line
 
     def m_blockizeList(self, text, k, label = None):
@@ -67,7 +79,7 @@ class Pmwiki(HtmlParser):
         text, mapping = self._holdblockplace(text, mode = 'hold')
         self._checkblockprefix(text)
         text = text.split('\n')
-        text = '\n'.join([x if x.startswith(self.blockph) else self.m_recode_pmwiki(re.sub(r'^{0}'.format(self.mark), '\t*\t', re.sub(r'^{0}'.format(self.mark*2), '\t\t*\t', x))) for x in text])
+        text = '\n'.join([x if x.startswith(self.blockph) else self.m_recode_pmwiki(re.sub(r'^{0}'.format(self.mark), '*\t', re.sub(r'^{0}'.format(self.mark*2), '**\t', x))) for x in text])
         text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
         return text
 
@@ -83,7 +95,7 @@ class Pmwiki(HtmlParser):
     def _parsecmd(self, text, serial, numbered = False):
         head = '>>cmd<<\n[@\n'
         lines = '\n'.join(text)
-        tail = '@]\n>><<\n'
+        tail = '\n@]\n>><<\n'
         return head + lines + tail
         
     def m_blockizeIn(self, text, k, label = None, sxh3 = False):
@@ -198,6 +210,8 @@ class Pmwiki(HtmlParser):
         # do not use strip at all, for pmwiki
         self.text = [x.lstrip() for x in self.text if x.lstrip()]
         otext = '\n'.join(self.text)
+        if self.hasfn:
+            otext += '\n[^#^]\n'
         if not self.toc:
             otext = otext.replace('(:toc:)', '')
         return otext

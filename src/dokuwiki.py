@@ -50,7 +50,9 @@ class Dokuwiki(HtmlParser):
         for m in re.finditer(pattern, line):
             if re.match(r'(\s*)@(.*?)@(\s*)', m.group('b')):
                 # is a link (internal or external). Have to flip this into [link|link name]
-                line = line.replace(m.group(0), '[[{1}|{0}]]'.format(m.group('a'), m.group('b')))
+                line = line.replace(m.group(0), '[[{1}|{0}]]'.\
+                                        format(m.group('a'),
+                                               re.sub(r'^(\s*)@|@(\s*)$', '', m.group('b'))))
             else:
                 # is footnote
                 line = line.replace(m.group(0), m.group('a') + '(({0}))'.format(self._parseUrl(m.group('b'))))
