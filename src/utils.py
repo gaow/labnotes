@@ -1,4 +1,5 @@
 import os, sys, re
+import glob, shutil
 from subprocess import PIPE, Popen
 import tempfile
 from .minted import minted
@@ -69,6 +70,10 @@ def multispace2tab(line):
     return p.sub('\t', line)
 
 def pdflatex(fname, text, vanilla=False, beamer = False):
+    def empty(directory, name):
+        for item in ['out','toc','aux','log','nav','snm','vrb']:
+            item = os.path.join(directory, '{0}.{1}'.format(name, item))
+            if os.path.exists(item): os.remove(item)
     # setup temp dir
     tmp_dir = None
     pattern = re.compile(r'tigernotes_cache_*(.*)')
@@ -77,7 +82,7 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
             tmp_dir = os.path.join(tempfile.gettempdir(), fn)
             break
     if tmp_dir and vanilla:
-        os.system('rm -rf {0}'.format(tmp_dir))
+        shutil.rmtree(tmp_dir)
         sys.stderr.write('INFO: cache folder {0} is removed\n'.format(tmp_dir))
         tmp_dir = tempfile.mkdtemp(prefix='tigernotes_cache_')
     if not tmp_dir:
@@ -108,8 +113,7 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
         if visit == 2 and ((tc.returncode) or error.decode(sys.getdefaultencoding()) or (not os.path.exists(fname + '.pdf'))):
             with codecs.open(os.path.join(dest_dir, '{0}-ERROR.txt'.format(fname)), 'w', encoding='utf-8') as f:
                 f.writelines(out.decode(sys.getdefaultencoding()) + error.decode(sys.getdefaultencoding()))
-            os.system('rm -f {0}.out {0}.toc {0}.aux {0}.log {0}.nav {0}.snm {0}.vrb'.format(fname))
-            #sys.stderr.write('DEBUG:\n\t$ cd {0}\n\t$ pdflatex -shell-escape -halt-on-error -file-line-error {1}\n'.format(tmp_dir, fname + '.tex'))
+            empty(tmp_dir, fname)
             sys.stderr.write('''
                     * * *
                     * Oops! One of the following problems occurred:
@@ -125,11 +129,11 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
             sys.exit(1)
         if visit == 1:
             sys.stderr.write('Still working ...\n')
-            os.system('rm -f *.pdf')
         else:
-            os.system('mv -f {0} {1}'.format(fname + '.pdf', dest_dir))
-            os.system('rm -f {0}.out {0}.toc {0}.aux {0}.log {0}.nav {0}.snm {0}.vrb'.format(fname))
-            os.system('rm -f {0}'.format(os.path.join(dest_dir, '{0}-ERROR.txt'.format(fname))))
+            shutil.move(os.path.join(tmp_dir, (fname + '.pdf')), os.path.join(dest_dir, (fname + '.pdf')))
+            empty(tmp_dir, fname)
+            ferr = os.path.join(dest_dir, '{0}-ERROR.txt'.format(fname))
+            if os.path.exists(ferr): os.remove(ferr)
     sys.stderr.write('Done!\n')
     return
 

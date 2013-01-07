@@ -9,5 +9,5 @@ class minted:
             f.write(self.sty)
         with codecs.open(os.path.join(self.outdir, 'pygmentize'), 'w', encoding='UTF-8') as f:
             f.write(self.pygmentize)
-        os.system('chmod +x {0}'.format(os.path.join(self.outdir, 'pygmentize')))
+        os.chmod(os.path.join(self.outdir, 'pygmentize'), 0755)
         return
