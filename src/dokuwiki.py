@@ -9,6 +9,7 @@ class Dokuwiki(HtmlParser):
             self.img_path = ''
         else:
             self.img_path = img_path
+        self.wrap_width = -1
         self.text = self.m_parseBlocks(self.text)
         self.m_parseComments()
         self.m_parseText()

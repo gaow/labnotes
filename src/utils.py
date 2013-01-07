@@ -26,11 +26,18 @@ def getfname(innames, outname, suffix='.pdf'):
                 os.makedirs(directory)
     return fname 
 
-def wraptxt(line, sep, by, rmblank = True):
+def wraptxt(line, sep, by, rmblank = True, prefix = ''):
     # will also remove blank lines, if any
+    if by <= 0:
+        return line
+    # comment flag
+    comment = False
     sline = ''
     i = 0
     for item in list(line):
+        if item == prefix and re.search(r'\n(\s*)$', sline):
+            # time to comment
+            comment = True
         if item == '\n' and i == 0:
             if rmblank:
                 # unnecessary wrap
@@ -38,6 +45,7 @@ def wraptxt(line, sep, by, rmblank = True):
         if item == '\n':
             # natural wrap
             sline += item
+            comment = False
             i = 0
             continue
         j = 1
@@ -47,7 +55,7 @@ def wraptxt(line, sep, by, rmblank = True):
         for k in range(j):
             if i == by:
                 # time to wrap
-                sline += item + sep + '\n'
+                sline += item + sep + '\n' + (prefix if comment else '')
                 i = 0
                 break
             else:

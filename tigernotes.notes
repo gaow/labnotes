@@ -32,7 +32,7 @@ tigernotes -h
       #!    #
       ###   ###	#!	#!!	#!!!	#
 
-      #{ ----------	#{out	#{table	#{list		
+      #{ ----------	#{table	#{list	#{out [name]		
       #} ----------	#}	#}	#}
 
       #{ xxx (xxx = warning, important, tip, note) [name]	
@@ -90,14 +90,15 @@ tigernotes pmwiki example.notes --toc
 # Known Issues
 ###
 #{list
-# html: cannot incorporate raw html codes in block or cmd mode (will conflict with the source)
+# Cannot incorporate raw html codes in block or cmd mode (will conflict with the source)
+# Nested lists works only with doc, slides and html, not the wikis
 #}
 ###
 # License & Contact
 ###
-# Gao Wang <ewanggao@gmail.com> (*) 2012, GNU GPL
+# Gao Wang <ewanggao@gmail.com> 2012, GNU GPL
 #{-----
-gw_log dokuwiki tigernotes.notes --lite --showall
+tigernotes dokuwiki tigernotes.notes --lite --showall
 scp tigernotes.txt tigerwang@tigerwang.org:./html/data/pages/software
 rm -rf ~/tmp/tigernotes* 
 svn export ~/Dropbox/Programs/tigernotes ~/tmp/tigernotes

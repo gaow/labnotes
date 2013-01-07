@@ -31,6 +31,17 @@ INVSYNTAX = {'r':'R',
           'text':'txt'
           }
 
+COMMENT = {'r':'#',
+          'bash':'#',
+          'python':'#',
+          'latex':'%',
+          'c':'//',
+          'cpp':'//',
+          'sql':'#',
+          'php':'#',
+          'text':''
+          }
+
 # base class
 class TexParser:
     def __init__(self, title, author, fname):
@@ -610,7 +621,7 @@ class HtmlParser(TexParser):
         self.anchor_id += 1
         text = '<div style="color:rgb(220, 20, 60);font-weight:bold;text-align:right;padding-right:2em;"><span class="textborder">' + \
                         (k.capitalize() if not label else self.m_recode(label)) + '</span></div>' + \
-                        self._parsecmd(wraptxt(text, '', int(self.wrap_width), rmblank = True).split('\n'), str(self.anchor_id), numbered = True)
+                        self._parsecmd(wraptxt(text, '', int(self.wrap_width), rmblank = True, prefix = COMMENT[k.lower()]).split('\n'), str(self.anchor_id), numbered = True)
         if self.html_tag:
             return '<HTML>\n' + text + '\n</HTML>\n'
         else:
