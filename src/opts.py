@@ -12,8 +12,8 @@ from .dokuwiki import Dokuwiki
 from .pmwiki import Pmwiki
 
 def doc(args):
-    tex = Tex(args.title, args.author, args.toc, args.footnote,
-                   args.filename, no_num = args.no_section_number,
+    tex = Tex(args.title, args.author, args.toc, args.footnote, args.font, args.font_size,
+                   args.filename, no_num = args.no_section_number, 
                    no_page = args.no_page_number, no_ref = False)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output)
@@ -150,7 +150,7 @@ class LogOpts:
                         help='''name of output file''')
 
     def getDocArguments(self, parser):
-        parser.add_argument('-f', '--footnote',
+        parser.add_argument('--footnote',
                         action='store_true',
                         default = '',
                         help='''generate footnote instead of reference''')
@@ -163,6 +163,14 @@ class LogOpts:
         parser.add_argument('--no_page_number',
                         action='store_true',
                         help='''generate un-numbered pages''')
+        parser.add_argument('--font',
+                        default = 'bch',
+                        choices = ['bch', 'default', 'serif', 'tt'],
+                        help='''font type, default to "bch"''')
+        parser.add_argument('--font_size',
+                        type=int,
+                        default = 10,
+                        help='''font size, default to 10''')
         parser.add_argument('-v', '--vanilla',
                         action='store_true',
                         default = '',

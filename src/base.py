@@ -8,19 +8,13 @@ import codecs
 from .utils import wraptxt, multispace2tab, getPaper
 from .style import MODE, CONFIG, TITLE, THANK, THEME, DOC_PACKAGES, DOC_CONFIG, HTML_STYLE, JS_SCRIPT
 
-SYNTAX = {'r':'r',
-          'sh':'bash',
-          'py':'python',
-          'tex':'latex',
-          'c':'c',
-          'cpp':'cpp',
-          'h':'c',
-          'sqlite':'sql',
-          'php':'php',
-          'txt':'text'
-          }
+FONT = {'bch':'bch',
+        'default':'default',
+        'serif':'\\sfdefault',
+        'tt':'\\ttdefault'
+    }
 
-INVSYNTAX = {'r':'R',
+SYNTAX = {'r':'R',
           'bash':'sh',
           'python':'py',
           'latex':'tex',
@@ -28,7 +22,8 @@ INVSYNTAX = {'r':'R',
           'cpp':'cpp',
           'sql':'sqlite',
           'php':'php',
-          'text':'txt'
+          'text':'txt',
+          'raw':'txt'
           }
 
 COMMENT = {'r':'#',
@@ -55,7 +50,7 @@ class TexParser:
                 'table':'self.m_blockizeTable',
                 'out':'self.m_blockizeOut'
                 }
-        for item in list(set(SYNTAX.values())):
+        for item in list(set(SYNTAX.keys())):
             self.PARSER_RULE[item] = 'self.m_blockizeIn'
         for item in ['warning', 'tip', 'important', 'note']:
             self.PARSER_RULE[item] = 'self.m_blockizeAlert'
@@ -439,7 +434,7 @@ class HtmlParser(TexParser):
             except IOError as e:
                 sys.exit(e)
         self.alertbox = ['warning', 'tip', 'important', 'note']
-        self.keywords = list(set(SYNTAX.values())) + self.alertbox + ['err', 'out', 'list', 'table']
+        self.keywords = list(set(SYNTAX.keys())) + self.alertbox + ['err', 'out', 'list', 'table']
         self.wrap_width = 90
         self.tablefont = 'small'
         self.anchor_id = 0
@@ -617,6 +612,7 @@ class HtmlParser(TexParser):
 
         
     def m_blockizeIn(self, text, k, label = None):
+        if k.lower() == 'raw': return text
         self._checknest(text)
         self.anchor_id += 1
         text = '<div style="color:rgb(220, 20, 60);font-weight:bold;text-align:right;padding-right:2em;"><span class="textborder">' + \

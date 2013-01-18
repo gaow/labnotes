@@ -27,7 +27,7 @@ class Beamer(TexParser):
                 self.wrap_adjust = 0.92
         self.thank = thank
         self.alertbox = ['warning', 'tip', 'important', 'note']
-        self.keywords = list(set(SYNTAX.values())) + self.alertbox + ['err', 'out', 'list', 'table']
+        self.keywords = list(set(SYNTAX.keys())) + self.alertbox + ['err', 'out', 'list', 'table']
         self.pause = True
         self.tablefont = 'tiny'
         self.text = self.m_parseBlocks(self.text)
@@ -41,6 +41,7 @@ class Beamer(TexParser):
                 self.textbib + '\n\\end{frame}')
 
     def m_blockizeIn(self, text, k, label = None):
+        if k.lower() == 'raw': return text
         self._checknest(text)
         return '\\begin{exampleblock}{\\texttt{%s}}\\scriptsize\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{exampleblock}\n' % \
                         (k.capitalize() if not label else self.m_recode(label), wraptxt(text, '', int(78 * self.wrap_adjust), rmblank = False, prefix = COMMENT[k.lower()]))

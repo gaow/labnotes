@@ -89,6 +89,7 @@ class Dokuwiki(HtmlParser):
         return head + lines + tail
         
     def m_blockizeIn(self, text, k, label = None, sxh3 = False):
+        if k.lower() == 'raw': return text
         self._checknest(text)
         # no wrap, totally rely on dokuwiki
         # text = wraptxt(text, '', 1000, rmblank = True)  
@@ -102,7 +103,7 @@ class Dokuwiki(HtmlParser):
         else:
             text = '<code {0} {1}>\n'.format(
                 k.lower() if k.lower() not in ['s', 'r'] else 'rsplus',
-                '{0}{1}'.format('_'.join(label.split()) if label else 'download-source', ('.' + INVSYNTAX[k.lower()]) if k.lower() != 'text' else '')
+                '{0}{1}'.format('_'.join(label.split()) if label else 'download-source', ('.' + SYNTAX[k.lower()]) if k.lower() != 'text' else '')
                 ) +  text + '\n</code>'        
         if self.show_all:
             text = '<hidden initialState="visible" -noprint>\n{0}\n</hidden>\\\\'.format(text)

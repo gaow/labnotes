@@ -689,6 +689,9 @@ CONFIG = '''
 \\newcommand*{\\abs}[1]{\\left\\lvert #1 \\right\\rvert}
 \\newcommand*{\\p}[1]{\\Pr{\\left\\{ #1\\right\\}}}
 
+\\newcommand\\independent{\\protect\\mathpalette{\\protect\\independenT}{\\perp}}
+\\def\\independenT#1#2{\\mathrel{\\rlap{$#1#2$}\\mkern2mu{#1#2}}}
+
 \\newcommand{\\cc}[1]{\\textcolor{red}{#1}} %% New color
 \\newcommand{\\ie}{\\textit{i.e.}} %% i.e.
 \\newcommand{\\bb}[1]{\\textbf{\\textcolor{blue}{#1}}}
@@ -696,6 +699,7 @@ CONFIG = '''
 
 \\newcommand{\\ignore}[1]{}
 \\newcommand{\\mynote}[1]{\\textit{#1}}
+
 
 \\definecolor{rblue}{rgb}{0,.14,.41}
 \\newcommand{\\rb}[1]{\\textcolor{rblue}{#1}}
@@ -933,10 +937,13 @@ DOC_PACKAGES = '''
 '''
 
 DOC_CONFIG = '''
-\\renewcommand\\rmdefault{bch}
 \\newcommand{\\ie}{\\textit{i.e.}}
 \\newcommand\\me{\\mathrm{e}}
 \\newcommand\\mlog{\\mathrm{log}}
+
+\\newcommand\\independent{\\protect\\mathpalette{\\protect\\independenT}{\\perp}}
+\\def\\independenT#1#2{\\mathrel{\\rlap{$#1#2$}\\mkern2mu{#1#2}}}
+
 \\newcommand*\\circled[1]{\\kern-2.5em
   \\put(0,4){\\color{black}\\circle*{18}}\\put(0,4){\\circle{16}}
   \\put(-3,0){\\color{white}\\\\bfseries\\large#1}}

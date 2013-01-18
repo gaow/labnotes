@@ -2,34 +2,29 @@ from .style import DOC_PACKAGES, DOC_CONFIG
 from .base import *
 import codecs
 class Tex(TexParser):
-    def __init__(self, title, author, toc, footnote, filename, no_num = False, no_page = False, no_ref = False):
+    def __init__(self, title, author, toc, footnote, font, font_size, filename, no_num = False, no_page = False, no_ref = False):
         TexParser.__init__(self, title, author, filename)
-        if sum([x.split('.')[-1].lower() in ['c','cpp','h'] for x in filename]) == len(filename):
-            self.mark = '//'
-        self.ftype = []
         self.text = []
         for fn in filename:
             try:
-                self.ftype.append(fn.split('.')[-1].lower())
                 with codecs.open(fn, 'r', encoding='UTF-8', errors='ignore') as f:
                     lines = [l.rstrip() for l in f.readlines() if l.rstrip()]
-                if fn.split('.')[-1].lower() in ['r','sh','py','c','cpp','h']:
-                    sys.stderr.write("WARNING: Treating input as {0} source code. Please use a different filename extension if this is not your intension.\n".format(SYNTAX[fn.split('.')[-1].lower()]))
+                    # in case I need to parse source code
                     if lines[0].startswith('#!/') and fn.split('.')[-1].lower() in lines[0].lower():
                         del lines[0]
-#                    lines.insert(0,self.mark*3)
-#                    lines.insert(0,self.mark + fn.upper())
-#                    lines.insert(0,self.mark*3)
                 self.text.extend(lines)
             except IOError as e:
-                sys.exit(e)
+                raise
         self.toc = toc
         self.doctype = 'article'
         self.footnote = footnote
+        self.font_size = font_size
+        self.font = font
         self.no_num = no_num
         self.no_page = no_page
-        self.bclogo = {'warning':'\\bcattention', 'tip':'\\bclampe', 'important':'\\bctakecare', 'note':'\\bccrayon'}
-        self.keywords = list(set(SYNTAX.values())) + self.bclogo.keys() + ['out', 'list', 'table']
+        self.bclogo = {'warning':'\\bcattention', 'tip':'\\bclampe',
+                       'important':'\\bctakecare', 'note':'\\bccrayon'}
+        self.keywords = list(set(SYNTAX.keys())) + self.bclogo.keys() + ['out', 'list', 'table']
         self.text = self.m_parseBlocks(self.text)
         self.m_parseComments()
         self.m_parseText()
@@ -38,6 +33,7 @@ class Tex(TexParser):
             self.text.append(self.textbib)
 
     def m_blockizeIn(self, text, k, label = None):
+        if k.lower() == 'raw': return text
         self._checknest(text)
         return '\\begin{minted}[samepage=false, fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{%s}]{%s}\n%s\n\\end{minted}\n' % (k.upper() if not label else self.m_recode(label), k, wraptxt(text, '\\' if k == 'bash' else '', 131, rmblank = False, prefix = COMMENT[k.lower()]))
 
@@ -67,7 +63,7 @@ class Tex(TexParser):
                 idx += 1
                 continue
             if not self.text[idx].startswith(self.mark):
-                # regular cmd text, or with syntax
+                # regular cmd text
                 if idx + 1 < len(self.text):
                     for i in range(idx + 1, len(self.text) + 1):
                         try:
@@ -77,19 +73,10 @@ class Tex(TexParser):
                             pass
                 else:
                     i = idx + 1
-                lan = list(set(self.ftype))
                 sep = '\\'
                 cnt = 114
                 sminted = '\\mint[bgcolor=bg, fontsize=\\footnotesize]{text}?'
                 lminted = '\\begin{minted}[bgcolor=bg, fontsize=\\footnotesize]{text}\n'
-                #
-                if (len(lan) == 1 and lan[0] in ['r','sh','py']) or self.mark == '//':
-                    if lan[0] == 'h': lan[0] = 'cpp'
-                    sep = '' if not lan[0] == 'sh' else '\\'
-                    cnt = 131
-                    sminted = '\\mint[fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=0.5pt, framesep=2mm]{%s}?' % (SYNTAX[lan[0]])
-                    lminted =  '\\begin{minted}[samepage=false, fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=0.5pt, framesep=2mm]{%s}\n' % (SYNTAX[lan[0]])
-                #
                 cmd = '\n'.join([wraptxt(x, sep, cnt) for x in self.text[idx:i]])
                 cmd = cmd.split('\n')
                 if len(cmd) == 1:
@@ -155,9 +142,10 @@ class Tex(TexParser):
                         self.text[idx] = ''
                         break
         self.text = filter(None, self.text)
-        return '\\documentclass[oneside, 10pt]{%s}' % self.doctype + DOC_PACKAGES + \
+        return '\\documentclass[oneside, %spt]{%s}' % (self.font_size, self.doctype) + DOC_PACKAGES + \
                 ('\\usepackage[Lenny]{fncychap}' if self.doctype == 'report' else '') + \
                 '\\renewcommand\\%s{References}' % ('bibname' if self.doctype == 'report' else 'refname') + \
+                (('\\renewcommand\\rmdefault{%s}' % FONT[self.font]) if self.font is not 'default' else '') + \
                 DOC_CONFIG + ('\\pagestyle{empty}\n' if self.no_page else '') + \
                 '\\title{%s}\n' % self.title + '\\author{%s}\n' % self.author + \
                 '\\date{Last updated: \\today}\n\\raggedbottom\n\\begin{document}\n' + \

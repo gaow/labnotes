@@ -99,6 +99,7 @@ class Pmwiki(HtmlParser):
         return head + lines + tail
         
     def m_blockizeIn(self, text, k, label = None, sxh3 = False):
+        if k.lower() == 'raw': return text
         self._checknest(text)
         text = '(:codestart {0}:)\n{1}\n(:codeend:)\n'.format(k.lower(), wraptxt(text, '', 1000, rmblank = True))
         return text
