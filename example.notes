@@ -51,6 +51,18 @@ tigernotes doc demo.notes --author "John Doe" --title "Example log documentation
 #!! Raw @@@\LaTeXe@@@ syntax
 #Display math: @@@\[\hat{\beta} = (\frac{1}{n}\sum_i^n \mathbf{x}_i\mathbf{x}_i^T)^{-1} (\frac{1}{n}\sum_i^n\mathbf{x}_iy_i)\]@@@
 #Inline math: @@@\(\hat{\beta} = (\frac{1}{n}\sum_i^n \mathbf{x}_i\mathbf{x}_i^T)^{-1} (\frac{1}{n}\sum_i^n\mathbf{x}_iy_i)\)@@@
+#{raw
+\begin{align*}
+p(\theta|y_1 \ldots y_6) & = \frac{p(y_1 \ldots y_6|\theta) p(\theta)}{p(y_1 \dots y_6)} \\
+& = \frac{p(y_1|\theta) \dots p(y_6|\theta) p(\theta)}{p(y_1 \dots y_6)} \\
+& = \frac{1/10}{0.02} \ \ \ (10.2 < \theta < 10.4) \\
+& = \left\{ 
+  \begin{array}{l l}
+    5 & \quad \text{if $10.2 < \theta < 10.4$}\\
+    0 & \quad \text{otherwise}
+  \end{array} \right.
+\end{align*}
+#}
 #!! Reference note
 # I visit the [BCM website|Baylor College of Medicine, @@www.bcm.edu@@] daily, [BCM|@http://www.bcm.edu@]
 # Check out this paper : @DOI://10.1086/280899@ [reference|@DOI://10.1086/280899@]

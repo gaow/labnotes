@@ -79,7 +79,7 @@ class Pmwiki(HtmlParser):
         text, mapping = self._holdblockplace(text, mode = 'hold')
         self._checkblockprefix(text)
         text = text.split('\n')
-        text = '\n'.join([x if x.startswith(self.blockph) else self.m_recode_pmwiki(re.sub(r'^{0}'.format(self.mark), '*\t', re.sub(r'^{0}'.format(self.mark*2), '**\t', x))) for x in text])
+        text = '\n'.join([x if x.startswith(self.blockph) else self.m_recode_pmwiki(re.sub(r'^{0}'.format(self.mark), '*\t', re.sub(r'^{0}'.format(self.mark*2), '**\t', x))) for x in text]) + '\n'
         text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
         return text
 

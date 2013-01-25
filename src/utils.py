@@ -110,7 +110,7 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
         tc = Popen(["pdflatex", "-shell-escape", "-halt-on-error", "-file-line-error", fname + '.tex'],
             stdin = PIPE, stdout = PIPE, stderr = PIPE)
         out, error = tc.communicate()
-        if visit == 2 and ((tc.returncode) or error.decode(sys.getdefaultencoding()) or (not os.path.exists(fname + '.pdf'))):
+        if visit == 2 and ((tc.returncode or error) and (not os.path.exists(fname + '.pdf'))):
             with codecs.open(os.path.join(dest_dir, '{0}-ERROR.txt'.format(fname)), 'w', encoding='utf-8') as f:
                 f.writelines(out.decode(sys.getdefaultencoding()) + error.decode(sys.getdefaultencoding()))
             empty(tmp_dir, fname)
