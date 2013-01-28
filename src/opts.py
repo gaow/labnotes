@@ -44,6 +44,8 @@ def html(args):
     woff = os.path.join(os.path.dirname(sys.modules['libtigernotes'].__file__), 'PTSans.woff')
     if os.path.exists(woff):
         shutil.copy2(woff, '.')
+    else:
+        sys.stderr.write("WARNING: missing font file 'PTSans.woff' (http://www.google.com/webfonts/specimen/PT+Sans)\n")
     return
 
 def dokuwiki(args):
@@ -82,7 +84,7 @@ class LogOpts:
         description = '''Compile formatted notes into various publishable formats''',
         prog = 'tigernotes',
         fromfile_prefix_chars = '@',
-        epilog = '''Gao Wang <ewanggao@gmail.com> (*) 2012 GNU GPL''')
+        epilog = '''Copyright 2012 Gao Wang <ewanggao@gmail.com> GNU General Public License''')
         self.master_parser.add_argument('--version', action='version', version='%(prog)s 1.0alpha')
         subparsers = self.master_parser.add_subparsers()
         # latex
