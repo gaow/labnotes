@@ -45,7 +45,9 @@ def html(args):
     if os.path.exists(woff):
         shutil.copy2(woff, '.')
     else:
-        sys.stderr.write("WARNING: missing font file 'PTSans.woff' (http://www.google.com/webfonts/specimen/PT+Sans)\n")
+        # cannot find font in current directory either
+        if not os.path.isfile('PTSans.woff'):
+            sys.stderr.write("WARNING: font file 'PTSans.woff' might be missing (http://www.google.com/webfonts/specimen/PT+Sans)\n")
     return
 
 def dokuwiki(args):
