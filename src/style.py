@@ -911,8 +911,7 @@ THANK = '''
 '''
 
 DOC_PACKAGES = '''
-\\usepackage{geometry}
-\\usepackage{fullpage}
+\\usepackage[text={6.5in,8.9in}, marginparwidth=0.5in]{geometry}
 \\usepackage{amsmath}
 \\usepackage{booktabs}
 \\usepackage{amssymb}
