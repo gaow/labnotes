@@ -201,4 +201,7 @@ def getPaper(doi):
                info['title'], info['date'],
                info['journal'], info['DOI'],
                info['link'])
-    return info.decode("ascii", "ignore").encode('utf-8')
+    if sys.version_info[0] == 2:
+        return info.decode("ascii", "ignore").encode('utf-8')
+    else:
+        return info

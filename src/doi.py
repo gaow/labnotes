@@ -122,7 +122,10 @@ class PaperList:
         
     def getInfo(self, paper, info):
         text = eval('self.get{0}'.format(info.capitalize()))(paper)
-        return text.encode('utf-8')
+        if sys.version_info[0] == 2:
+            return text.encode('utf-8')
+        else:
+            return text
 
     def extract(self, doi):
         paper = self.db[doi]
