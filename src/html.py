@@ -1,9 +1,8 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from .style import HTML_STYLE, JS_SCRIPT
 from .base import *
-try:
-    from collections import OrderedDict
-except:
-    from .ordereddict import OrderedDict
+from .ordereddict import OrderedDict
 
 class Html(HtmlParser):
     def __init__(self, title, author, toc, filename, columns):

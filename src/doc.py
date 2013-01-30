@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from .style import DOC_PACKAGES, DOC_CONFIG
 from .base import *
 import codecs

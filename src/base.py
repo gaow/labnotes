@@ -1,9 +1,8 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import os, sys, re
 from time import strftime, localtime
-try:
-    from collections import OrderedDict
-except:
-    from .ordereddict import OrderedDict
+from .ordereddict import OrderedDict
 import codecs
 from .utils import wraptxt, multispace2tab, getPaper
 from .style import MODE, CONFIG, TITLE, THANK, THEME, DOC_PACKAGES, DOC_CONFIG, HTML_STYLE, JS_SCRIPT

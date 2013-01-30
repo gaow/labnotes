@@ -1,8 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import sys, shutil, os
-try:
-    from argparse import ArgumentParser
-except:
-    from .argparse import ArgumentParser
+from .argparse import ArgumentParser
 import codecs
 from .utils import getfname, pdflatex, indexhtml
 from .doc import Tex

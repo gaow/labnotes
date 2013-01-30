@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import os, codecs
 class btheme:
     def __init__(self, outdir):

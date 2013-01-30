@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from .base import *
 def mathjaxphp_convert(item):
     item = re.sub(r'\$(.*?)\$', r'{$\1$}', item)

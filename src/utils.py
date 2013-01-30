@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import os, sys, re
 import glob, shutil
 from subprocess import PIPE, Popen
@@ -5,10 +7,7 @@ import tempfile
 from .minted import minted
 from .style import btheme, HTML_INDEX
 from .doi import PaperList
-try:
-    from collections import OrderedDict
-except:
-    from .ordereddict import OrderedDict
+from .ordereddict import OrderedDict
 import codecs
 import stat
 
@@ -202,4 +201,4 @@ def getPaper(doi):
                info['title'], info['date'],
                info['journal'], info['DOI'],
                info['link'])
-    return info 
+    return info.decode("ascii", "ignore").encode('utf-8')

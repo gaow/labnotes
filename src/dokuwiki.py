@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from .base import *
 class Dokuwiki(HtmlParser):
     def __init__(self, fname, toc, show_all, img_path):

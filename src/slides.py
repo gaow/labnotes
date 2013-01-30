@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from .base import *
 from .style import MODE, CONFIG, TITLE, THANK, THEME
 import codecs

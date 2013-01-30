@@ -1,11 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 try:
     # python3
     from urllib.request import urlopen
-    from collections import OrderedDict
 except:
     # python2
     from urllib2 import urlopen
-    from .ordereddict import OrderedDict 
+from .ordereddict import OrderedDict 
 import json
 import sys, os
 from time import sleep
@@ -117,10 +118,11 @@ class PaperList:
             info = paper['doi_record']['crossref']['journal']['journal_article']['doi_data']['resource']
         except:
             info = '-'
-        return info        
+        return info
         
     def getInfo(self, paper, info):
-        return eval('self.get{0}'.format(info.capitalize()))(paper)
+        text = eval('self.get{0}'.format(info.capitalize()))(paper)
+        return text.encode('utf-8')
 
     def extract(self, doi):
         paper = self.db[doi]

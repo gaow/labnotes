@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import os, codecs
 class minted:
     def __init__(self, outdir):
