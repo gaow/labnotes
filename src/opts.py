@@ -11,7 +11,7 @@ from .dokuwiki import Dokuwiki
 from .pmwiki import Pmwiki
 
 def doc(args):
-    tex = Tex(args.title, args.author, args.toc, args.footnote, args.font, args.font_size,
+    tex = Tex(args.title, args.author, args.date, args.toc, args.footnote, args.font, args.font_size,
                    args.filename, no_num = args.no_section_number, 
                    no_page = args.no_page_number, no_ref = False)
     lite = 1 if args.lite else 0
@@ -20,7 +20,7 @@ def doc(args):
     return
 
 def slides(args):
-    tex = Beamer(args.title, args.author, args.institute,
+    tex = Beamer(args.title, args.author, args.date, args.institute,
                       args.toc, args.stoc, args.mode, args.theme,
                       args.thank, args.filename)
     lite = 1 if args.lite else 0
@@ -131,14 +131,10 @@ class LogOpts:
                         metavar = 'FN',
                         nargs = '+',
                         help='''name of the input notes file(s)''')
-        parser.add_argument('-a', '--author',
-                        action='store',
-                        default = '',
-                        help='''author's name''')
-        parser.add_argument('-t', '--title',
-                        action='store',
-                        default = '',
-                        help='''title of document''')
+        parser.add_argument('-o', '--output',
+                        metavar='name',
+                        type=str,
+                        help='''name of output file''')
         parser.add_argument('--lite',
                         action='store_true',
                         default = '',
@@ -147,16 +143,20 @@ class LogOpts:
                         action='store_true',
                         default = '',
                         help='''generate table of contents''')
-        parser.add_argument('-o', '--output',
-                        metavar='name',
-                        type=str,
-                        help='''name of output file''')
+        parser.add_argument('-a', '--author',
+                        action='store',
+                        default = '',
+                        help='''author's name''')
+        parser.add_argument('-t', '--title',
+                        action='store',
+                        default = '',
+                        help='''title of document''')
 
     def getDocArguments(self, parser):
-        parser.add_argument('--footnote',
-                        action='store_true',
+        parser.add_argument('-d', '--date',
+                        action='store',
                         default = '',
-                        help='''generate footnote instead of reference''')
+                        help='''date, leave empty for current date''')
 #        parser.add_argument('--no_reference',
 #                        action='store_true',
 #                        help='''do not include reference in the document''')
@@ -166,6 +166,10 @@ class LogOpts:
         parser.add_argument('--no_page_number',
                         action='store_true',
                         help='''generate un-numbered pages''')
+        parser.add_argument('--footnote',
+                        action='store_true',
+                        default = '',
+                        help='''generate footnote instead of reference''')
         parser.add_argument('--font',
                         default = 'bch',
                         choices = ['bch', 'default', 'serif', 'tt'],
@@ -184,6 +188,10 @@ class LogOpts:
                         action='store',
                         default = '',
                         help='''institute of author''')
+        parser.add_argument('-d', '--date',
+                        action='store',
+                        default = '',
+                        help='''date, leave empty for current date''')
         parser.add_argument('--theme',
                         type = str,
                         choices = ['heavy', 'compact', 'plain'],

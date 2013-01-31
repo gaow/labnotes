@@ -116,7 +116,7 @@ class Pmwiki(HtmlParser):
         text = self._holdfigureplace(text)
         text, mapping = self._holdblockplace(text, mode = 'hold')
         self._checkblockprefix(text)
-        text = '\n'.join([item if item.startswith(self.blockph) else self.m_recode_pmwiki(re.sub(r'^{0}'.format(self.mark), '', item)) for item in text.split('\n')])
+        text = '\n'.join([item if item.startswith(self.blockph) else self.m_recode_pmwiki(re.sub(r'^{0}'.format(self.mark), '', item)).lstrip() for item in text.split('\n')])
         text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
         text = '>>{0}<<\n{1}\n>><<\n'.format(k.lower(), text)
         return text

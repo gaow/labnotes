@@ -4,7 +4,7 @@ from .base import *
 from .style import MODE, CONFIG, TITLE, THANK, THEME
 import codecs
 class Beamer(TexParser):
-    def __init__(self, title, author, institute, toc, stoc, mode, theme, thank, filename):
+    def __init__(self, title, author, date, institute, toc, stoc, mode, theme, thank, filename):
         TexParser.__init__(self, title, author, filename)
         self.text = []
         for fn in filename:
@@ -15,6 +15,7 @@ class Beamer(TexParser):
                 self.text.extend(lines)
             except IOError as e:
                 sys.exit(e)
+        self.date = date
         self.institute = institute.replace('\\n', '\n')
         self.toc = toc
         # section toc
@@ -222,7 +223,8 @@ class Beamer(TexParser):
                 (self.m_stitle(35), self.title, re.sub(r'\\inst{(.*?)}', '', self.author).strip().split(r'\and')[0].strip(), self.author)
         if self.institute:
             otext += '\\institute[%s]{%s}\n' % (re.sub(r'\\inst{(.*?)}', '', self.institute).strip().split(r'\and')[0].strip(), self.institute)
-        otext += '\\date{\\today}\n%s\\begin{document}\n%s\n%s' % (
+        otext += '\\date{%s}\n%s\\begin{document}\n%s\n%s' % (
+                self.date if self.date else '\\today', 
                 sectiontoc if self.toc else '',
                 titlepage if self.title or self.author else '',
                 tocpage if self.toc else ''

@@ -4,7 +4,7 @@ from .style import DOC_PACKAGES, DOC_CONFIG
 from .base import *
 import codecs
 class Tex(TexParser):
-    def __init__(self, title, author, toc, footnote, font, font_size, filename, no_num = False, no_page = False, no_ref = False):
+    def __init__(self, title, author, date, toc, footnote, font, font_size, filename, no_num = False, no_page = False, no_ref = False):
         TexParser.__init__(self, title, author, filename)
         self.text = []
         for fn in filename:
@@ -17,6 +17,7 @@ class Tex(TexParser):
                 self.text.extend(lines)
             except IOError as e:
                 raise
+        self.date = date
         self.toc = toc
         self.doctype = 'article'
         self.footnote = footnote
@@ -150,6 +151,7 @@ class Tex(TexParser):
                 (('\\renewcommand\\rmdefault{%s}' % FONT[self.font]) if self.font is not 'default' else '') + \
                 DOC_CONFIG + ('\\pagestyle{empty}\n' if self.no_page else '') + \
                 '\\title{%s}\n' % self.title + '\\author{%s}\n' % self.author + \
-                '\\date{Last updated: \\today}\n\\raggedbottom\n\\begin{document}\n' + \
-                '%s\n%s\n\\bigskip\n%s' % ('\\maketitle' if self.title or self.author else '', '\\tableofcontents' if self.toc else '', '\n'.join(self.text)) + \
-                '\n\\end{document}'
+                '\\date{%s}\n\\raggedbottom\n\\begin{document}\n' + \
+                '%s\n%s\n\\bigskip\n%s\n\\end{document}' % ('\\maketitle' if self.title or self.author else '',
+                                                            self.date if self.date else 'Last updated: \\today',
+                                                            '\\tableofcontents' if self.toc else '', '\n'.join(self.text)) 
