@@ -680,12 +680,12 @@ CONFIG = '''
 %%%%%%%%%%%%%%%%%%
 %%%% 
 %%%%%%%%%%%%%%%%%%
-
-\\newcommand\\dif{\\mathrm{d}}
-\\newcommand\\diff{\\,\\dif}
-\\newcommand\\me{\\mathrm{e}}
-\\newcommand\\mi{\\mathrm{i}}
-\\newcommand{\\defeq}{\\xlongequal{\\text{def}}}
+\\DeclareMathOperator*{\\dif}{\\mathrm{d}}
+\\DeclareMathOperator*{\\diff}{\\,\\dif}
+\\DeclareMathOperator*{\\e}{\\mathrm{e}}
+\\DeclareMathOperator*{\\E}{\\mathbb{E}}
+\\DeclareMathOperator*{\\V}{\\mathbb{V}}
+\\DeclareMathOperator*{\\defeq}{\\xlongequal{\\text{def}}}
 \\newcommand*{\\set}[1]{\\left\\{ #1 \\right\\}}
 \\newcommand*{\\Set}[2]{\\left\\{ \\, #1 \\colon #2 \\, \\right\\}}
 \\newcommand*{\\abs}[1]{\\left\\lvert #1 \\right\\rvert}
@@ -938,9 +938,18 @@ DOC_PACKAGES = '''
 '''
 
 DOC_CONFIG = '''
+\\DeclareMathOperator*{\\dif}{\\mathrm{d}}
+\\DeclareMathOperator*{\\diff}{\\,\\dif}
+\\DeclareMathOperator*{\\e}{\\mathrm{e}}
+\\DeclareMathOperator*{\\E}{\\mathbb{E}}
+\\DeclareMathOperator*{\\V}{\\mathbb{V}}
+\\DeclareMathOperator*{\\defeq}{\\xlongequal{\\text{def}}}
+\\newcommand*{\\set}[1]{\\left\\{ #1 \\right\\}}
+\\newcommand*{\\Set}[2]{\\left\\{ \\, #1 \\colon #2 \\, \\right\\}}
+\\newcommand*{\\abs}[1]{\\left\\lvert #1 \\right\\rvert}
+\\newcommand*{\\p}[1]{\\Pr{\\left\\{ #1\\right\\}}}
+
 \\newcommand{\\ie}{\\textit{i.e.}}
-\\newcommand\\me{\\mathrm{e}}
-\\newcommand\\mlog{\\mathrm{log}}
 
 \\newcommand\\independent{\\protect\\mathpalette{\\protect\\independenT}{\\perp}}
 \\def\\independenT#1#2{\\mathrel{\\rlap{$#1#2$}\\mkern2mu{#1#2}}}
