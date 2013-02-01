@@ -10,7 +10,8 @@ from .style import MODE, CONFIG, TITLE, THANK, THEME, DOC_PACKAGES, DOC_CONFIG, 
 FONT = {'bch':'bch',
         'default':'default',
         'serif':'\\sfdefault',
-        'tt':'\\ttdefault'
+        'tt':'\\ttdefault',
+        'roman':'ptm'
     }
 
 SYNTAX = {'r':'R',

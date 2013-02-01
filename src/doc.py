@@ -145,13 +145,14 @@ class Tex(TexParser):
                         self.text[idx] = ''
                         break
         self.text = filter(None, self.text)
+        print self.font
         return '\\documentclass[oneside, %spt]{%s}' % (self.font_size, self.doctype) + DOC_PACKAGES + \
-                ('\\usepackage[Lenny]{fncychap}' if self.doctype == 'report' else '') + \
-                '\\renewcommand\\%s{References}' % ('bibname' if self.doctype == 'report' else 'refname') + \
-                (('\\renewcommand\\rmdefault{%s}' % FONT[self.font]) if self.font is not 'default' else '') + \
+                ('\\usepackage[Lenny]{fncychap}\n' if self.doctype == 'report' else '') + \
+                ('\\usepackage{mathptmx}\n' if self.font == 'roman' else '') + \
+                '\\renewcommand\\%s{References}\n' % ('bibname' if self.doctype == 'report' else 'refname') + \
+                (('\\renewcommand\\rmdefault{%s}' % FONT[self.font]) if (self.font != 'default' and self.font != 'roman') else '') + \
                 DOC_CONFIG + ('\\pagestyle{empty}\n' if self.no_page else '') + \
                 '\\title{%s}\n' % self.title + '\\author{%s}\n' % self.author + \
-                '\\date{%s}\n\\raggedbottom\n\\begin{document}\n' + \
+                '\\date{%s}\n\\raggedbottom\n\\begin{document}\n' % (self.date if self.date else 'Last updated: \\today') + \
                 '%s\n%s\n\\bigskip\n%s\n\\end{document}' % ('\\maketitle' if self.title or self.author else '',
-                                                            self.date if self.date else 'Last updated: \\today',
                                                             '\\tableofcontents' if self.toc else '', '\n'.join(self.text)) 

@@ -172,7 +172,7 @@ class LogOpts:
                         help='''generate footnote instead of reference''')
         parser.add_argument('--font',
                         default = 'bch',
-                        choices = ['bch', 'default', 'serif', 'tt'],
+                        choices = ['bch', 'default', 'serif', 'tt', 'roman'],
                         help='''font type, default to "bch"''')
         parser.add_argument('--font_size',
                         type=int,
