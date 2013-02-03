@@ -4,7 +4,7 @@ from .style import DOC_PACKAGES, DOC_CONFIG
 from .base import *
 import codecs
 class Tex(TexParser):
-    def __init__(self, title, author, date, toc, footnote, font, font_size, filename, no_num = False, no_page = False, no_ref = False):
+    def __init__(self, title, author, date, toc, footnote, font, font_size, filename, no_num = False, no_page = False, no_ref = False, twocols = False):
         TexParser.__init__(self, title, author, filename)
         self.text = []
         for fn in filename:
@@ -25,6 +25,7 @@ class Tex(TexParser):
         self.font = font
         self.no_num = no_num
         self.no_page = no_page
+        self.twocols = twocols
         self.bclogo = {'warning':'\\bcattention', 'tip':'\\bclampe',
                        'important':'\\bctakecare', 'note':'\\bccrayon'}
         self.keywords = list(set(SYNTAX.keys())) + self.bclogo.keys() + ['out', 'list', 'table']
@@ -146,13 +147,15 @@ class Tex(TexParser):
                         break
         self.text = filter(None, self.text)
         print self.font
-        return '\\documentclass[oneside, %spt]{%s}' % (self.font_size, self.doctype) + DOC_PACKAGES + \
+        return '\\documentclass[oneside%s]{%s}' % (',twocolumn' if self.twocols else '', self.doctype) + DOC_PACKAGES + \
                 ('\\usepackage[Lenny]{fncychap}\n' if self.doctype == 'report' else '') + \
                 ('\\usepackage{mathptmx}\n' if self.font == 'roman' else '') + \
                 '\\renewcommand\\%s{References}\n' % ('bibname' if self.doctype == 'report' else 'refname') + \
-                (('\\renewcommand\\rmdefault{%s}' % FONT[self.font]) if (self.font != 'default' and self.font != 'roman') else '') + \
+                (('\\renewcommand\\rmdefault{%s}\n' % FONT[self.font]) if (self.font != 'default' and self.font != 'roman') else '') + \
                 DOC_CONFIG + ('\\pagestyle{empty}\n' if self.no_page else '') + \
+                (('\\setlength{\\columnsep}{%s}\\setlength{\\columnseprule}{%s}\n' % ('2em','0pt')) if self.twocols else '') + \
                 '\\title{%s}\n' % self.title + '\\author{%s}\n' % self.author + \
                 '\\date{%s}\n\\raggedbottom\n\\begin{document}\n' % (self.date if self.date else 'Last updated: \\today') + \
+                '\\fontsize{%s}{%s}\\selectfont\n' % (self.font_size, int(self.font_size * 1.2)) + \
                 '%s\n%s\n\\bigskip\n%s\n\\end{document}' % ('\\maketitle' if self.title or self.author else '',
                                                             '\\tableofcontents' if self.toc else '', '\n'.join(self.text)) 

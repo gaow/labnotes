@@ -13,7 +13,7 @@ from .pmwiki import Pmwiki
 def doc(args):
     tex = Tex(args.title, args.author, args.date, args.toc, args.footnote, args.font, args.font_size,
                    args.filename, no_num = args.no_section_number, 
-                   no_page = args.no_page_number, no_ref = False)
+                   no_page = args.no_page_number, no_ref = False, twocols = args.twocols)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output)
     pdflatex(fname, tex.get(lite), vanilla=args.vanilla)
@@ -166,6 +166,9 @@ class LogOpts:
         parser.add_argument('--no_page_number',
                         action='store_true',
                         help='''generate un-numbered pages''')
+        parser.add_argument('--twocols',
+                        action='store_true',
+                        help='''two columns per page''')
         parser.add_argument('--footnote',
                         action='store_true',
                         default = '',
