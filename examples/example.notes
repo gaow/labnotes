@@ -166,8 +166,14 @@ print "hi"
 #{warning Careful!
 # a message
 #}
-
-#!Figures
+#!! Special boxes contents from file
+# The @@file:///filename start end@@ (or simply @@file:///@@ to include the whole file) syntax allows inclusion of contents of external file into a special box.
+#{out
+file:///example.notes 21 26
+------------------
+file:///example.notes 60 65
+#}
+#! Figures
 #Support pdf, png and jpg. This is bcm logo
 #* bcm.png 
 # and smaller ...

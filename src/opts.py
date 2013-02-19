@@ -50,7 +50,7 @@ def html(args):
     return
 
 def dokuwiki(args):
-    htm = Dokuwiki(args.filename, args.toc, args.showall, args.img)
+    htm = Dokuwiki(args.filename, args.toc, args.showall, args.prefix)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output, suffix='.txt')
     if args.filename == fname + '.txt':
@@ -60,7 +60,7 @@ def dokuwiki(args):
     return
 
 def pmwiki(args):
-    htm = Pmwiki(args.filename, args.toc, args.img)
+    htm = Pmwiki(args.filename, args.toc, args.prefix)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output, suffix='.txt')
     if args.filename == fname + '.txt':
@@ -236,7 +236,7 @@ class LogOpts:
                         metavar='name',
                         type=str,
                         help='''name of output file''')
-        parser.add_argument('--img',
+        parser.add_argument('--prefix',
                         metavar='PATH',
                         type=str,
                         help='''remote relative path for image, usually is the namespace a dokuwiki page belongs to''')

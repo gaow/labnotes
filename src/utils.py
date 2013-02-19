@@ -68,6 +68,34 @@ def multispace2tab(line):
     p = re.compile(r' \s+|\t\s+')
     return p.sub('\t', line)
 
+def readfromfile(fname, start = None, end = None):
+    try:
+        with open(fname, 'r') as f:
+            text = [x.rstrip() for x in f.readlines()]
+        if start is not None and end is not None and start >= 1 and end <= len(text):
+            return '\n'.join(text[start-1:end])
+        else:
+            return '\n'.join(text)
+    except Exception as e:
+        raise ValueError('Cannot load {0}: {1}'.format(fname, e))
+
+def gettxtfromfile(text):
+    flist = text.split('\n')
+    for idx, item in enumerate(flist):
+        if item.startswith('file:///'):
+            item = item[8:].split()
+            if len(item) == 3:
+                try:
+                    item[1] = int(item[1])
+                    item[2] = int(item[2])
+                except:
+                    raise ValueError("Invalid input argument '{0} {1}' for '{2}'".format(item[1], item[2], item[0]))
+                flist[idx] = readfromfile(item[0], item[1], item[2])
+            else:
+                flist[idx] = readfromfile(item[0])
+    return '\n'.join(flist)
+                
+
 def pdflatex(fname, text, vanilla=False, beamer = False):
     def empty(directory, name):
         for item in ['out','toc','aux','log','nav','snm','vrb']:

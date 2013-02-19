@@ -35,7 +35,7 @@ class Dokuwiki(HtmlParser):
         # support for raw latex syntax
         pattern = re.compile(r'@@@(.*?)@@@')
         for m in re.finditer(pattern, line):
-            line = line.replace(m.group(0), self.latexph + str(len(raw)))
+            line = line.replace(m.group(0), "{0}{1}E".format(self.rawph, len(raw)))
             raw.append(m.group(1))
         # DOI online lookup
         pattern = re.compile('@DOI://(.*?)@')
@@ -63,7 +63,7 @@ class Dokuwiki(HtmlParser):
         line = self._parseUrl(line)
         # recover raw latex syntax
         for i in range(len(raw)):
-            line = line.replace(self.latexph + str(i), raw[i])
+            line = line.replace("{0}{1}E".format(self.rawph, i), raw[i])
         return line
 
     def m_blockizeList(self, text, k, label = None):
@@ -91,6 +91,7 @@ class Dokuwiki(HtmlParser):
         return head + lines + tail
         
     def m_blockizeIn(self, text, k, label = None, sxh3 = False):
+        if text.startswith("file:///"): text = gettxtfromfile(text) 
         if k.lower() == 'raw': return text
         self._checknest(text)
         # no wrap, totally rely on dokuwiki
@@ -114,6 +115,7 @@ class Dokuwiki(HtmlParser):
         return text
     
     def m_blockizeOut(self, text, k, label = None):
+        if text.startswith("file:///"): text = gettxtfromfile(text) 
         self._checknest(text)
         text = '\n'.join(['  ' + x for x in text.split('\n')])
         if self.show_all:
@@ -199,7 +201,7 @@ class Dokuwiki(HtmlParser):
                 self.quit("You have so many urgly '{0}' symbols in a regular line. Please clear them up in this line: '{1}'".format(self.mark, self.text[idx]))
             if self.text[idx].startswith(self.mark + '!!!'):
                 # box
-                self.text[idx] = '<WRAP em hi>\n' + self.m_recode_dokuwiki(self.text[idx][len(self.mark)+3:]) + '\n</WRAP>\n'
+                self.text[idx] = '<wrap em hi>\n' + self.m_recode_dokuwiki(self.text[idx][len(self.mark)+3:]) + '\n</wrap>\n'
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark + '!!'):

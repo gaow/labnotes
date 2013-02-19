@@ -4,7 +4,7 @@ import os, sys, re
 from time import strftime, localtime
 from .ordereddict import OrderedDict
 import codecs
-from .utils import wraptxt, multispace2tab, getPaper
+from .utils import wraptxt, multispace2tab, getPaper, gettxtfromfile
 from .style import MODE, CONFIG, TITLE, THANK, THEME, DOC_PACKAGES, DOC_CONFIG, HTML_STYLE, JS_SCRIPT
 
 FONT = {'bch':'bch',
@@ -61,9 +61,8 @@ class TexParser:
         self.footnote = False
         self.tablefont = 'footnotesize'
         # dirty place holders ....
-        self.blockph = 'ABLOCKBLOODYPLACEHOLDER'
-        self.latexph = 'ALATEXBLOODYRAWPATTERNPLACEHOLDER'
-        self.htmlph = 'AHTMLBLOODYRAWPATTERNPLACEHOLDER'
+        self.blockph = 'TIGERNOTEBLOCKUGLYPLACEHOLDER'
+        self.rawph = 'TIGERNOTERAWPATTERNUGLYPLACEHOLDER'
         self.pause = False
         self.fig_support = ['jpg','pdf','png', 'eps']
         self.fig_tag = 'tex'
@@ -91,7 +90,7 @@ class TexParser:
         # support for raw latex syntax
         pattern = re.compile(r'@@@(.*?)@@@')
         for m in re.finditer(pattern, line):
-            line = line.replace(m.group(0), self.latexph + str(len(raw)))
+            line = line.replace(m.group(0), "{0}{1}E".format(self.rawph, len(raw)))
             raw.append(m.group(1))
         # DOI online lookup
         pattern = re.compile('@DOI://(.*?)@')
@@ -130,7 +129,7 @@ class TexParser:
                 line = line.replace(m.group(0), '{\\color{MidnightBlue}%s}~\\footnote{%s}' % (m.group('a'), '\\underline{' + m.group('a') + '} ' + m.group('b')))
         # recover raw latex syntax
         for i in range(len(raw)):
-            line = line.replace(self.latexph + str(i), raw[i])
+            line = line.replace("{0}{1}E".format(self.rawph, i), raw[i])
         return line
 
     def _bulkreplace(self, text, start, end, nestedtext):
@@ -290,21 +289,31 @@ class TexParser:
             fname = os.path.split(fig)[-1]
             if not '.' in fname:
                 self.quit("Cannot determine graphic file format for '{0}'. Valid extensions are {1}".format(fname, ' '.join(support)))
-            if fname.split('.')[-1] not in support:
-                self.quit("Input file format '{0}' not supported. Valid extensions are {1}".format(fname.split('.')[-1], ' '.join(support)))
+            extension = fname.split('.')[-1]
+            if extension not in support:
+                self.quit("Input file format '{0}' not supported. Valid extensions are {1}".format(extension, ' '.join(support)))
             if not os.path.exists(fig):
                 self.quit("Cannot find file %s" % fig)
             # syntax images
             if tag == 'tex':
                 lines[idx] = '\\includegraphics[width=%s\\textwidth]{%s}\n' % (width, os.path.abspath(fig))
             elif tag == 'html':
-                lines[idx] = '<p><center><img src="{0}" alt="{1}" width="{2}%" /></center></p>'.format(fig, os.path.split(fig)[-1], int(width * 100))
+                if extension == 'pdf':
+                    lines[idx] = '<a style="text-shadow: 1px 1px 1px #999;" href="{0}">{1}</a>\n'.format(os.path.join(remote_path, fname), 'Download Image "{0}"'.format(fname))
+                else:
+                    lines[idx] = '<p><center><img src="{0}" alt="{1}" width="{2}%" /></center></p>'.format(fig, fname, int(width * 100))
             elif tag.endswith("wiki"):
                 if tag == 'dokuwiki':
                     # dokuwiki style 
-                    lines[idx] = '{{%s:%s?%s}}' % (remote_path, os.path.split(fig)[-1], width)
+                    if extension == 'pdf':
+                        lines[idx] = "[[{0}|{1}]]\n".format(os.path.join(remote_path, fname), 'Download Image "{0}"'.format(fname))
+                    else:
+                        lines[idx] = '{{%s:%s?%s}}' % (remote_path, fname, width)
                 if tag == 'pmwiki':
-                    lines[idx] = '%center% Attach:%s' % (os.path.split(fig)[-1])
+                    if extension == 'pdf':
+                        lines[idx] = "[[{0}|{1}]]\n".format(os.path.join(remote_path, fname), 'Download Image "{0}"'.format(fname))
+                    else:
+                        lines[idx] = '%center% Attach:%s' % (fname)
             else:
                 self.quit('Unknown tag for figure {0}'.format(tag))
         if tag == 'tex':
@@ -438,7 +447,7 @@ class HtmlParser(TexParser):
         self.wrap_width = 90
         self.tablefont = 'small'
         self.anchor_id = 0
-        self.fig_support = ['jpg','tif','png']
+        self.fig_support = ['jpg','tif','png', 'pdf']
         self.html_tag = False
 
     def _parseUrlPrefix(self, text):
@@ -463,7 +472,7 @@ class HtmlParser(TexParser):
         # support for raw html syntax/symbols
         pattern = re.compile(r'@@@(.*?)@@@')
         for m in re.finditer(pattern, line):
-            line = line.replace(m.group(0), self.htmlph + str(len(raw)))
+            line = line.replace(m.group(0), "{0}{1}E".format(self.rawph, len(raw)))
             raw.append(m.group(1))
         # DOI online lookup
         pattern = re.compile('@DOI://(.*?)@')
@@ -512,7 +521,7 @@ class HtmlParser(TexParser):
         line = self._parseUrl(line)
         # recover raw html syntax
         for i in range(len(raw)):
-            line = line.replace(self.htmlph + str(i), raw[i])
+            line = line.replace("{0}{1}E".format(self.rawph, i), raw[i])
         return line.strip()
 
     def m_blockizeList(self, text, k, label = None):
@@ -598,7 +607,6 @@ class HtmlParser(TexParser):
         else:
             return text
 
-
     def _parsecmd(self, text, serial, numbered = False):
         head = '<div><div id="highlighter_{0}" class="syntaxhighlighter bash"><table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="gutter">'.format(serial)
         numbers = ''.join(['<div class="line number{0} index{1} alt{2}">{0}</div>'.format(j+1 if numbered else ' ', j, 2 - j % 2) for j in range(len(text))]) + '</td><td class="code"><div class="container">'
@@ -609,9 +617,9 @@ class HtmlParser(TexParser):
             return '<HTML>\n' + text + '\n</HTML>\n'
         else:
             return text
-
         
     def m_blockizeIn(self, text, k, label = None):
+        if text.startswith("file:///"): text = gettxtfromfile(text) 
         if k.lower() == 'raw': return text
         self._checknest(text)
         self.anchor_id += 1
@@ -624,6 +632,7 @@ class HtmlParser(TexParser):
             return text
 
     def m_blockizeOut(self, text, k, label = None):
+        if text.startswith("file:///"): text = gettxtfromfile(text) 
         self._checknest(text)
         nrow = len(text.split('\n'))
         text = '<center><textarea rows="{0}", wrap="off">{1}</textarea></center>'.format(max(min(nrow, 30), 1), text)

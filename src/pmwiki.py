@@ -40,7 +40,7 @@ class Pmwiki(HtmlParser):
         # support for raw latex syntax
         pattern = re.compile(r'@@@(.*?)@@@')
         for m in re.finditer(pattern, line):
-            line = line.replace(m.group(0), self.latexph + str(len(raw)))
+            line = line.replace(m.group(0), "{0}{1}E".format(self.rawph, len(raw)))
             raw.append(m.group(1))
         # DOI online lookup
         pattern = re.compile('@DOI://(.*?)@')
@@ -73,7 +73,7 @@ class Pmwiki(HtmlParser):
         for i in range(len(raw)):
             #  {$$ ... $$} and {$...$} for MathJax.php for pmwiki, have to replace to that
             item = mathjaxphp_convert(raw[i])
-            line = line.replace(self.latexph + str(i), item)
+            line = line.replace("{0}{1}E".format(self.rawph, i), item)
         return line
 
     def m_blockizeList(self, text, k, label = None):
@@ -101,12 +101,14 @@ class Pmwiki(HtmlParser):
         return head + lines + tail
         
     def m_blockizeIn(self, text, k, label = None, sxh3 = False):
+        if text.startswith("file:///"): text = gettxtfromfile(text) 
         if k.lower() == 'raw': return text
         self._checknest(text)
         text = '(:codestart {0}:)\n{1}\n(:codeend:)\n'.format(k.lower(), wraptxt(text, '', 1000, rmblank = True))
         return text
     
     def m_blockizeOut(self, text, k, label = None):
+        if text.startswith("file:///"): text = gettxtfromfile(text) 
         self._checknest(text)
         text = '>>frame<<\n[@\n{0}\n@]\n>><<\n'.format(text)
         return text

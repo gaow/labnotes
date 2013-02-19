@@ -37,11 +37,13 @@ class Tex(TexParser):
             self.text.append(self.textbib)
 
     def m_blockizeIn(self, text, k, label = None):
+        if text.startswith("file:///"): text = gettxtfromfile(text) 
         if k.lower() == 'raw': return text
         self._checknest(text)
         return '\\begin{minted}[samepage=false, fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{%s}]{%s}\n%s\n\\end{minted}\n' % (k.upper() if not label else self.m_recode(label), k, wraptxt(text, '\\' if k == 'bash' else '', 131, rmblank = False, prefix = COMMENT[k.lower()]))
 
     def m_blockizeOut(self, text, k, label = None):
+        if text.startswith("file:///"): text = gettxtfromfile(text) 
         self._checknest(text)
         return '\\begin{Verbatim}[samepage=false, fontfamily=tt,\nfontsize=\\footnotesize, formatcom=\\color{rgray},\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{\\scriptsize %s}, labelposition=topline]\n%s\n\\end{Verbatim}\n' % ('OUTPUT' if not label else self.m_recode(label), wraptxt(text, '', 116))
 
@@ -118,7 +120,7 @@ class Tex(TexParser):
                 continue
             if self.text[idx].startswith(self.mark + '!!'):
                 # subsection, subsubsection ...
-                self.text[idx] = '\\subsubsection{' + self.m_recode(self.text[idx][len(self.mark)+2:]) + '}'
+                self.text[idx] = ('\\subsubsection*{' if self.no_num else '\\subsubsection{')+ self.m_recode(self.text[idx][len(self.mark)+2:]) + '}'
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark + '!'):
@@ -146,7 +148,6 @@ class Tex(TexParser):
                         self.text[idx] = ''
                         break
         self.text = filter(None, self.text)
-        print self.font
         return '\\documentclass[oneside%s]{%s}' % (',twocolumn' if self.twocols else '', self.doctype) + DOC_PACKAGES + \
                 ('\\usepackage[Lenny]{fncychap}\n' if self.doctype == 'report' else '') + \
                 ('\\usepackage{mathptmx}\n' if self.font == 'roman' else '') + \
