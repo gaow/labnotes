@@ -207,6 +207,7 @@ def indexhtml(fnames):
     return HTML_INDEX['head'] + otext + HTML_INDEX['tail']
 
 def getPaper(doi):
+    doi = doi.rstrip('/')
     datadir = os.path.expanduser('~/.tigernotes')
     if not os.path.isdir(datadir):
         os.makedirs(datadir)
