@@ -451,9 +451,9 @@ class HtmlParser(TexParser):
         self.html_tag = False
         if header:
             # the header be title and author embedded
-            if author is not None:
+            if author:
                 self.text.insert(0, '{1}{0}, {2}'.format(author, self.mark, strftime("%a %d %b %Y %H:%M:%S", localtime())))
-            if title is not None:
+            if title:
                 self.text = [self.mark * 3, '{0}!{1}'.format(self.mark, title), self.mark * 3] + self.text
 
     def _parseUrlPrefix(self, text):
