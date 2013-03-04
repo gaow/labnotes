@@ -50,7 +50,7 @@ def html(args):
     return
 
 def dokuwiki(args):
-    htm = Dokuwiki(args.filename, args.toc, args.showall, args.prefix)
+    htm = Dokuwiki(args.title, args.author, args.filename, args.toc, args.showall, args.prefix)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output, suffix='.txt')
     if args.filename == fname + '.txt':
@@ -60,7 +60,7 @@ def dokuwiki(args):
     return
 
 def pmwiki(args):
-    htm = Pmwiki(args.filename, args.toc, args.prefix)
+    htm = Pmwiki(args.title, args.author, args.filename, args.toc, args.prefix)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output, suffix='.txt')
     if args.filename == fname + '.txt':
@@ -105,10 +105,12 @@ class LogOpts:
         parser.set_defaults(func=html)
         # dokuwiki
         parser = subparsers.add_parser('dokuwiki', help='Generate dokuwiki text from notes file(s)')
+        self.getTexArguments(parser)
         self.getDokuwikiArguments(parser)
         parser.set_defaults(func=dokuwiki)
         # pmwiki
         parser = subparsers.add_parser('pmwiki', help='Generate pmwiki text from notes file(s)')
+        self.getTexArguments(parser)
         self.getPmwikiArguments(parser)
         parser.set_defaults(func=pmwiki)
         # admin
@@ -228,26 +230,10 @@ class LogOpts:
                         help='''use separate files for css and js scripts''')
 
     def getPmwikiArguments(self, parser):
-        parser.add_argument('filename',
-                        metavar = 'FN',
-                        nargs = '+',
-                        help='''name of the input file(s)''')
-        parser.add_argument('-o', '--output',
-                        metavar='name',
-                        type=str,
-                        help='''name of output file''')
         parser.add_argument('--prefix',
                         metavar='PATH',
                         type=str,
                         help='''remote relative path for image, usually is the namespace a dokuwiki page belongs to''')
-        parser.add_argument('--lite',
-                        action='store_true',
-                        default = '',
-                        help='''mask commented-out text from output''')
-        parser.add_argument('--toc',
-                        action='store_true',
-                        default = '',
-                        help='''generate table of contents''')
 
     def getDokuwikiArguments(self, parser):
         self.getPmwikiArguments(parser)

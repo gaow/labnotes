@@ -431,7 +431,7 @@ class TexParser:
 
 
 class HtmlParser(TexParser):
-    def __init__(self, title, author, filename):
+    def __init__(self, title, author, filename, header=False):
         TexParser.__init__(self, title, author, filename)
         self.text = []
         for fn in filename:
@@ -449,6 +449,12 @@ class HtmlParser(TexParser):
         self.anchor_id = 0
         self.fig_support = ['jpg','tif','png', 'pdf']
         self.html_tag = False
+        if header:
+            # the header be title and author embedded
+            if author is not None:
+                self.text.insert(0, '{1}{0}, {2}'.format(author, self.mark, strftime("%a %d %b %Y %H:%M:%S", localtime())))
+            if title is not None:
+                self.text = [self.mark * 3, '{0}!{1}'.format(self.mark, title), self.mark * 3] + self.text
 
     def _parseUrlPrefix(self, text):
         prefix = re.search(r'^(.+?)://', text)

@@ -8,8 +8,8 @@ def mathjaxphp_convert(item):
     return item
     
 class Pmwiki(HtmlParser):
-    def __init__(self, fname, toc, img_path):
-        HtmlParser.__init__(self, 'wikititle', 'authortitle', fname)
+    def __init__(self, title, author, fname, toc, img_path):
+        HtmlParser.__init__(self, title, author, fname, header=True)
         self.toc = toc
         self.fig_tag = "Pmwiki"
         if img_path is None:
