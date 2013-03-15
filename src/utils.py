@@ -77,7 +77,7 @@ def readfromfile(fname, start = None, end = None):
         else:
             return '\n'.join(text)
     except Exception as e:
-        raise ValueError('Cannot load {0}: {1}'.format(fname, e))
+        sys.exit('Cannot load {0}: {1}'.format(fname, e))
 
 def gettxtfromfile(text):
     flist = text.split('\n')
@@ -89,7 +89,7 @@ def gettxtfromfile(text):
                     item[1] = int(item[1])
                     item[2] = int(item[2])
                 except:
-                    raise ValueError("Invalid input argument '{0} {1}' for '{2}'".format(item[1], item[2], item[0]))
+                    sys.exit("Invalid input argument '{0} {1}' for '{2}'".format(item[1], item[2], item[0]))
                 flist[idx] = readfromfile(item[0], item[1], item[2])
             else:
                 flist[idx] = readfromfile(item[0])

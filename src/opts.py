@@ -243,8 +243,6 @@ class LogOpts:
                         help='''unfold source code / output fields in page by default''')
 
 
-
-
     def getAdminArguments(self, parser):
         parser.add_argument('filename',
                         metavar = 'FN',

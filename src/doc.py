@@ -85,7 +85,7 @@ class Tex(TexParser):
                 lminted = '\\begin{minted}[bgcolor=bg, fontsize=\\footnotesize]{text}\n'
                 cmd = '\n'.join([wraptxt(x, sep, cnt) for x in self.text[idx:i]])
                 cmd = cmd.split('\n')
-                if len(cmd) == 1:
+                if len(cmd) == 1 and "?" not in cmd[0] and "`" not in cmd[0]:
                     self.text[idx] = sminted + cmd[0] + '?'
                 else:
                     self.text[idx] = lminted + '\n'.join(cmd) + '\n\\end{minted}'

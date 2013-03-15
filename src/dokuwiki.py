@@ -106,7 +106,8 @@ class Dokuwiki(HtmlParser):
         else:
             text = '<code {0} {1}>\n'.format(
                 k.lower() if k.lower() not in ['s', 'r'] else 'rsplus',
-                '{0}{1}'.format('_'.join(label.split()) if label else 'download-source', ('.' + SYNTAX[k.lower()]) if k.lower() != 'text' else '')
+                '{0}{1}'.format(os.path.splitext('_'.join(label.split()))[0] if label else 'download-source',
+                                ('.' + SYNTAX[k.lower()]) if k.lower() != 'text' else '')
                 ) +  text + '\n</code>'        
         if self.show_all:
             text = '<hidden initialState="visible" -noprint>\n{0}\n</hidden>\\\\'.format(text)
