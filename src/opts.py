@@ -9,6 +9,8 @@ from .slides import Beamer
 from .html import Html
 from .dokuwiki import Dokuwiki
 from .pmwiki import Pmwiki
+from . import VERSION
+
 
 def doc(args):
     tex = Tex(args.title, args.author, args.date, args.toc, args.footnote, args.font, args.font_size,
@@ -86,7 +88,7 @@ class LogOpts:
         prog = 'tigernotes',
         fromfile_prefix_chars = '@',
         epilog = '''Copyright 2012 Gao Wang <ewanggao@gmail.com> GNU General Public License''')
-        self.master_parser.add_argument('--version', action='version', version='%(prog)s 1.0alpha')
+        self.master_parser.add_argument('--version', action='version', version='%(prog)s {0}'.format(VERSION))
         subparsers = self.master_parser.add_subparsers()
         # latex
         parser = subparsers.add_parser('doc', help='Generate text document from notes file(s)')

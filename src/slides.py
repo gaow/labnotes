@@ -53,7 +53,7 @@ class Beamer(TexParser):
     def m_blockizeOut(self, text, k, label = None):
         if text.startswith("file:///"): text = gettxtfromfile(text) 
         self._checknest(text)
-        return '\\begin{exampleblock}{0}\\tiny\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{exampleblock}\n' % \
+        return '\\begin{exampleblock}{-}\\tiny\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{exampleblock}\n' % \
                     wraptxt(text, '', int(105 * self.wrap_adjust), rmblank = False)
 
     def m_blockizeAlert(self, text, k, label = None):
