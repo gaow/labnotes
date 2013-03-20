@@ -4,12 +4,303 @@ import os, codecs
 class minted:
     def __init__(self, outdir):
         self.outdir = outdir
-        self.sty = "%%\n%% This is file `minted.sty\',\n%% generated with the docstrip utility.\n%%\n%% The original source files were:\n%%\n%% minted.dtx  (with options: `package\')\n%% Copyright 2010--2011 Konrad Rudolph\n%% \n%% This work may be distributed and/or modified under the\n%% conditions of the LaTeX Project Public License, either version 1.3\n%% of this license or (at your option) any later version.\n%% The latest version of this license is in\n%%   http://www.latex-project.org/lppl.txt\n%% and version 1.3 or later is part of all distributions of LaTeX\n%% version 2005/12/01 or later.\n%% \n%% Additionally, the project may be distributed under the terms of the new BSD\n%% license.\n%% \n%% This work has the LPPL maintenance status `maintained\'.\n%% \n%% The Current Maintainer of this work is Konrad Rudolph.\n%% \n%% This work consists of the files minted.dtx and minted.ins\n%% and the derived file minted.sty.\n\\NeedsTeXFormat{LaTeX2e}\n\\ProvidesPackage{minted}[2011/09/17 v1.7 Yet another Pygments shim for LaTeX]\n\\RequirePackage{keyval}\n\\RequirePackage{fancyvrb}\n\\RequirePackage{xcolor}\n\\RequirePackage{float}\n\\RequirePackage{ifthen}\n\\RequirePackage{calc}\n\\RequirePackage{ifplatform}\n\\DeclareOption{chapter}{\\def\\minted@float@within{chapter}}\n\\DeclareOption{section}{\\def\\minted@float@within{section}}\n\\ProcessOptions\\relax\n\\ifwindows\n  \\providecommand\\DeleteFile[1]{\\immediate\\write18{del #1}}\n\\else\n  \\providecommand\\DeleteFile[1]{\\immediate\\write18{rm #1}}\n\\fi\n\\newboolean{AppExists}\n\\newcommand\\TestAppExists[1]{\n  \\ifwindows\n    \\DeleteFile{\\jobname.aex}\n    \\immediate\\write18{for \\string^\\@percentchar i in (#1.exe #1.bat #1.cmd)\n      do set >\\jobname.aex <nul: /p x=\\string^\\@percentchar \\string~$PATH:i>>\\jobname.aex} %$\n    \\newread\\@appexistsfile\n    \\immediate\\openin\\@appexistsfile\\jobname.aex\n    \\expandafter\\def\\expandafter\\@tmp@cr\\expandafter{\\the\\endlinechar}\n    \\endlinechar=-1\\relax\n    \\readline\\@appexistsfile to \\@apppathifexists\n    \\endlinechar=\\@tmp@cr\n    \\ifthenelse{\\equal{\\@apppathifexists}{}}\n     {\\AppExistsfalse}\n     {\\AppExiststrue}\n    \\immediate\\closein\\@appexistsfile\n    \\DeleteFile{\\jobname.aex}\n\\immediate\\typeout{file deleted}\n  \\else\n    \\immediate\\write18{which #1 && touch \\jobname.aex}\n    \\IfFileExists{\\jobname.aex}\n     {\\AppExiststrue\n      \\DeleteFile{\\jobname.aex}}\n     {\\AppExistsfalse}\n  \\fi}\n\\newcommand\\minted@resetoptions{}\n\\newcommand\\minted@defopt[1]{\n  \\expandafter\\def\\expandafter\\minted@resetoptions\\expandafter{%\n    \\minted@resetoptions\n    \\@namedef{minted@opt@#1}{}}}\n\\newcommand\\minted@opt[1]{\n  \\expandafter\\detokenize%\n    \\expandafter\\expandafter\\expandafter{\\csname minted@opt@#1\\endcsname}}\n\\newcommand\\minted@define@opt[3][]{\n  \\minted@defopt{#2}\n  \\ifthenelse{\\equal{#1}{}}{\n    \\define@key{minted@opt}{#2}{\\@namedef{minted@opt@#2}{#3}}}\n   {\\define@key{minted@opt}{#2}[#1]{\\@namedef{minted@opt@#2}{#3}}}}\n\\newcommand\\minted@define@switch[3][]{\n  \\minted@defopt{#2}\n  \\define@booleankey{minted@opt}{#2}\n   {\\@namedef{minted@opt@#2}{#3}}\n   {\\@namedef{minted@opt@#2}{#1}}}\n\\minted@defopt{extra}\n\\newcommand\\minted@define@extra[1]{\n  \\define@key{minted@opt}{#1}{\n    \\expandafter\\def\\expandafter\\minted@opt@extra\\expandafter{%\n      \\minted@opt@extra,#1=##1}}}\n\\newcommand\\minted@define@extra@switch[1]{\n  \\define@booleankey{minted@opt}{#1}\n   {\\expandafter\\def\\expandafter\\minted@opt@extra\\expandafter{%\n      \\minted@opt@extra,#1}}\n   {\\expandafter\\def\\expandafter\\minted@opt@extra\\expandafter{%\n      \\minted@opt@extra,#1=false}}}\n\\minted@define@switch{texcl}{-P texcomments}\n\\minted@define@switch{mathescape}{-P mathescape}\n\\minted@define@switch{linenos}{-P linenos}\n\\minted@define@switch{startinline}{-P startinline}\n\\minted@define@switch[-P funcnamehighlighting=False]%\n  {funcnamehighlighting}{-P funcnamehighlighting}\n\\minted@define@opt{gobble}{-F gobble:n=#1}\n\\minted@define@opt{bgcolor}{#1}\n\\minted@define@extra{frame}\n\\minted@define@extra{framesep}\n\\minted@define@extra{framerule}\n\\minted@define@extra{rulecolor}\n\\minted@define@extra{numbersep}\n\\minted@define@extra{firstnumber}\n\\minted@define@extra{stepnumber}\n\\minted@define@extra{firstline}\n\\minted@define@extra{lastline}\n\\minted@define@extra{baselinestretch}\n\\minted@define@extra{xleftmargin}\n\\minted@define@extra{xrightmargin}\n\\minted@define@extra{fillcolor}\n\\minted@define@extra{tabsize}\n\\minted@define@extra{fontfamily}\n\\minted@define@extra{fontsize}\n\\minted@define@extra{fontshape}\n\\minted@define@extra{fontseries}\n\\minted@define@extra{formatcom}\n\\minted@define@extra{label}\n\\minted@define@extra@switch{numberblanklines}\n\\minted@define@extra@switch{showspaces}\n\\minted@define@extra@switch{resetmargins}\n\\minted@define@extra@switch{samepage}\n\\minted@define@extra@switch{showtabs}\n\\minted@define@extra@switch{obeytabs}\n\\newsavebox{\\minted@bgbox}\n\\newenvironment{minted@colorbg}[1]{\n  \\def\\minted@bgcol{#1}\n  \\noindent\n  \\begin{lrbox}{\\minted@bgbox}\n  \\begin{minipage}{\\linewidth-2\\fboxsep}}\n {\\end{minipage}\n  \\end{lrbox}%\n  \\colorbox{\\minted@bgcol}{\\usebox{\\minted@bgbox}}}\n\\newwrite\\minted@code\n\\newcommand\\minted@savecode[1]{\n  \\immediate\\openout\\minted@code\\jobname.pyg\n  \\immediate\\write\\minted@code{#1}\n  \\immediate\\closeout\\minted@code}\n\\newcommand\\minted@pygmentize[2][\\jobname.pyg]{\n  \\def\\minted@cmd{" + os.path.join(self.outdir, 'pygmentize') + " -l #2 -f latex -F tokenmerge\n    \\minted@opt{gobble} \\minted@opt{texcl} \\minted@opt{mathescape}\n    \\minted@opt{startinline} \\minted@opt{funcnamehighlighting}\n    \\minted@opt{linenos} -P \"verboptions=\\minted@opt{extra}\"\n    -o \\jobname.out.pyg #1}\n  \\immediate\\write18{\\minted@cmd}\n  % For debugging, uncomment:\n  %\\immediate\\typeout{\\minted@cmd}\n  \\ifthenelse{\\equal{\\minted@opt@bgcolor}{}}\n   {}\n   {\\begin{minted@colorbg}{\\minted@opt@bgcolor}}\n  \\input{\\jobname.out.pyg}\n  \\ifthenelse{\\equal{\\minted@opt@bgcolor}{}}\n   {}\n   {\\end{minted@colorbg}}\n  \\DeleteFile{\\jobname.out.pyg}}\n\\newcommand\\minted@usedefaultstyle{\\usemintedstyle{default}}\n\\newcommand\\usemintedstyle[1]{\n  \\renewcommand\\minted@usedefaultstyle{}\n  \\immediate\\write18{pygmentize -S #1 -f latex > \\jobname.pyg}\n  \\input{\\jobname.pyg}}\n\\newcommand\\mint[3][]{\n  \\DefineShortVerb{#3}\n  \\minted@resetoptions\n  \\setkeys{minted@opt}{#1}\n  \\SaveVerb[aftersave={\n    \\UndefineShortVerb{#3}\n    \\minted@savecode{\\FV@SV@minted@verb}\n    \\minted@pygmentize{#2}\n    \\DeleteFile{\\jobname.pyg}}]{minted@verb}#3}\n\\newcommand\\minted@proglang[1]{}\n\\newenvironment{minted}[2][]\n {\\VerbatimEnvironment\n  \\renewcommand{\\minted@proglang}[1]{#2}\n  \\minted@resetoptions\n  \\setkeys{minted@opt}{#1}\n  \\begin{VerbatimOut}[codes={\\catcode`\\^^I=12}]{\\jobname.pyg}}%\n {\\end{VerbatimOut}\n  \\minted@pygmentize{\\minted@proglang{}}\n  \\DeleteFile{\\jobname.pyg}}\n\\newcommand\\inputminted[3][]{\n  \\minted@resetoptions\n  \\setkeys{minted@opt}{#1}\n  \\minted@pygmentize[#3]{#2}}\n\\newcommand\\newminted[3][]{\n  \\ifthenelse{\\equal{#1}{}}\n   {\\def\\minted@envname{#2code}}\n   {\\def\\minted@envname{#1}}\n  \\newenvironment{\\minted@envname}\n   {\\VerbatimEnvironment\\begin{minted}[#3]{#2}}\n   {\\end{minted}}\n  \\newenvironment{\\minted@envname *}[1]\n   {\\VerbatimEnvironment\\begin{minted}[#3,##1]{#2}}\n   {\\end{minted}}}\n\\newcommand\\newmint[3][]{\n  \\ifthenelse{\\equal{#1}{}}\n   {\\def\\minted@shortname{#2}}\n   {\\def\\minted@shortname{#1}}\n  \\expandafter\\newcommand\\csname\\minted@shortname\\endcsname[2][]{\n    \\mint[#3,##1]{#2}##2}}\n\\newcommand\\newmintedfile[3][]{\n  \\ifthenelse{\\equal{#1}{}}\n   {\\def\\minted@shortname{#2file}}\n   {\\def\\minted@shortname{#1}}\n  \\expandafter\\newcommand\\csname\\minted@shortname\\endcsname[2][]{\n    \\inputminted[#3,##1]{#2}{##2}}}\n\\@ifundefined{minted@float@within}\n {\\newfloat{listing}{h}{lol}}\n {\\newfloat{listing}{h}{lol}[\\minted@float@within]}\n\\newcommand\\listingscaption{Listing}\n\\floatname{listing}{\\listingscaption}\n\\newcommand\\listoflistingscaption{List of listings}\n\\providecommand\\listoflistings{\\listof{listing}{\\listoflistingscaption}}\n\\AtBeginDocument{\n  \\minted@usedefaultstyle}\n\\AtEndOfPackage{\n  \\ifnum\\pdf@shellescape=1\\relax\\else\n    \\PackageError{minted}\n     {You must invoke LaTeX with the\n      -shell-escape flag}\n     {Pass the -shell-escape flag to LaTeX. Refer to the minted.sty\n      documentation for more information.}\\fi\n  \\TestAppExists{pygmentize}\n  \\ifAppExists\\else\n    \\PackageError{minted}\n     {You must have `pygmentize\' installed\n      to use this package}\n     {Refer to the installation instructions in the minted\n      documentation for more information.}\n  \\fi}\n\\endinput\n%%\n%% End of file `minted.sty\'.\n"
-        self.pygmentize = '''#!/bin/bash\n\n# An ugly hack to speed up pdflatex using the minted package place this file\n# with the name \'pygmentize\' somewhere on your path before the \'real\'\n# pygmentize, such that this file gets executed and can act as a wrapper around\n# the \'real\' pygmentize.  This script computes a hash-value (md5sum) of the\n# input file from minted and caches the output of pygmentize.  The cached files\n# are stored in a .minted/ directory next to the TeX doc.\n\nreal_pygmentize=`which pygmentize`\n\n# find the output file used by minted\ntake_outfile=0\nfor arg in $@\ndo\n  if [ $take_outfile -eq 1 ]\n  then\n    outfile=$arg\n    take_outfile=0\n  fi\n  if [ $arg = -o ]\n  then\n    take_outfile=1\n  fi\ndone\n\n# the last parameter is the input file\ninfile=${@: -1}\n\n# Create the .minted/ directory, if it doesn\'t exist.\nminted_cache=".minted_cache"\nif [[ ! -d ${minted_cache} ]]; then\n    mkdir ${minted_cache}\nfi\n\n# compute the hash value of the input\nhash="${minted_cache}/$( md5sum ${infile} | cut -d\' \' -f1 )"\nif [[ -f ${hash} ]]; then\n  # we have cached output from pygmentize\n  cp ${hash} ${outfile}\nelse\n  # call \'real\' pygmentize and cache the result\n  $real_pygmentize "$@"\n  cp ${outfile} ${hash}\nfi\n'''
+        # two modifications to original minted.sty
+        # 1) Add "-f" to "rm" command, to accommodate for my version of rm
+        # 2) use "./pygmentize" instead of system "pygmentize"
+        self.sty = r'''%%
+%% This is file `minted.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% minted.dtx  (with options: `package')
+%% Copyright 2010--2011 Konrad Rudolph
+%% 
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either version 1.3
+%% of this license or (at your option) any later version.
+%% The latest version of this license is in
+%%   http://www.latex-project.org/lppl.txt
+%% and version 1.3 or later is part of all distributions of LaTeX
+%% version 2005/12/01 or later.
+%% 
+%% Additionally, the project may be distributed under the terms of the new BSD
+%% license.
+%% 
+%% This work has the LPPL maintenance status `maintained'.
+%% 
+%% The Current Maintainer of this work is Konrad Rudolph.
+%% 
+%% This work consists of the files minted.dtx and minted.ins
+%% and the derived file minted.sty.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{minted}[2011/09/17 v1.7 Yet another Pygments shim for LaTeX]
+\RequirePackage{keyval}
+\RequirePackage{fancyvrb}
+\RequirePackage{xcolor}
+\RequirePackage{float}
+\RequirePackage{ifthen}
+\RequirePackage{calc}
+\RequirePackage{ifplatform}
+\DeclareOption{chapter}{\def\minted@float@within{chapter}}
+\DeclareOption{section}{\def\minted@float@within{section}}
+\ProcessOptions\relax
+\ifwindows
+  \providecommand\DeleteFile[1]{\immediate\write18{del #1}}
+\else
+  \providecommand\DeleteFile[1]{\immediate\write18{rm -f #1}}
+\fi
+\newboolean{AppExists}
+\newcommand\TestAppExists[1]{
+  \ifwindows
+    \DeleteFile{\jobname.aex}
+    \immediate\write18{for \string^\@percentchar i in (#1.exe #1.bat #1.cmd)
+      do set >\jobname.aex <nul: /p x=\string^\@percentchar \string~$PATH:i>>\jobname.aex} %$
+    \newread\@appexistsfile
+    \immediate\openin\@appexistsfile\jobname.aex
+    \expandafter\def\expandafter\@tmp@cr\expandafter{\the\endlinechar}
+    \endlinechar=-1\relax
+    \readline\@appexistsfile to \@apppathifexists
+    \endlinechar=\@tmp@cr
+    \ifthenelse{\equal{\@apppathifexists}{}}
+     {\AppExistsfalse}
+     {\AppExiststrue}
+    \immediate\closein\@appexistsfile
+    \DeleteFile{\jobname.aex}
+\immediate\typeout{file deleted}
+  \else
+    \immediate\write18{which #1 && touch \jobname.aex}
+    \IfFileExists{\jobname.aex}
+     {\AppExiststrue
+      \DeleteFile{\jobname.aex}}
+     {\AppExistsfalse}
+  \fi}
+\newcommand\minted@resetoptions{}
+\newcommand\minted@defopt[1]{
+  \expandafter\def\expandafter\minted@resetoptions\expandafter{%
+    \minted@resetoptions
+    \@namedef{minted@opt@#1}{}}}
+\newcommand\minted@opt[1]{
+  \expandafter\detokenize%
+    \expandafter\expandafter\expandafter{\csname minted@opt@#1\endcsname}}
+\newcommand\minted@define@opt[3][]{
+  \minted@defopt{#2}
+  \ifthenelse{\equal{#1}{}}{
+    \define@key{minted@opt}{#2}{\@namedef{minted@opt@#2}{#3}}}
+   {\define@key{minted@opt}{#2}[#1]{\@namedef{minted@opt@#2}{#3}}}}
+\newcommand\minted@define@switch[3][]{
+  \minted@defopt{#2}
+  \define@booleankey{minted@opt}{#2}
+   {\@namedef{minted@opt@#2}{#3}}
+   {\@namedef{minted@opt@#2}{#1}}}
+\minted@defopt{extra}
+\newcommand\minted@define@extra[1]{
+  \define@key{minted@opt}{#1}{
+    \expandafter\def\expandafter\minted@opt@extra\expandafter{%
+      \minted@opt@extra,#1=##1}}}
+\newcommand\minted@define@extra@switch[1]{
+  \define@booleankey{minted@opt}{#1}
+   {\expandafter\def\expandafter\minted@opt@extra\expandafter{%
+      \minted@opt@extra,#1}}
+   {\expandafter\def\expandafter\minted@opt@extra\expandafter{%
+      \minted@opt@extra,#1=false}}}
+\minted@define@switch{texcl}{-P texcomments}
+\minted@define@switch{mathescape}{-P mathescape}
+\minted@define@switch{linenos}{-P linenos}
+\minted@define@switch{startinline}{-P startinline}
+\minted@define@switch[-P funcnamehighlighting=False]%
+  {funcnamehighlighting}{-P funcnamehighlighting}
+\minted@define@opt{gobble}{-F gobble:n=#1}
+\minted@define@opt{bgcolor}{#1}
+\minted@define@extra{frame}
+\minted@define@extra{framesep}
+\minted@define@extra{framerule}
+\minted@define@extra{rulecolor}
+\minted@define@extra{numbersep}
+\minted@define@extra{firstnumber}
+\minted@define@extra{stepnumber}
+\minted@define@extra{firstline}
+\minted@define@extra{lastline}
+\minted@define@extra{baselinestretch}
+\minted@define@extra{xleftmargin}
+\minted@define@extra{xrightmargin}
+\minted@define@extra{fillcolor}
+\minted@define@extra{tabsize}
+\minted@define@extra{fontfamily}
+\minted@define@extra{fontsize}
+\minted@define@extra{fontshape}
+\minted@define@extra{fontseries}
+\minted@define@extra{formatcom}
+\minted@define@extra{label}
+\minted@define@extra@switch{numberblanklines}
+\minted@define@extra@switch{showspaces}
+\minted@define@extra@switch{resetmargins}
+\minted@define@extra@switch{samepage}
+\minted@define@extra@switch{showtabs}
+\minted@define@extra@switch{obeytabs}
+\newsavebox{\minted@bgbox}
+\newenvironment{minted@colorbg}[1]{
+  \def\minted@bgcol{#1}
+  \noindent
+  \begin{lrbox}{\minted@bgbox}
+  \begin{minipage}{\linewidth-2\fboxsep}}
+ {\end{minipage}
+  \end{lrbox}%
+  \colorbox{\minted@bgcol}{\usebox{\minted@bgbox}}}
+\newwrite\minted@code
+\newcommand\minted@savecode[1]{
+  \immediate\openout\minted@code\jobname.pyg
+  \immediate\write\minted@code{#1}
+  \immediate\closeout\minted@code}
+\newcommand\minted@pygmentize[2][\jobname.pyg]{
+  \def\minted@cmd{./pygmentize -l #2 -f latex -F tokenmerge
+    \minted@opt{gobble} \minted@opt{texcl} \minted@opt{mathescape}
+    \minted@opt{startinline} \minted@opt{funcnamehighlighting}
+    \minted@opt{linenos} -P "verboptions=\minted@opt{extra}"
+    -o \jobname.out.pyg #1}
+  \immediate\write18{\minted@cmd}
+  % For debugging, uncomment:
+  %\immediate\typeout{\minted@cmd}
+  \ifthenelse{\equal{\minted@opt@bgcolor}{}}
+   {}
+   {\begin{minted@colorbg}{\minted@opt@bgcolor}}
+  \input{\jobname.out.pyg}
+  \ifthenelse{\equal{\minted@opt@bgcolor}{}}
+   {}
+   {\end{minted@colorbg}}
+  \DeleteFile{\jobname.out.pyg}}
+\newcommand\minted@usedefaultstyle{\usemintedstyle{default}}
+\newcommand\usemintedstyle[1]{
+  \renewcommand\minted@usedefaultstyle{}
+  \immediate\write18{pygmentize -S #1 -f latex > \jobname.pyg}
+  \input{\jobname.pyg}}
+\newcommand\mint[3][]{
+  \DefineShortVerb{#3}
+  \minted@resetoptions
+  \setkeys{minted@opt}{#1}
+  \SaveVerb[aftersave={
+    \UndefineShortVerb{#3}
+    \minted@savecode{\FV@SV@minted@verb}
+    \minted@pygmentize{#2}
+    \DeleteFile{\jobname.pyg}}]{minted@verb}#3}
+\newcommand\minted@proglang[1]{}
+\newenvironment{minted}[2][]
+ {\VerbatimEnvironment
+  \renewcommand{\minted@proglang}[1]{#2}
+  \minted@resetoptions
+  \setkeys{minted@opt}{#1}
+  \begin{VerbatimOut}[codes={\catcode`\^^I=12}]{\jobname.pyg}}%
+ {\end{VerbatimOut}
+  \minted@pygmentize{\minted@proglang{}}
+  \DeleteFile{\jobname.pyg}}
+\newcommand\inputminted[3][]{
+  \minted@resetoptions
+  \setkeys{minted@opt}{#1}
+  \minted@pygmentize[#3]{#2}}
+\newcommand\newminted[3][]{
+  \ifthenelse{\equal{#1}{}}
+   {\def\minted@envname{#2code}}
+   {\def\minted@envname{#1}}
+  \newenvironment{\minted@envname}
+   {\VerbatimEnvironment\begin{minted}[#3]{#2}}
+   {\end{minted}}
+  \newenvironment{\minted@envname *}[1]
+   {\VerbatimEnvironment\begin{minted}[#3,##1]{#2}}
+   {\end{minted}}}
+\newcommand\newmint[3][]{
+  \ifthenelse{\equal{#1}{}}
+   {\def\minted@shortname{#2}}
+   {\def\minted@shortname{#1}}
+  \expandafter\newcommand\csname\minted@shortname\endcsname[2][]{
+    \mint[#3,##1]{#2}##2}}
+\newcommand\newmintedfile[3][]{
+  \ifthenelse{\equal{#1}{}}
+   {\def\minted@shortname{#2file}}
+   {\def\minted@shortname{#1}}
+  \expandafter\newcommand\csname\minted@shortname\endcsname[2][]{
+    \inputminted[#3,##1]{#2}{##2}}}
+\@ifundefined{minted@float@within}
+ {\newfloat{listing}{h}{lol}}
+ {\newfloat{listing}{h}{lol}[\minted@float@within]}
+\newcommand\listingscaption{Listing}
+\floatname{listing}{\listingscaption}
+\newcommand\listoflistingscaption{List of listings}
+\providecommand\listoflistings{\listof{listing}{\listoflistingscaption}}
+\AtBeginDocument{
+  \minted@usedefaultstyle}
+\AtEndOfPackage{
+  \ifnum\pdf@shellescape=1\relax\else
+    \PackageError{minted}
+     {You must invoke LaTeX with the
+      -shell-escape flag}
+     {Pass the -shell-escape flag to LaTeX. Refer to the minted.sty
+      documentation for more information.}\fi
+  \TestAppExists{pygmentize}
+  \ifAppExists\else
+    \PackageError{minted}
+     {You must have `pygmentize' installed
+      to use this package}
+     {Refer to the installation instructions in the minted
+      documentation for more information.}
+  \fi}
+\endinput
+%%
+%% End of file `minted.sty'.
+'''
+        self.pygmentize = r'''#!/bin/bash
+# An ugly hack to speed up pdflatex using the minted package place this file
+# with the name 'pygmentize' somewhere on your path before the 'real'
+# pygmentize, such that this file gets executed and can act as a wrapper around
+# the 'real' pygmentize.  This script computes a hash-value (md5sum) of the
+# input file from minted and caches the output of pygmentize.  The cached files
+# are stored in a .minted/ directory next to the TeX doc.
+
+real_pygmentize=`which pygmentize`
+if [ -z $real_pygmentize ]; then
+    rm -rf pygments
+    hg clone http://bitbucket.org/birkenfeld/pygments-main pygments
+    real_pygmentize="pygments/pygmentize"
+fi
+
+# find the output file used by minted
+take_outfile=0
+for arg in $@
+do
+  if [ $take_outfile -eq 1 ]
+  then
+    outfile=$arg
+    take_outfile=0
+  fi
+  if [ $arg = -o ]
+  then
+    take_outfile=1
+  fi
+done
+
+# the last parameter is the input file
+infile=${@: -1}
+
+# Create the .minted/ directory, if it doesn't exist.
+minted_cache=".minted_cache"
+if [[ ! -d ${minted_cache} ]]; then
+    mkdir ${minted_cache}
+fi
+
+# compute the hash value of the input
+hash="${minted_cache}/$( md5sum ${infile} | cut -d' ' -f1 )"
+if [[ -f ${hash} ]]; then
+  # we have cached output from pygmentize
+  cp ${hash} ${outfile}
+else
+  # call 'real' pygmentize and cache the result
+  $real_pygmentize "$@"
+  cp ${outfile} ${hash}
+fi
+'''
     def put(self):
         with codecs.open(os.path.join(self.outdir, 'minted.sty'), 'w', encoding='UTF-8') as f:
             f.write(self.sty)
         with codecs.open(os.path.join(self.outdir, 'pygmentize'), 'w', encoding='UTF-8') as f:
             f.write(self.pygmentize)
         os.chmod(os.path.join(self.outdir, 'pygmentize'), 0755)
-        return
+        return os.path.join(self.outdir, 'pygmentize')
