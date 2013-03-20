@@ -172,7 +172,7 @@ class minted:
 \newcommand\minted@usedefaultstyle{\usemintedstyle{default}}
 \newcommand\usemintedstyle[1]{
   \renewcommand\minted@usedefaultstyle{}
-  \immediate\write18{pygmentize -S #1 -f latex > \jobname.pyg}
+  \immediate\write18{./pygmentize -S #1 -f latex > \jobname.pyg}
   \input{\jobname.pyg}}
 \newcommand\mint[3][]{
   \DefineShortVerb{#3}

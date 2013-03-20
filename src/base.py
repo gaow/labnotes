@@ -88,7 +88,7 @@ class TexParser:
         line = line.strip()
         raw = []
         # support for raw latex syntax
-        pattern = re.compile(r'@@@(.*?)@@@')
+        pattern = re.compile(r'{\$(.*?)\$}')
         for m in re.finditer(pattern, line):
             line = line.replace(m.group(0), "{0}{1}E".format(self.rawph, len(raw)))
             raw.append(m.group(1))
@@ -476,7 +476,7 @@ class HtmlParser(TexParser):
         line = line.strip()
         raw = []
         # support for raw html syntax/symbols
-        pattern = re.compile(r'@@@(.*?)@@@')
+        pattern = re.compile(r'{\$(.*?)\$}')
         for m in re.finditer(pattern, line):
             line = line.replace(m.group(0), "{0}{1}E".format(self.rawph, len(raw)))
             raw.append(m.group(1))

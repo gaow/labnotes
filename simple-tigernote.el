@@ -146,7 +146,7 @@ subexpression.")
    '("\\`\\([0-9]+\\)[ \t]+\\(#.+?\\)\n"
      (1 font-lock-constant-face)
      (2 font-lock-warning-face))
-   '("@@@[^ \t@][^@]*[^ \t@]@@@" . font-lock-keyword-face) ; @@@a .. b@@@
+   '("{\$\\([^\$]\\|[^\$]\$\\)*\$}" . font-lock-keyword-face) ; {$a .. b$}
    '("@@[^ \t@][^@]*[^ \t@]@@" . font-lock-string-face) ; @@a .. b@@
    '(simple-tigernote-match-tag-i . (0 'simple-tigernote-italic-face append))
    '(simple-tigernote-match-tag-b . (0 'simple-tigernote-bold-face append))

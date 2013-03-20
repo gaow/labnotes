@@ -38,7 +38,7 @@ class Pmwiki(HtmlParser):
         line = line.rstrip()
         raw = []
         # support for raw latex syntax
-        pattern = re.compile(r'@@@(.*?)@@@')
+        pattern = re.compile(r'{\$(.*?)\$}')
         for m in re.finditer(pattern, line):
             line = line.replace(m.group(0), "{0}{1}E".format(self.rawph, len(raw)))
             raw.append(m.group(1))

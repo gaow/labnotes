@@ -48,9 +48,9 @@ tigernotes doc demo.notes --author "John Doe" --title "Example log documentation
 #!! Emphasis symbols 
 # ``double quote'', `single quote',  "italics", ""bold"", """bold italics""", @@monospaced@@, @www.google.com@
 #!!! sentence emphasized
-#!! Raw @@@\LaTeXe@@@ syntax
-#Display math: @@@\[\hat{\beta} = (\frac{1}{n}\sum_i^n \mathbf{x}_i\mathbf{x}_i^T)^{-1} (\frac{1}{n}\sum_i^n\mathbf{x}_iy_i)\]@@@
-#Inline math: @@@\(\hat{\beta} = (\frac{1}{n}\sum_i^n \mathbf{x}_i\mathbf{x}_i^T)^{-1} (\frac{1}{n}\sum_i^n\mathbf{x}_iy_i)\)@@@
+#!! Raw {$\LaTeXe$} syntax
+#Display math: {$\[\hat{\beta} = (\frac{1}{n}\sum_i^n \mathbf{x}_i\mathbf{x}_i^T)^{-1} (\frac{1}{n}\sum_i^n\mathbf{x}_iy_i)\]$}
+#Inline math: {$\(\hat{\beta} = (\frac{1}{n}\sum_i^n \mathbf{x}_i\mathbf{x}_i^T)^{-1} (\frac{1}{n}\sum_i^n\mathbf{x}_iy_i)\)$}
 #{raw
 \begin{align*}
 p(\theta|y_1 \ldots y_6) & = \frac{p(y_1 \ldots y_6|\theta) p(\theta)}{p(y_1 \dots y_6)} \\
