@@ -23,7 +23,8 @@ SYNTAX = {'r':'R',
           'sql':'sqlite',
           'php':'php',
           'text':'txt',
-          'raw':'txt'
+          'raw':'txt',
+          '$':'txt'
           }
 
 COMMENT = {'r':'#',
@@ -150,6 +151,9 @@ class TexParser:
         while True:
             if idx >= len(text):
                 break
+            if text[idx].startswith(self.mark + '{$') and '$}' in text[idx]:
+                idx += 1
+                continue
             if text[idx].startswith(self.mark + '}') and '--' not in text[idx]:
                 self.quit("Invalid use of '%s' without previous %s{, near %s" % \
                         (text[idx], self.mark, text[idx+1] if idx + 1 < len(text) else "end of document"))
@@ -203,7 +207,9 @@ class TexParser:
                     text[idx] += '\n' + text[i]
                 del text[(idx + 1) : (newend + 1)]
                 # parse the block
-                text[idx] = 'BEGIN' + self.blockph + eval(self.PARSER_RULE[bname])(text[idx], bname, blabel) + 'END' + self.blockph
+                text[idx] = 'BEGIN' + self.blockph + \
+                    eval(self.PARSER_RULE[bname])(text[idx], bname, blabel) + \
+                    'END' + self.blockph
             #
             idx += 1
         return text
@@ -626,7 +632,7 @@ class HtmlParser(TexParser):
         
     def m_blockizeIn(self, text, k, label = None):
         if text.startswith("file:///"): text = gettxtfromfile(text) 
-        if k.lower() == 'raw': return text
+        if k.lower() == 'raw' or k.lower() == '$': return text
         self._checknest(text)
         self.anchor_id += 1
         text = '<div style="color:rgb(220, 20, 60);font-weight:bold;text-align:right;padding-right:2em;"><span class="textborder">' + \

@@ -92,7 +92,7 @@ class Dokuwiki(HtmlParser):
         
     def m_blockizeIn(self, text, k, label = None, sxh3 = False):
         if text.startswith("file:///"): text = gettxtfromfile(text) 
-        if k.lower() == 'raw': return text
+        if k.lower() == 'raw' or k.lower() == '$': return text
         self._checknest(text)
         # no wrap, totally rely on dokuwiki
         # text = wraptxt(text, '', 1000, rmblank = True)  

@@ -102,7 +102,7 @@ class Pmwiki(HtmlParser):
         
     def m_blockizeIn(self, text, k, label = None, sxh3 = False):
         if text.startswith("file:///"): text = gettxtfromfile(text) 
-        if k.lower() == 'raw': return text
+        if k.lower() == 'raw' or k.lower() == '$': return text
         self._checknest(text)
         text = '(:codestart {0}:)\n{1}\n(:codeend:)\n'.format(k.lower(), wraptxt(text, '', 1000, rmblank = True))
         return text
