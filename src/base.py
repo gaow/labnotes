@@ -113,7 +113,7 @@ class TexParser:
         # citation
         # [note|reference] defines the pattern for citation.
         # Will have to use [note$|$reference] here since '|' was previously replaced by $|$
-        pattern = re.compile('\[(?P<a>.+?)\$\|\$(?P<b>.+?)\]')
+        pattern = re.compile('\[(\s*)(?P<a>.+?)(\s*)\$\|\$(\s*)(?P<b>.+?)(\s*)\]')
         # re.compile('\[(.+?)\|(.+?)\]')
         for m in re.finditer(pattern, line):
             if not self.footnote:
@@ -444,7 +444,7 @@ class HtmlParser(TexParser):
             try:
                 with codecs.open(fn, 'r', encoding='UTF-8', errors='ignore') as f:
                     #lines = [l.rstrip() for l in f.readlines() if l.rstrip()]
-                    lines = [l.rstrip() for l in f.readlines()]
+                    lines = [l.rstrip() for l in f.readlines() if f.readlines()]
                 self.text.extend(lines)
             except IOError as e:
                 sys.exit(e)

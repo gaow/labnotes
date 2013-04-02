@@ -4,15 +4,17 @@ from .style import DOC_PACKAGES, DOC_CONFIG
 from .base import *
 import codecs
 class Tex(TexParser):
-    def __init__(self, title, author, date, toc, footnote, font, font_size, filename, no_num = False, no_page = False, no_ref = False, twocols = False):
+    def __init__(self, title, author, date, toc, footnote, font, font_size,
+                 filename, no_num = False, no_page = False, no_ref = False, twocols = False):
         TexParser.__init__(self, title, author, filename)
         self.text = []
         for fn in filename:
             try:
                 with codecs.open(fn, 'r', encoding='UTF-8', errors='ignore') as f:
-                    lines = [l.rstrip() for l in f.readlines() if l.rstrip()]
+                    lines = [l.rstrip() for l in f.readlines() if l.rstrip() and f.readlines()]
                     # in case I need to parse source code
-                    if lines[0].startswith('#!/') and fn.split('.')[-1].lower() in lines[0].lower():
+                    if len(lines) > 0 and lines[0].startswith('#!/') \
+                      and fn.split('.')[-1].lower() in lines[0].lower():
                         del lines[0]
                 self.text.extend(lines)
             except IOError as e:

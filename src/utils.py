@@ -147,7 +147,7 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
                     * 1. Missing required software / packages dependencies
                     *   -> Install the required dependencies
                     * 2. Invalid raw LaTeX syntax
-                    *   -> Make sure text between {$ ... $} syntax is legal
+                    *   -> Make sure text between {{$ ... $}} syntax is legal
                     * 3. Cache files messed up
                     *   -> Try to run the program with '--vanilla' option
                     * 4. Internal bugs
