@@ -674,6 +674,7 @@ CONFIG = '''
 \\usepackage{longtable}
 \\usepackage{subfigure}
 \\usepackage{multicol}
+\\usepackage{multirow}
 \\usepackage[numbered]{bookmark}
 %%Make sure it comes last of your loaded packages
 \\usepackage{hyperref}
