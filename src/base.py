@@ -177,8 +177,8 @@ class TexParser:
                     # nested block identified
                     if text[i].startswith(self.mark + '{'):
                         if '--' in text[i]:
-                            self.quit('Invalid use of "%s{----" within block environment, near %') %\
-                                (self.mark, self.text[i+1] if i + 1 < len(self.text) else "end of document")
+                            self.quit('Invalid use of "%s{----" within block environment, near %s' % \
+                                (self.mark, self.text[i+1] if i + 1 < len(self.text) else "end of document"))
                         base += 1
                     # block end identified
                     if text[i].startswith(self.mark + '}'):
