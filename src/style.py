@@ -657,6 +657,7 @@ CONFIG = '''
 %% \\usepackage{mathpazo}
 %% \\usepackage{mathptmx}
 \\usepackage{latexsym}
+\\usepackage{fixltx2e}
 \\usepackage{fancyvrb}
 \\usepackage{graphicx}
 \\usepackage{color}
@@ -920,6 +921,7 @@ DOC_PACKAGES = '''
 \\usepackage{mathabx}
 \\newcommand\hmmax{0} % default 3
 \\usepackage{bm}
+\\usepackage{fixltx2e}
 \\usepackage{fancyhdr}
 \\usepackage{fancyvrb}
 \\usepackage{shadow}
