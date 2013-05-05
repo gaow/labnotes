@@ -70,8 +70,10 @@ def multispace2tab(line):
 
 def readfromfile(fname, start = None, end = None):
     try:
-        with open(fname, 'r') as f:
+        with open(os.path.expanduser(fname), 'r') as f:
             text = [x.rstrip() for x in f.readlines()]
+        if start is not None and end is None:
+            end = len(text)
         if start is not None and end is not None and start >= 1 and end <= len(text):
             return '\n'.join(text[start-1:end])
         else:
@@ -84,10 +86,12 @@ def gettxtfromfile(text):
     for idx, item in enumerate(flist):
         if item.startswith('file:///'):
             item = item[8:].split()
+            if len(item) == 2:
+                item.append(None)
             if len(item) == 3:
                 try:
                     item[1] = int(item[1])
-                    item[2] = int(item[2])
+                    item[2] = int(item[2]) if item[2] is not None else None
                 except:
                     sys.exit("Invalid input argument '{0} {1}' for '{2}'".format(item[1], item[2], item[0]))
                 flist[idx] = readfromfile(item[0], item[1], item[2])

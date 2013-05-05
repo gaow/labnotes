@@ -73,6 +73,8 @@ class TexParser:
     def capitalize(self, text):
         omit = ["a", "an", "the", "and", "but", "or", "nor", "as", "at", "by", "for", "in", "of", "on", "to", "but", "cum", "mid", "off", "per", "qua", "re", "up", "via", "to", "from", "into", "onto", "with", "within", "without"]
         text = text.split()
+        if len(text) == 0:
+            return ''
         # first word capitalized anyways
         out = text[0][0].upper() + (text[0][1:] if len(text[0]) > 1 else '')
         # omit keywords for the rest
