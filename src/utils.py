@@ -229,7 +229,7 @@ def getPaper(doi):
     for k, value in info.items():
         if len(info[k]) == 0:
             return doi
-    info = '{0} ({2}) ""{1}"". "{3}" doi:@@{4}@@. @{5}@'.\
+    info = '{0} ({2}). ""{1}"". "{3}". \n\ndoi:@@{4}@@ | @{5}@'.\
         format(info['authors'],
                info['title'], info['date'],
                info['journal'], info['DOI'],
