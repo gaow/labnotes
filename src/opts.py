@@ -42,13 +42,13 @@ def html(args):
         with open('style.css', 'w') as f: f.writelines(css)
     if js:
         with open('script.js', 'w') as f: f.writelines(js)
-    woff = os.path.join(os.path.dirname(sys.modules['libtigernotes'].__file__), 'PTSans.woff')
-    if os.path.exists(woff):
-        shutil.copy2(woff, '.')
-    else:
-        # cannot find font in current directory either
-        if not os.path.isfile('PTSans.woff'):
-            sys.stderr.write("WARNING: font file 'PTSans.woff' might be missing (http://www.google.com/webfonts/specimen/PT+Sans)\n")
+    # woff = os.path.join(os.path.dirname(sys.modules['libtigernotes'].__file__), 'PTSans.woff')
+    # if os.path.exists(woff):
+    #     shutil.copy2(woff, '.')
+    # else:
+    #     # cannot find font in current directory either
+    #     if not os.path.isfile('PTSans.woff'):
+    #         sys.stderr.write("WARNING: font file 'PTSans.woff' might be missing (http://www.google.com/webfonts/specimen/PT+Sans)\n")
     return
 
 def dokuwiki(args):
