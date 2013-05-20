@@ -210,7 +210,7 @@ def indexhtml(fnames):
             otext += v + '\n'
     return HTML_INDEX['head'] + otext + HTML_INDEX['tail']
 
-def getPaper(doi):
+def getPaper(doi, longref):
     doi = doi.rstrip('/')
     datadir = os.path.expanduser('~/.tigernotes')
     if not os.path.isdir(datadir):
@@ -229,11 +229,17 @@ def getPaper(doi):
     for k, value in info.items():
         if len(info[k]) == 0:
             return doi
-    info = '{0} ({2}). ""{1}"". "{3}". \n\ndoi:@@{4}@@ | @{5}@'.\
-        format(info['authors'],
+    if longref:
+        info = '{0} ({2}). ""{1}"". "{3}". doi:@@{4}@@ | @{5}@'.\
+          format(info['authors'],
                info['title'], info['date'],
                info['journal'], info['DOI'],
                info['link'])
+    else:
+        info = '{0} ({2}). ""{1}"". "{3}"'.\
+          format(info['authors'],
+               info['title'], info['date'],
+               info['journal'])
     if sys.version_info[0] == 2:
         return info.decode("ascii", "ignore").encode('utf-8')
     else:

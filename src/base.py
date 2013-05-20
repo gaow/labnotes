@@ -42,7 +42,7 @@ COMMENT = {'r':'#',
 
 # base class
 class TexParser:
-    def __init__(self, title, author, fname):
+    def __init__(self, title, author, fname, long_ref = True):
         self.title = title.replace('\\n', '\n')
         self.author = author.replace('\\n', '\n')
         self.fn = '-'.join(fname)
@@ -69,6 +69,7 @@ class TexParser:
         self.pause = False
         self.fig_support = ['jpg','pdf','png', 'eps']
         self.fig_tag = 'tex'
+        self.long_ref = long_ref
 
     def capitalize(self, text):
         omit = ["a", "an", "the", "and", "but", "or", "nor", "as", "at", "by", "for", "in", "of", "on", "to", "but", "cum", "mid", "off", "per", "qua", "re", "up", "via", "to", "from", "into", "onto", "with", "within", "without"]
@@ -100,7 +101,7 @@ class TexParser:
         # DOI online lookup
         pattern = re.compile('@DOI://(.*?)@')
         for m in re.finditer(pattern, line):
-            line = line.replace(m.group(0), getPaper(m.group(1)))
+            line = line.replace(m.group(0), getPaper(m.group(1), self.long_ref))
         # latex keywords
         for item in [('\\', '!!\\backslash!!'),('$', '\$'),('!!\\backslash!!', '$\\backslash$'),
                 ('{', '\{'),('}', '\}'),('%', '\%'), ('_', '\-\_'),('|', '$|$'),('&', '\&'),('<', '$<$'),
@@ -318,7 +319,8 @@ class TexParser:
                     if extension == 'pdf':
                         lines[idx] = "[[{0}|{1}]]\n".format(os.path.join(remote_path, fname), 'Download Image "{0}"'.format(fname))
                     else:
-                        lines[idx] = '{{%s:%s?%s}}' % (remote_path, fname, width)
+                        sep = ':' if not '://' in remote_path else '/'
+                        lines[idx] = '{{%s%s%s?%s}}' % (remote_path, sep, fname, width) 
                 if tag == 'pmwiki':
                     if extension == 'pdf':
                         lines[idx] = "[[{0}|{1}]]\n".format(os.path.join(remote_path, fname), 'Download Image "{0}"'.format(fname))
@@ -441,8 +443,8 @@ class TexParser:
 
 
 class HtmlParser(TexParser):
-    def __init__(self, title, author, filename, header=False):
-        TexParser.__init__(self, title, author, filename)
+    def __init__(self, title, author, filename, header=False, long_ref=True):
+        TexParser.__init__(self, title, author, filename, long_ref)
         self.text = []
         for fn in filename:
             try:
@@ -493,7 +495,7 @@ class HtmlParser(TexParser):
         # DOI online lookup
         pattern = re.compile('@DOI://(.*?)@')
         for m in re.finditer(pattern, line):
-            line = line.replace(m.group(0), getPaper(m.group(1)))
+            line = line.replace(m.group(0), getPaper(m.group(1), self.long_ref))
         # html keywords
         # no need to convert most of them
         for item in [

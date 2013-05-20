@@ -14,7 +14,7 @@ from . import VERSION
 
 def doc(args):
     tex = Tex(args.title, args.author, args.date, args.toc, args.footnote, args.font, args.font_size,
-                   args.filename, no_num = args.no_section_number, 
+                   args.filename, long_ref = args.long_ref, no_num = args.no_section_number, 
                    no_page = args.no_page_number, no_ref = False, twocols = args.twocols)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output)
@@ -24,7 +24,7 @@ def doc(args):
 def slides(args):
     tex = Beamer(args.title, args.author, args.date, args.institute,
                       args.toc, args.stoc, args.mode, args.theme,
-                      args.thank, args.filename)
+                      args.thank, args.filename, long_ref = args.long_ref)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output)
     pdflatex(fname, tex.get(lite), vanilla=args.vanilla, beamer = True)
@@ -32,7 +32,7 @@ def slides(args):
 
 def html(args):
     htm = Html(args.title, args.author, args.toc,
-                    args.filename, args.columns)
+                    args.filename, args.columns, long_ref = args.long_ref)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output, suffix='.html')
     body, css, js = htm.get(lite, args.separate)
@@ -52,7 +52,8 @@ def html(args):
     return
 
 def dokuwiki(args):
-    htm = Dokuwiki(args.title, args.author, args.filename, args.toc, args.showall, args.prefix)
+    htm = Dokuwiki(args.title, args.author, args.filename, args.toc,
+                   args.showall, args.prefix, long_ref = args.long_ref)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output, suffix='.txt')
     if args.filename == fname + '.txt':
@@ -62,7 +63,7 @@ def dokuwiki(args):
     return
 
 def pmwiki(args):
-    htm = Pmwiki(args.title, args.author, args.filename, args.toc, args.prefix)
+    htm = Pmwiki(args.title, args.author, args.filename, args.toc, args.prefix, long_ref = args.long_ref)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output, suffix='.txt')
     if args.filename == fname + '.txt':
@@ -139,10 +140,6 @@ class LogOpts:
                         metavar='name',
                         type=str,
                         help='''name of output file''')
-        parser.add_argument('--lite',
-                        action='store_true',
-                        default = '',
-                        help='''mask commented-out text from output''')
         parser.add_argument('--toc',
                         action='store_true',
                         default = '',
@@ -155,15 +152,23 @@ class LogOpts:
                         action='store',
                         default = '',
                         help='''title of document''')
+        parser.add_argument('--lite',
+                        action='store_true',
+                        default = '',
+                        help='''mask commented-out text from output''')
+        parser.add_argument('--long_ref',
+                        action='store_true',
+                        help='''additionally include DOI and HTTP links in reference paper''')
+#        parser.add_argument('--no_reference',
+#                        action='store_true',
+#                        help='''do not include reference in the document''')
+
 
     def getDocArguments(self, parser):
         parser.add_argument('-d', '--date',
                         action='store',
                         default = '',
                         help='''date, leave empty for current date''')
-#        parser.add_argument('--no_reference',
-#                        action='store_true',
-#                        help='''do not include reference in the document''')
         parser.add_argument('--no_section_number',
                         action='store_true',
                         help='''generate un-numbered sections''')

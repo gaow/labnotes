@@ -5,8 +5,8 @@ from .base import *
 from .ordereddict import OrderedDict
 
 class Html(HtmlParser):
-    def __init__(self, title, author, toc, filename, columns):
-        HtmlParser.__init__(self, title, author, filename)
+    def __init__(self, title, author, toc, filename, columns, long_ref = True):
+        HtmlParser.__init__(self, title, author, filename, long_ref)
         self.toc = toc
         if columns == 2:
             self.frame = 'two-col'

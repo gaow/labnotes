@@ -5,8 +5,9 @@ from .base import *
 import codecs
 class Tex(TexParser):
     def __init__(self, title, author, date, toc, footnote, font, font_size,
-                 filename, no_num = False, no_page = False, no_ref = False, twocols = False):
-        TexParser.__init__(self, title, author, filename)
+                 filename, long_ref = True, no_num = False, no_page = False,
+                 no_ref = False, twocols = False):
+        TexParser.__init__(self, title, author, filename, long_ref)
         self.text = []
         for fn in filename:
             try:
@@ -58,6 +59,17 @@ class Tex(TexParser):
         text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
         return '\\begin{bclogo}[logo=%s, couleurBarre=MidnightBlue, noborder=true, couleur=white]{~%s}%s\n\\end{bclogo}\n' % (self.bclogo[k], k.capitalize() if not label else self.m_recode(label), text)
 
+
+    def m_removeBlankCmd(self, cmd):
+        tmp = [x.strip() for x in cmd.split('\n')]
+        cmd = []
+        for idx, item in enumerate(tmp):
+            if item.endswith('\\') and tmp[min(idx+1, len(tmp)-1)] == '':
+                item = item[:-1] 
+            if item != '':
+                cmd.append(item)
+        return cmd
+
     def m_parseText(self):
         skip = []
         for idx, item in enumerate(self.text):
@@ -86,7 +98,7 @@ class Tex(TexParser):
                 sminted = '\\mint[bgcolor=bg, fontsize=\\footnotesize]{text}?'
                 lminted = '\\begin{minted}[bgcolor=bg, fontsize=\\footnotesize]{text}\n'
                 cmd = '\n'.join([wraptxt(x, sep, cnt) for x in self.text[idx:i]])
-                cmd = cmd.split('\n')
+                cmd = self.m_removeBlankCmd(cmd)
                 if len(cmd) == 1 and "?" not in cmd[0] and "`" not in cmd[0]:
                     self.text[idx] = sminted + cmd[0] + '?'
                 else:

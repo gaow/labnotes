@@ -4,8 +4,8 @@ from .base import *
 from .style import MODE, CONFIG, TITLE, THANK, THEME
 import codecs
 class Beamer(TexParser):
-    def __init__(self, title, author, date, institute, toc, stoc, mode, theme, thank, filename):
-        TexParser.__init__(self, title, author, filename)
+    def __init__(self, title, author, date, institute, toc, stoc, mode, theme, thank, filename, long_ref = True):
+        TexParser.__init__(self, title, author, filename, long_ref)
         self.text = []
         for fn in filename:
             try:

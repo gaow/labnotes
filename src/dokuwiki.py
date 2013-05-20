@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 from .base import *
 class Dokuwiki(HtmlParser):
-    def __init__(self, title, author, fname, toc, show_all, img_path):
-        HtmlParser.__init__(self, title, author, fname, header=True)
+    def __init__(self, title, author, fname, toc, show_all, img_path, long_ref = True):
+        HtmlParser.__init__(self, title, author, fname, header=True, long_ref = long_ref)
         self.toc = toc
         self.show_all = show_all
         self.fig_tag = "dokuwiki"
