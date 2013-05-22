@@ -40,7 +40,7 @@ class Dokuwiki(HtmlParser):
         # DOI online lookup
         pattern = re.compile('@DOI://(.*?)@')
         for m in re.finditer(pattern, line):
-            line = line.replace(m.group(0), getPaper(m.group(1)))
+            line = line.replace(m.group(0), getPaper(m.group(1), self.long_ref))
         line = re.sub(r'"""(.*?)"""', r"**//\1//**", line)
         line = re.sub(r'""(.*?)""', r'**\1**', line)
         line = re.sub(r'"(.*?)"', r'//\1//', line)
