@@ -70,7 +70,8 @@ def multispace2tab(line):
 
 def readfromfile(fname, start = None, end = None):
     try:
-        with open(os.path.expanduser(fname), 'r') as f:
+
+        with codecs.open(os.path.expanduser(fname), 'r', encoding='UTF-8', errors='ignore') as f:
             text = [x.rstrip() for x in f.readlines()]
         if start is not None and end is None:
             end = len(text)

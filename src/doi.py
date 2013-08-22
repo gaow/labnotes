@@ -128,8 +128,13 @@ class PaperList:
             return text
 
     def extract(self, doi):
-        paper = self.db[doi]
         info = OrderedDict()
+        try:
+            paper = self.db[doi]
+        except KeyError:
+            sys.stderr.write('{} is not found in database!\n'.format(doi))
+            info["authors"] = ''
+            return info
         info["authors"] = self.getInfo(paper, "authors")
         info["title"] = self.getInfo(paper, "title")
         info["date"] = self.getInfo(paper, "date")
