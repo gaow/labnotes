@@ -6,7 +6,7 @@ import codecs
 class Tex(TexParser):
     def __init__(self, title, author, date, toc, footnote, font, font_size,
                  filename, long_ref = True, no_num = False, no_page = False,
-                 no_ref = False, twocols = False):
+                 no_ref = False, twocols = False, landscape = False):
         TexParser.__init__(self, title, author, filename, long_ref)
         self.text = []
         for fn in filename:
@@ -29,6 +29,7 @@ class Tex(TexParser):
         self.no_num = no_num
         self.no_page = no_page
         self.twocols = twocols
+        self.landscape = landscape
         self.bclogo = {'warning':'\\bcattention', 'tip':'\\bclampe',
                        'important':'\\bctakecare', 'note':'\\bccrayon'}
         self.keywords = list(set(SYNTAX.keys())) + self.bclogo.keys() + ['out', 'list', 'table']
@@ -162,7 +163,9 @@ class Tex(TexParser):
                         self.text[idx] = ''
                         break
         self.text = filter(None, self.text)
-        return '\\documentclass[oneside%s]{%s}' % (',twocolumn' if self.twocols else '', self.doctype) + DOC_PACKAGES + \
+        return '\\documentclass[oneside%s%s]{%s}' % (',twocolumn' if self.twocols else '',
+                                                     ',landscape' if self.landscape else '', self.doctype) + \
+                                                     DOC_PACKAGES + \
                 ('\\usepackage[Lenny]{fncychap}\n' if self.doctype == 'report' else '') + \
                 ('\\usepackage{mathptmx}\n' if self.font == 'roman' else '') + \
                 '\\renewcommand\\%s{References}\n' % ('bibname' if self.doctype == 'report' else 'refname') + \

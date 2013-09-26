@@ -15,7 +15,8 @@ from . import VERSION
 def doc(args):
     tex = Tex(args.title, args.author, args.date, args.toc, args.footnote, args.font, args.font_size,
                    args.filename, long_ref = args.long_ref, no_num = args.no_section_number, 
-                   no_page = args.no_page_number, no_ref = False, twocols = args.twocols)
+                   no_page = args.no_page_number, no_ref = False, twocols = args.twocols,
+                   landscape = args.landscape)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output)
     pdflatex(fname, tex.get(lite), vanilla=args.vanilla)
@@ -178,6 +179,9 @@ class LogOpts:
         parser.add_argument('--twocols',
                         action='store_true',
                         help='''two columns per page''')
+        parser.add_argument('--landscape',
+                        action='store_true',
+                        help='''landscape orientation''')
         parser.add_argument('--footnote',
                         action='store_true',
                         default = '',
