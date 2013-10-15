@@ -4,4 +4,7 @@
 if __name__ == '__main__':
 	from libtigernotes.opts import LogOpts as opts
 	p = opts()
-	p.run()
+    try:
+        p.run()
+    except Exception as e:
+        sys.exit(e)
