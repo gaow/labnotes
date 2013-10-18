@@ -124,7 +124,7 @@ class Html(HtmlParser):
         for k in [x for x in bibkeys if x not in seen and not seen.add(x)]:
             self.textbib += '<p id="footnote-{0}">[{1}]: {2}</p>\n'.format(k, self.bib[k][0], self.bib[k][1])
 
-    def get(self, include_comment, separate):
+    def get(self, include_comment, separate, text_only = False):
         if include_comment and len(self.comments) > 0:
             for idx in range(len(self.text)):
                 for item in self.comments:
@@ -132,6 +132,8 @@ class Html(HtmlParser):
                         self.text[idx] = ''
                         break
         self.text = [x.strip() for x in self.text if x and x.strip()]
+        if text_only:
+            return '\n'.join(self.text), '', ''
         otext = '<!DOCTYPE html><html><head><title>{0}</title>\n'.format((self.title + ' | ' + self.author) if self.title or self.author else '')
         if separate:
             otext += '<link href="style.css" rel="stylesheet" type="text/css"><script LANGUAGE="JavaScript" src="style.js"></script>'

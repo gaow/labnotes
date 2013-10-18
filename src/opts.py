@@ -36,7 +36,7 @@ def html(args):
                     args.filename, args.columns, long_ref = args.long_ref)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output, suffix='.html')
-    body, css, js = htm.get(lite, args.separate)
+    body, css, js = htm.get(lite, args.separate, args.plain)
     if body:
         with codecs.open(fname + '.html', 'w', encoding='UTF-8', errors='ignore') as f: f.writelines(body)
     if css:
@@ -239,6 +239,10 @@ class LogOpts:
         parser.add_argument('-s', '--separate',
                         action='store_true',
                         help='''use separate files for css and js scripts''')
+        parser.add_argument('-p', '--plain',
+                        action='store_true',
+                        help='''plain html code for text body (no style, no title / author, etc.)''')
+
 
     def getPmwikiArguments(self, parser):
         parser.add_argument('--prefix',

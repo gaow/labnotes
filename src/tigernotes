@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 if __name__ == '__main__':
-	from libtigernotes.opts import LogOpts as opts
-	p = opts()
+    from libtigernotes.opts import LogOpts as opts
+    p = opts()
     try:
         p.run()
     except Exception as e:
