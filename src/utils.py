@@ -107,6 +107,8 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
             item = os.path.join(directory, '{0}.{1}'.format(name, item))
             if os.path.exists(item): os.remove(item)
     # setup temp dir
+    dest_dir = os.path.dirname(os.path.abspath(os.path.expanduser(fname)))
+    fname = os.path.split(fname)[-1]
     tmp_dir = None
     pattern = re.compile(r'tigernotes_cache_*(.*)')
     for fn in os.listdir(tempfile.gettempdir()):
@@ -123,7 +125,7 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
             home_dir = os.getenv("HOME")
             tmp_dir = os.path.join(home_dir, '.tigernotes/cache')
             if not os.path.exists(tmp_dir): os.makedirs(tmp_dir)
-    dest_dir = os.getcwd()
+    cwd = os.getcwd()
     os.chdir(tmp_dir)
     # write tex file
     with codecs.open(fname + '.tex', 'w', encoding='utf-8') as f:
@@ -143,7 +145,7 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
             stdin = PIPE, stdout = PIPE, stderr = PIPE)
         out, error = tc.communicate()
         if visit == 2 and ((tc.returncode or error) and (not os.path.exists(fname + '.pdf'))):
-            with codecs.open(os.path.join(dest_dir, '{0}-ERROR.txt'.format(fname)), 'w', encoding='utf-8') as f:
+            with codecs.open(os.path.join(cwd, '{0}-ERROR.txt'.format(fname)), 'w', encoding='utf-8') as f:
                 f.writelines(out.decode(sys.getdefaultencoding()) + error.decode(sys.getdefaultencoding()))
             empty(tmp_dir, fname)
             sys.stderr.write('''
@@ -162,9 +164,9 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
         if visit == 1:
             sys.stderr.write('Still working ...\n')
         else:
-            shutil.move(os.path.join(tmp_dir, (fname + '.pdf')), os.path.join(dest_dir, (fname + '.pdf')))
+            shutil.move(os.path.join(tmp_dir, (fname + '.pdf')), os.path.join(dest_dir, fname + '.pdf'))
             empty(tmp_dir, fname)
-            ferr = os.path.join(dest_dir, '{0}-ERROR.txt'.format(fname))
+            ferr = os.path.join(cwd, '{0}-ERROR.txt'.format(fname))
             if os.path.exists(ferr): os.remove(ferr)
     sys.stderr.write('Done!\n')
     return
