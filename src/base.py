@@ -63,7 +63,6 @@ class TexParser:
         self.textbib = ''
         self.footnote = False
         self.tablefont = 'footnotesize'
-        self.table_maxwidth = '360pt'
         # dirty place holders ....
         self.blockph = 'TIGERNOTEBLOCKUGLYPLACEHOLDER'
         self.rawph = 'TIGERNOTERAWPATTERNUGLYPLACEHOLDER'
@@ -412,10 +411,11 @@ class TexParser:
         self._checknest(text)
         table = [['\seqsplit{{{}}}'.format(self.m_recode(iitem).replace(' ', '~')) if len([x for x in iitem if x == ' ']) > 2 else self.m_recode(iitem) for iitem in multispace2tab(item).split('\t')] for item in text.split('\n') if item]
         ncols = list(set([len(x) for x in table]))
+        nseqsplit = max([len([iitem for iitem in item if iitem.startswith('\\seqsplit')]) for item in table])
         if len(ncols) > 1:
             self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {0}".format(text))
         try:
-            cols = ''.join(['c' if len([item[i] for item in table if item[i].startswith('\\seqsplit')]) == 0 else 'p{{{}pt}}'.format((480-len(table[0])*10)/len([item[i] for item in table if item[i].startswith('\\seqsplit')])) for i in range(ncols[0])])
+            cols = ''.join(['c' if len([item[i] for item in table if item[i].startswith('\\seqsplit')]) == 0 else 'p{{{}pt}}'.format((480-(ncols[0]-nseqsplit)*10)/nseqsplit) for i in range(ncols[0])])
             head = '\\begin{center}\n{\\%s\\begin{longtable}{%s}\n\\hline\n' % (self.tablefont, cols)
             body = '&'.join(table[0]) + '\\\\\n' + '\\hline\n' + '\\\\\n'.join(['&'.join(item) for item in table[1:]]) + '\\\\\n'
             tail = '\\hline\n\\end{longtable}}\n\\end{center}\n'
