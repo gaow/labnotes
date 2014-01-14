@@ -22,7 +22,7 @@ class Pmwiki(HtmlParser):
         self.m_parseText()
 
     def _parseUrl(self, line):
-        pattern = re.compile('@(.*?)@')
+        pattern = re.compile('@(\S*?)@')
         for m in re.finditer(pattern, line):
             line = line.replace(m.group(0), '[[' + m.group(1) + ']]')
         return line
@@ -56,7 +56,7 @@ class Pmwiki(HtmlParser):
         # footnote and link
         pattern = re.compile('\[(\s*)(?P<a>.+?)(\s*)\|(\s*)(?P<b>.+?)(\s*)\]')
         for m in re.finditer(pattern, line):
-            if re.match(r'(\s*)@(.*?)@(\s*)', m.group('b')):
+            if re.match(r'(\s*)@(\S*?)@(\s*)', m.group('b')):
                 # is a link (internal or external). Have to flip this into [link|link name]
                 line = line.replace(m.group(0), '[[{1}|{0}]]'.\
                                         format(m.group('a'),

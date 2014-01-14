@@ -673,6 +673,7 @@ CONFIG = '''
 \\usepackage{pdfpages}
 \\usepackage{pgfpages}
 \\usepackage{longtable}
+\\usepackage{seqsplit}
 \\usepackage{subfigure}
 \\usepackage{multicol}
 \\usepackage{multirow}
@@ -934,6 +935,7 @@ DOC_PACKAGES = '''
 %%\\usepackage{ucs}
 \\usepackage{titlesec}
 \\usepackage{longtable}
+\\usepackage{seqsplit}
 \\usepackage{subfigure}
 \\usepackage{float}
 \\usepackage{varwidth}
