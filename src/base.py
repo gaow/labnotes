@@ -629,7 +629,7 @@ class HtmlParser(TexParser):
     def _parsecmd(self, text, serial, numbered = False):
         head = '<div><div id="highlighter_{0}" class="syntaxhighlighter bash"><table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="gutter">'.format(serial)
         numbers = ''.join(['<div class="line number{0} index{1} alt{2}">{0}</div>'.format(j+1 if numbered else ' ', j, 2 - j % 2) for j in range(len(text))]) + '</td><td class="code"><div class="container">'
-        lines = ''.join(['<div class="line number{0} index{1} alt{2}"><code class="bash plain">{3}</code></div>'.format(j+1, j, 2 - j % 2, line) for j, line in enumerate(text)])
+        lines = ''.join(['<div class="line number%s index%s alt%s"><code class="bash plain">%s</code></div>' % (j+1, j, 2 - j % 2, line) for j, line in enumerate(text)])
         tail = '</div></td></tr></tbody></table></div></div>'
         text = head + numbers + lines + tail
         if self.html_tag:
@@ -654,7 +654,7 @@ class HtmlParser(TexParser):
         if text.startswith("file:///"): text = gettxtfromfile(text) 
         self._checknest(text)
         nrow = len(text.split('\n'))
-        text = '<center><textarea rows="{0}", wrap="off">{1}</textarea></center>'.format(max(min(nrow, 30), 1), text)
+        text = '<center><textarea rows="%s", wrap="off">%s</textarea></center>' % (max(min(nrow, 30), 1), text)
         if self.html_tag:
             return '<HTML>\n' + text + '\n</HTML>\n'
         else:

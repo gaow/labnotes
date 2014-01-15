@@ -141,8 +141,10 @@ class Html(HtmlParser):
             otext += '<style type="text/css">\n{0}</style><script LANGUAGE="JavaScript">\n{1}\n</script>'.format(HTML_STYLE, JS_SCRIPT)
         # mathjax support
         otext += '\n<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>\n'
-        otext += '</head><body><a name="top"></a>{1}{2}<div class="{0}"><div class="content">{3}</div></div></body></html>'.\
-                format(self.frame, self.m_title(self.title, self.author), (self.m_toc(self.dtoc) if self.toc else ''), '\n'.join(self.text))
+        otext += '</head><body><a name="top"></a>%s%s<div class="%s"><div class="content">%s</div></div></body></html>' % (self.m_title(self.title, self.author),
+                       (self.m_toc(self.dtoc) if self.toc else ''),
+                       self.frame, 
+                       '\n'.join(self.text))
         return otext, HTML_STYLE if separate else '', JS_SCRIPT if separate else ''
 
     def m_title(self, title, author):
