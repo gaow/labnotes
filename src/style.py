@@ -677,6 +677,7 @@ CONFIG = '''
 \\usepackage{subfigure}
 \\usepackage{multicol}
 \\usepackage{multirow}
+\\usepackage[multidot]{grffile}  
 \\usepackage[numbered]{bookmark}
 %%Make sure it comes last of your loaded packages
 \\usepackage{hyperref}
@@ -937,6 +938,7 @@ DOC_PACKAGES = '''
 \\usepackage{longtable}
 \\usepackage{seqsplit}
 \\usepackage{subfigure}
+\\usepackage[multidot]{grffile}  
 \\usepackage{float}
 \\usepackage{varwidth}
 \\usepackage[tikz]{bclogo}
