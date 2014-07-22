@@ -186,7 +186,7 @@ class Dokuwiki(HtmlParser):
                 continue
             if self.text[idx].startswith(self.mark * 3) and self.text[idx+1].startswith(self.mark + '!') and self.text[idx+2].startswith(self.mark * 3):
                 # chapter
-                chapter = self.capitalize(self.m_recode_dokuwiki(self.text[idx + 1][len(self.mark)+1:]))
+                chapter = self.capitalize(self.m_recode_dokuwiki(self.text[idx + 1][len(self.mark)+1:].strip()))
                 self.text[idx] = ''
                 self.text[idx + 1] = '===== ' + chapter + ' ====='
                 self.text[idx + 2] = ''
@@ -194,9 +194,9 @@ class Dokuwiki(HtmlParser):
                 continue
             if self.text[idx].startswith(self.mark * 3) and self.text[idx+1].startswith(self.mark) and (not self.text[idx+1].startswith(self.mark * 2)) and self.text[idx+2].startswith(self.mark * 3):
                 # section
-                section = self.capitalize(self.m_recode_dokuwiki(self.text[idx + 1][len(self.mark):]))
+                section = self.capitalize(self.m_recode_dokuwiki(self.text[idx + 1][len(self.mark):].strip()))
                 self.text[idx] = ''
-                self.text[idx + 1] = '====' + section + '===='
+                self.text[idx + 1] = '==== ' + section + ' ===='
                 self.text[idx + 2] = ''
                 idx += 3
                 continue
@@ -210,12 +210,12 @@ class Dokuwiki(HtmlParser):
                 continue
             if self.text[idx].startswith(self.mark + '!!'):
                 # subsection, subsubsection ...
-                self.text[idx] = '== ' + self.m_recode_dokuwiki(self.text[idx][len(self.mark)+2:]) + ' =='
+                self.text[idx] = '== ' + self.m_recode_dokuwiki(self.text[idx][len(self.mark)+2:].strip()) + ' =='
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark + '!'):
                 # subsection, subsubsection ...
-                subsection = self.m_recode_dokuwiki(self.text[idx][len(self.mark)+1:])
+                subsection = self.m_recode_dokuwiki(self.text[idx][len(self.mark)+1:].strip())
                 self.text[idx] = '=== ' + subsection + ' ==='
                 idx += 1
                 continue
@@ -226,7 +226,7 @@ class Dokuwiki(HtmlParser):
                 continue
             if self.text[idx].startswith(self.mark):
                 # a plain line here
-                self.text[idx] = self.m_recode_dokuwiki(self.text[idx][len(self.mark):]) + '\n'
+                self.text[idx] = self.m_recode_dokuwiki(self.text[idx][len(self.mark):].strip()) + '\n'
                 idx += 1
                 continue
         return
