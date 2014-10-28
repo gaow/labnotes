@@ -786,7 +786,8 @@ CONFIG = '''
 %% Inner theme settings
 %%%%%%%%%%%%%%%%%%
 
-\\setbeamercovered{transparent}
+%%\\setbeamercovered{transparent}
+\\setbeamercovered{invisible}
 %%\\setbeamertemplate{blocks}[rounded][shadow=true] %% format blocks
 %%\\setbeamertemplate{footline}[frame number]
 %% ----------- It is possible to customize Beamer color as follows
