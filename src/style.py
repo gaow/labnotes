@@ -835,7 +835,7 @@ CONFIG = '''
   \\hypersetup{colorlinks, breaklinks, urlcolor=purple, linkcolor=linkcolour}
   \\usepackage{fancyhdr}
   \\usepackage{fancyvrb}
-
+  \\usepackage[maxfloats=52]{morefloats}
   \\renewcommand\\rmdefault{bch}
 %%  \\pagestyle{fancy} %% fancy page: with header and footer
 %%  \\setlength\\headheight{14pt}
