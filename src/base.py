@@ -301,7 +301,7 @@ class TexParser:
             if not '.' in fname:
                 self.quit("Cannot determine graphic file format for '{0}'. Valid extensions are {1}".format(fname, ' '.join(support)))
             extension = fname.split('.')[-1]
-            if extension not in support:
+            if extension.lower() not in support:
                 self.quit("Input file format '{0}' not supported. Valid extensions are {1}".format(extension, ' '.join(support)))
             if not os.path.exists(fig):
                 self.quit("Cannot find file %s" % fig)
@@ -460,7 +460,7 @@ class HtmlParser(TexParser):
         self.wrap_width = 90
         self.tablefont = 'small'
         self.anchor_id = 0
-        self.fig_support = ['jpg','tif','png', 'pdf']
+        self.fig_support = ['jpg', 'jpeg', 'tif','png', 'pdf']
         self.html_tag = False
         if header:
             # the header be title and author embedded
