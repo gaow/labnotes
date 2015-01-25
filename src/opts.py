@@ -129,7 +129,6 @@ class LogOpts:
         try:
             args.func(args)
         except Exception as e:
-            raise
             sys.exit('Unexpected error occurred while processing {0}: {1}'.format('-'.join(args.filename), e))
 
     def getTexArguments(self, parser):

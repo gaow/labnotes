@@ -31,7 +31,7 @@ setup(name = 'tigernotes',
         'libtigernotes.ordereddict',
         'libtigernotes.argparse'
     ],
-    scripts = ['src/tigernotes'],
+    scripts = ['src/tigernotes', 'src/tigerjournal'],
     cmdclass = {'build_py': build_py },
     package_dir = {'libtigernotes': 'src'},
     packages = ['libtigernotes'],

@@ -1,0 +1,140 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import sys, datetime, os, glob
+from argparse import ArgumentParser, SUPPRESS
+from distutils.dir_util import mkpath
+from libtigernotes.html import Html
+from libtigernotes.style import TigerJournal as TJ
+
+class Env:
+    def __init__(self):
+        self.version = '0.0.1'
+        self.editor = 'emacs'
+        self.root_dir = '.'
+        self.author = 'Gao T. Wang'
+        self.title = "Journal of Gao T. Wang"
+        self.url_root = '../../'
+        self.monthdict = {'January': 0, 
+              'February': 1, 
+              'March': 2, 
+              'April': 3, 
+              'May': 4, 
+              'June': 5, 
+              'July': 6,
+              'August': 7, 
+              'September': 8, 
+              'October': 9, 
+              'November': 10, 
+              'December': 11}
+
+        self.monthlist = ['January',
+              'February',
+              'March',
+              'April',
+              'May',
+              'June',
+              'July',
+              'August',
+              'September',
+              'October',
+              'November',
+              'December']
+
+env = Env()
+
+class Opts:
+    def __init__(self):
+        self.master_parser = ArgumentParser(
+        description = '''Journal of Gao T. Wang manager''',
+        prog = 'tigerjournal',
+        fromfile_prefix_chars = '@',
+        epilog = '''Copyright 2012 Gao Wang <ewanggao@gmail.com> GNU General Public License''')
+        self.master_parser.add_argument('--version', action='version', version='%(prog)s {0}'.format(env.version))
+        subparsers = self.master_parser.add_subparsers()
+        parser = subparsers.add_parser('edit', help='Edit journal page')
+        parser.add_argument('-d', '--date', help='''Date to edit''')
+        parser.add_argument('--debug', action='store_true', help = SUPPRESS)
+        parser.set_defaults(func=edit)
+        parser = subparsers.add_parser('make', help='Generate journal page')
+        parser.add_argument('-d', '--date', help='''Date to generate''')
+        parser.add_argument('--debug', action='store_true', help = SUPPRESS)
+        parser.set_defaults(func=make)
+
+    def run(self):
+        args = self.master_parser.parse_args()
+        if args.debug:
+            test(args) 
+        try:
+            args.func(args)
+        except Exception as e:
+            sys.exit('Unexpected error occurred: {0}'.format(e))
+
+class DateParser:
+    def __init__(self, date):
+        '''Input date has to be in format YYYYMMDD'''
+        if date is None:
+            # Figure out the date
+            time = datetime.datetime.now()
+            self.year = time.strftime("%Y")
+            self.month = time.strftime("%m")
+            self.date = time.strftime("%d")
+            self.month_name = time.strftime("%B")
+            self.name = self.year + self.month + self.date
+        else:
+            self.name = date
+            self.year = date[:4]
+            self.month = date[4:6]
+            self.date = date[6:]
+            self.month_name = datetime.datetime.strptime(date, "%Y%m%d").strftime("%B")
+        self.path = '{}/{}/{}'.format(env.root_dir, self.year, self.month_name)
+
+    def show(self):
+        print self.name, self.year, self.month, self.date, self.month_name
+
+
+class PageGenerator:
+    def __init__(self, date):
+        self.date = date
+        self.html_path = '{}/{}'.format(env.root_dir, date.year)
+        self.html = os.path.join(self.html_path, '{}.html'.format(self.date.month_name))
+        self.contents = []
+        for fn in glob.glob(os.path.join(date.path, "*.notes")):
+            content = Html('', '', False, [fn], 1)
+            # summary, date, text
+            self.contents.append((content.text[0][4:-5], '{}-{}-{}'.format(date.year, date.month,date.date),
+                             ''.join(content.text[1:])))
+        self.links = []
+        for item in env.monthlist:
+            self.links.append((os.path.join(env.url_root, date.year, item + '.html'), item))
+
+    def write(self):
+        page = TJ()
+        with open(self.html, 'w') as f:
+            f.write(page.GetMeta('Journal of {}, {}'.format(self.date.month_name, self.date.year)) + \
+                    page.GetLeftColumn('Journal of {}'.format(self.date.year), self.links) + \
+                    page.GetRightColumn(self.contents))
+
+def test(args):
+    date = DateParser(args.date)
+    date.show()
+    return
+
+def edit(args):
+    date = DateParser(args.date)
+    mkpath(date.path)
+    os.system('{} {}/{}.notes &'.format(env.editor, date.path, date.name))
+    return
+
+def make(args):
+    date = DateParser(args.date)
+    pg = PageGenerator(date)
+    pg.write()
+    return
+
+if __name__ == '__main__':
+    p = Opts()
+    try:
+        p.run()
+    except Exception as e:
+        raise
+        sys.exit(e)

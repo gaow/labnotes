@@ -1818,3 +1818,234 @@ hr {
 ''',
 'tail':'</ul><h4>Last updated: %s</h4></div></body></html>' % strftime("%a %d %b %Y %H:%M:%S", localtime())
         }
+
+
+class TigerJournal:
+        def __init__(self, url = 'http://tigerwang.org/journal/', title = 'Journal of Gao T. Wang', logo = 'logo.png', logo_ref = 'index.html', background = 'bg.jpg'):
+            self.url = url
+            self.title = title
+            self.logo = url + logo
+            self.logo_ref = url + logo_ref
+            self.bg = url + background
+            
+        def GetMeta(self, title): 
+            return '''
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>{0}</title>
+<style>
+  body {{font-family: georgia;}}
+</style>
+</head>
+<body vlink="#000000" alink="#000000" background="{4}"
+ bgcolor="#fefefe" link="#000000" text="#000000">
+<center>
+<br>
+<br>
+<br>
+<table width="85%" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td colspan="3">
+      <table width="95%" cellpadding="0" cellspacing="0">
+        <tbody>
+          <tr>
+            <td width="55%" align="center" valign="bottom">
+            <table width="80%" cellpadding="0">
+              <tbody>
+                <tr>
+                  <td bgcolor="#000000">
+                  <table width="100%" cellpadding="6">
+                    <tbody>
+                      <tr>
+                        <td bgcolor="#fefefe"><!--Document Title-->
+                        <center><b>{1}</b><br></center>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            </td>
+            <td align="right" valign="bottom">
+            <table cellpadding="0">
+              <tbody>
+                <tr>
+                  <td bgcolor="#000000">
+                  <table cellpadding="0">
+                    <tbody>
+                      <tr>
+                        <td bgcolor="#ffffff"> <a href="{2}"><img style="border: 0px solid ; " alt="Site Logo" src="{3}"></a></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2"><br>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      </td>
+    </tr>
+            '''.format(title, self.title, self.logo, self.logo_ref, self.bg)
+
+        def GetLeftColumn(self, title, links):
+            contents = '\n'.join(['<p><center><font size="-1"><b><a href="{0}">{1}</a></b></font></center></p>'.format(self.url + x[0], x[1]) for x in links])
+            return '''
+    <tr valign="top">
+      <td width="10%">
+      <table width="100%" cellpadding="0">
+        <tbody>
+          <tr>
+            <td bgcolor="#000000">
+            <table width="100%" cellpadding="14">
+              <tbody>
+                <tr>
+                  <td bgcolor="#fefefe">
+                  <center><font size="-1"><b>{0}</b></font></center>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <table width="100%" cellpadding="0">
+        <tbody>
+          <tr>
+            <td bgcolor="#000000">
+            <table width="100%" cellpadding="14">
+              <tbody>
+                <tr>
+                  <td bgcolor="#fefefe">
+                {1}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p> </p>
+      </td>
+      <td> &nbsp; </td>
+            '''.format(title, contents)
+
+
+        def GetRightColumn(self, contents):
+                '''input format [(summary, date, text)], properly ordered'''    
+                start = '<td><!--Document Contents-->\n'
+                end = '''
+    </td>
+    </tr>
+    <tr valign="top">
+      <td colspan="3" align="right">
+      <table width="" cellpadding="0">
+        <tbody>
+          <tr>
+            <td bgcolor="#000000">
+            <table width="100%" cellpadding="4">
+              <tbody>
+                <tr>
+                  <td bgcolor="#fefefe"><font size="-2">Page design of this journal is adapted from The Slackware's homepage, 2010</font> </td>
+                </tr>
+              </tbody>
+            </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</center>
+</body>
+                '''
+                text = ''
+                for item in contents:
+                        text += '''
+        <center><!--entry start-->
+      <table width="100%" border="0" cellpadding="0" cellspacing="0">
+        <tbody>
+          <tr>
+            <td colspan="2">
+            <table width="100%" cellpadding="0">
+              <tbody>
+                <tr>
+                  <td bgcolor="#000000">
+                  <table width="100%" cellpadding="4">
+                    <tbody>
+                      <tr>
+                        <td bgcolor="#fefefe"> &nbsp; <b> {0} <b> </b></b></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top">
+            <table width="100%" cellpadding="0">
+              <tbody>
+                <tr>
+                  <td bgcolor="#000000">
+                  <table width="100%" cellpadding="14">
+                    <tbody>
+                      <tr>
+                        <td bgcolor="#fefefe">
+                        {2}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            </td>
+            <td width="20%" valign="top">
+            <table width="100%" cellpadding="0">
+              <tbody>
+                <tr>
+                  <td bgcolor="#000000">
+                  <table width="100%" cellpadding="4">
+                    <tbody>
+                      <tr>
+                        <td bgcolor="#fefefe">
+                        <center><font size="-1"><b>{1}</b></font></center>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2"><br>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      </center><!--entry end-->
+                        '''.format(item[0], item[1], item[2])
+                return start + text + end
