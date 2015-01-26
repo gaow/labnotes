@@ -10,23 +10,12 @@ class Env:
     def __init__(self):
         self.version = '0.0.1'
         self.editor = 'emacs'
-        self.root_dir = '.'
+        self.root_dir = os.path.expanduser('~/Dropbox/Notes/Blog/Journal')
         self.author = 'Gao T. Wang'
         self.title = "Journal of Gao T. Wang"
-        self.url_root = '../../'
-        self.monthdict = {'January': 0, 
-              'February': 1, 
-              'March': 2, 
-              'April': 3, 
-              'May': 4, 
-              'June': 5, 
-              'July': 6,
-              'August': 7, 
-              'September': 8, 
-              'October': 9, 
-              'November': 10, 
-              'December': 11}
-
+        self.url_root = '../'
+        self.url = 'tigerwang.org'
+        self.sitedir = 'tigerwang'
         self.monthlist = ['January',
               'February',
               'March',
@@ -98,7 +87,7 @@ class PageGenerator:
         self.html_path = '{}/{}'.format(env.root_dir, date.year)
         self.html = os.path.join(self.html_path, '{}.html'.format(self.date.month_name))
         self.contents = []
-        for fn in glob.glob(os.path.join(date.path, "*.notes")):
+        for fn in sorted(glob.glob(os.path.join(date.path, "*.notes")), reverse = True):
             content = Html('', '', False, [fn], 1)
             # summary, date, text
             self.contents.append((content.text[0][4:-5], '{}-{}-{}'.format(date.year, date.month,date.date),
@@ -122,13 +111,16 @@ def test(args):
 def edit(args):
     date = DateParser(args.date)
     mkpath(date.path)
-    os.system('{} {}/{}.notes &'.format(env.editor, date.path, date.name))
+    os.system('{} {}.notes &'.format(env.editor, os.path.join(date.path, date.name)))
     return
 
 def make(args):
     date = DateParser(args.date)
     pg = PageGenerator(date)
     pg.write()
+    user = raw_input("Username: ")
+    passwd = raw_input("Password: ")
+    os.system('sshpass -p {} rsync -auzP {}/* {}@{}:./{}/journal'.format(passwd, env.root_dir, user, env.url, env.sitedir))
     return
 
 if __name__ == '__main__':

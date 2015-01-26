@@ -1821,11 +1821,9 @@ hr {
 
 
 class TigerJournal:
-        def __init__(self, url = 'http://tigerwang.org/journal/', title = 'Journal of Gao T. Wang', logo = 'logo.png', logo_ref = 'index.html', background = 'bg.jpg'):
-            self.url = url
+        def __init__(self, url = 'http://tigerwang.org/uploads/', title = 'Journal of Gao T. Wang', logo = 'logo.png', background = 'bg.jpg'):
             self.title = title
             self.logo = url + logo
-            self.logo_ref = url + logo_ref
             self.bg = url + background
             
         def GetMeta(self, title): 
@@ -1880,7 +1878,7 @@ class TigerJournal:
                   <table cellpadding="0">
                     <tbody>
                       <tr>
-                        <td bgcolor="#ffffff"> <a href="{2}"><img style="border: 0px solid ; " alt="Site Logo" src="{3}"></a></td>
+                        <td bgcolor="#ffffff"><a href="{2}"><img style="border: 0px solid ; " alt="Site Logo" src="{3}"></a></td>
                       </tr>
                     </tbody>
                   </table>
@@ -1898,10 +1896,10 @@ class TigerJournal:
       </table>
       </td>
     </tr>
-            '''.format(title, self.title, self.logo, self.logo_ref, self.bg)
+            '''.format(title, self.title, 'http://tigerwang.org', self.logo, self.bg)
 
         def GetLeftColumn(self, title, links):
-            contents = '\n'.join(['<p><center><font size="-1"><b><a href="{0}">{1}</a></b></font></center></p>'.format(self.url + x[0], x[1]) for x in links])
+            contents = '\n'.join(['<p><center><font size="-1"><b><a href="{0}">{1}</a></b></font></center></p>'.format(x[0], x[1]) for x in links])
             return '''
     <tr valign="top">
       <td width="10%">
