@@ -1836,6 +1836,7 @@ class TigerJournal:
   <title>{0}</title>
 <style>
   body {{font-family: georgia;}}
+  ol {{list-style-type: circle;}}
 </style>
 </head>
 <body vlink="#000000" alink="#000000" background="{4}"

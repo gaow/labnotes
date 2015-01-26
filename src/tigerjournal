@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import sys, datetime, os, glob
+import sys, datetime, os, glob, getpass
 from argparse import ArgumentParser, SUPPRESS
 from distutils.dir_util import mkpath
 from libtigernotes.html import Html
@@ -120,8 +120,8 @@ def make(args):
     pg = PageGenerator(date)
     pg.write()
     user = raw_input("Username: ")
-    passwd = raw_input("Password: ")
-    os.system('sshpass -p {} rsync -auzP {}/* {}@{}:./{}/journal'.format(passwd, env.root_dir, user, env.url, env.sitedir))
+    passwd = getpass.getpass("Password: ")
+    os.system('sshpass -p {} rsync -auzP {}/* {}@{}:./{}/journal --exclude=*.notes'.format(passwd, env.root_dir, user, env.url, env.sitedir))
     return
 
 if __name__ == '__main__':
