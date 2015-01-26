@@ -90,7 +90,8 @@ class PageGenerator:
         for fn in sorted(glob.glob(os.path.join(date.path, "*.notes")), reverse = True):
             content = Html('', '', False, [fn], 1)
             # summary, date, text
-            self.contents.append((content.text[0][4:-5], '{}-{}-{}'.format(date.year, date.month,date.date),
+            name = os.path.splitext(os.path.basename(fn))[0]
+            self.contents.append((content.text[0][4:-5], '{}-{}-{}'.format(name[:4], name[4:6], name[6:]),
                              ''.join(content.text[1:])))
         self.links = []
         for item in env.monthlist:
