@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os, sys, re
-import glob, shutil
+import glob, shutil, shlex
 from subprocess import PIPE, Popen
 import tempfile
 from .minted import minted
@@ -99,7 +99,14 @@ def gettxtfromfile(text):
             else:
                 flist[idx] = readfromfile(item[0])
     return '\n'.join(flist)
-                
+
+def gettxtfromcmd(text):
+    flist = text.split('\n')
+    for idx, item in enumerate(flist):
+        if item.startswith('output:///'):
+            flist[idx] = Popen(shlex.split(item[10:]), stdout=PIPE).communicate()[0]
+    return '\n'.join(flist)
+
 
 def pdflatex(fname, text, vanilla=False, beamer = False):
     def empty(directory, name):

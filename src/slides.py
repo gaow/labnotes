@@ -45,6 +45,7 @@ class Beamer(TexParser):
 
     def m_blockizeIn(self, text, k, label = None):
         if text.startswith("file:///"): text = gettxtfromfile(text) 
+        if text.startswith("output:///"): text = gettxtfromcmd(text)   
         if k.lower() == 'raw' or k.lower() == '$': return text
         self._checknest(text)
         return '\\begin{exampleblock}{\\texttt{%s}}\\scriptsize\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{exampleblock}\n' % \
@@ -52,6 +53,7 @@ class Beamer(TexParser):
 
     def m_blockizeOut(self, text, k, label = None):
         if text.startswith("file:///"): text = gettxtfromfile(text) 
+        if text.startswith("output:///"): text = gettxtfromcmd(text)   
         self._checknest(text)
         return '\\begin{exampleblock}{%s}\\tiny\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{exampleblock}\n' % \
                     (label if label is not None else "-", wraptxt(text, '', int(105 * self.wrap_adjust), rmblank = False))

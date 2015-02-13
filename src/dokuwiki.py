@@ -95,6 +95,7 @@ class Dokuwiki(HtmlParser):
         
     def m_blockizeIn(self, text, k, label = None, sxh3 = False):
         if text.startswith("file:///"): text = gettxtfromfile(text) 
+        if text.startswith("output:///"): text = gettxtfromcmd(text) 
         if k.lower() == 'raw' or k.lower() == '$': return text
         self._checknest(text)
         # no wrap, totally rely on dokuwiki
@@ -120,6 +121,7 @@ class Dokuwiki(HtmlParser):
     
     def m_blockizeOut(self, text, k, label = None):
         if text.startswith("file:///"): text = gettxtfromfile(text) 
+        if text.startswith("output:///"): text = gettxtfromcmd(text) 
         self._checknest(text)
         text = '\n'.join(['  ' + x for x in text.split('\n')])
         if self.show_all:

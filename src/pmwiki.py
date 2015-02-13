@@ -102,6 +102,7 @@ class Pmwiki(HtmlParser):
         
     def m_blockizeIn(self, text, k, label = None, sxh3 = False):
         if text.startswith("file:///"): text = gettxtfromfile(text) 
+        if text.startswith("output:///"): text = gettxtfromcmd(text)   
         if k.lower() == 'raw' or k.lower() == '$': return text
         self._checknest(text)
         text = '(:codestart {0}:)\n{1}\n(:codeend:)\n'.format(k.lower(), wraptxt(text, '', 1000, rmblank = True))
@@ -109,6 +110,7 @@ class Pmwiki(HtmlParser):
     
     def m_blockizeOut(self, text, k, label = None):
         if text.startswith("file:///"): text = gettxtfromfile(text) 
+        if text.startswith("output:///"): text = gettxtfromcmd(text)   
         self._checknest(text)
         text = '>>frame<<\n[@\n{0}\n@]\n>><<\n'.format(text)
         return text

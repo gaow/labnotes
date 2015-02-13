@@ -4,7 +4,7 @@ import os, sys, re
 from time import strftime, localtime
 from .ordereddict import OrderedDict
 import codecs
-from .utils import wraptxt, multispace2tab, getPaper, gettxtfromfile
+from .utils import wraptxt, multispace2tab, getPaper, gettxtfromfile, gettxtfromcmd
 from .style import MODE, CONFIG, TITLE, THANK, THEME, DOC_PACKAGES, DOC_CONFIG, HTML_STYLE, JS_SCRIPT
 
 FONT = {'bch':'bch',
@@ -639,6 +639,7 @@ class HtmlParser(TexParser):
         
     def m_blockizeIn(self, text, k, label = None):
         if text.startswith("file:///"): text = gettxtfromfile(text) 
+        if text.startswith("output:///"): text = gettxtfromcmd(text) 
         if k.lower() == 'raw' or k.lower() == '$': return text
         self._checknest(text)
         self.anchor_id += 1
@@ -652,6 +653,7 @@ class HtmlParser(TexParser):
 
     def m_blockizeOut(self, text, k, label = None):
         if text.startswith("file:///"): text = gettxtfromfile(text) 
+        if text.startswith("output:///"): text = gettxtfromcmd(text) 
         self._checknest(text)
         nrow = len(text.split('\n'))
         text = '<center><textarea rows="%s", wrap="off">%s</textarea></center>' % (max(min(nrow, 30), 1), text)

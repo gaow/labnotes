@@ -42,12 +42,14 @@ class Tex(TexParser):
 
     def m_blockizeIn(self, text, k, label = None):
         if text.startswith("file:///"): text = gettxtfromfile(text) 
+        if text.startswith("output:///"): text = gettxtfromcmd(text) 
         if k.lower() == 'raw' or k.lower() == '$': return text
         self._checknest(text)
         return '\\begin{minted}[samepage=false, fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{%s}]{%s}\n%s\n\\end{minted}\n' % (k.upper() if not label else self.m_recode(label), k, wraptxt(text, '\\' if k == 'bash' else '', 131, rmblank = False, prefix = COMMENT[k.lower()]))
 
     def m_blockizeOut(self, text, k, label = None):
         if text.startswith("file:///"): text = gettxtfromfile(text) 
+        if text.startswith("output:///"): text = gettxtfromcmd(text)
         self._checknest(text)
         return '\\begin{Verbatim}[samepage=false, fontfamily=tt,\nfontsize=\\footnotesize, formatcom=\\color{rgray},\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{\\scriptsize %s}, labelposition=topline]\n%s\n\\end{Verbatim}\n' % ('OUTPUT' if not label else self.m_recode(label), wraptxt(text, '', 116))
 
