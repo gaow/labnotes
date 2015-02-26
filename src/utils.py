@@ -104,7 +104,7 @@ def gettxtfromcmd(text):
     flist = text.split('\n')
     for idx, item in enumerate(flist):
         if item.startswith('output:///'):
-            flist[idx] = Popen(shlex.split(item[10:]), stdout=PIPE).communicate()[0]
+            flist[idx] = Popen(shlex.split(item[10:]), stdout=PIPE).communicate()[0].decode('utf-8')
     return '\n'.join(flist)
 
 

@@ -48,6 +48,9 @@ class Opts:
         parser.add_argument('-d', '--date', help='''Date to generate''')
         parser.add_argument('--debug', action='store_true', help = SUPPRESS)
         parser.set_defaults(func=make)
+        parser = subparsers.add_parser('show', help='Show journal pages')
+        parser.add_argument('--debug', action='store_true', help = SUPPRESS)
+        parser.set_defaults(func=show)
 
     def run(self):
         args = self.master_parser.parse_args()
@@ -122,6 +125,10 @@ def make(args):
     user = raw_input("Username: ")
     passwd = getpass.getpass("Password: ")
     os.system('sshpass -p {} rsync -auzP {}/* {}@{}:./{}/journal --exclude=*.notes'.format(passwd, env.root_dir, user, env.url, env.sitedir))
+    return
+
+def show(args):
+    os.system('tree -h {}'.format(env.root_dir))
     return
 
 if __name__ == '__main__':
