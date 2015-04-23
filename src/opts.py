@@ -33,7 +33,8 @@ def slides(args):
 
 def html(args):
     htm = Html(args.title, args.author, args.toc,
-                    args.filename, args.columns, long_ref = args.long_ref)
+               args.filename, args.columns,
+               long_ref = args.long_ref, fig_path = args.figure_path)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output, suffix='.html')
     body, css, js = htm.get(lite, args.separate, args.plain)
@@ -241,6 +242,10 @@ class LogOpts:
         parser.add_argument('-p', '--plain',
                         action='store_true',
                         help='''plain html code for text body (no style, no title / author, etc.)''')
+        parser.add_argument('--figure_path',
+                        metavar = 'PATH',
+                        default = '',
+                        help='''path to where figures are saved''')
 
 
     def getPmwikiArguments(self, parser):

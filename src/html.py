@@ -5,7 +5,7 @@ from .base import *
 from .ordereddict import OrderedDict
 
 class Html(HtmlParser):
-    def __init__(self, title, author, toc, filename, columns, long_ref = True):
+    def __init__(self, title, author, toc, filename, columns, long_ref = True, fig_path = ''):
         HtmlParser.__init__(self, title, author, filename, long_ref)
         self.toc = toc
         if columns == 2:
@@ -16,6 +16,7 @@ class Html(HtmlParser):
             self.frame = 'frame'
         self.dtoc = OrderedDict()
         self.fig_tag = 'html'
+        self.fig_path = fig_path
         self.text = self.m_parseBlocks(self.text)
         self.m_parseComments()
         self.m_parseText()
@@ -47,7 +48,9 @@ class Html(HtmlParser):
                 else:
                     i = idx + 1
                 #
-                cmd = '\n'.join([wraptxt(x, '\\', int(self.wrap_width)) for x in self.text[idx:i]])
+                # cmd = '\n'.join([wraptxt(x, '\\', int(self.wrap_width)) for x in self.text[idx:i]])
+                # Disallow wrap in HTML for ease to copy-paste command to terminal
+                cmd = '\n'.join(self.text[idx:i])
                 cmd = cmd.split('\n')
                 if len(cmd) == 1:
                     self.text[idx] = self._parsecmd(cmd, idx)
@@ -102,7 +105,8 @@ class Html(HtmlParser):
                 continue
             if self.text[idx].startswith(self.mark + '*'):
                 # fig: figure.png 0.9
-                self.text[idx] = self.insertFigure(self.text[idx], support = self.fig_support, tag = self.fig_tag)
+                self.text[idx] = self.insertFigure(self.text[idx], support = self.fig_support,
+                                                   tag = self.fig_tag, remote_path = self.fig_path)
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark):
