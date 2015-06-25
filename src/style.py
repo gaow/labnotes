@@ -664,6 +664,7 @@ CONFIG = '''
 \\usepackage{beamerthemesplit}
 \\usepackage{pgf,pgfarrows,pgfnodes,pgfautomata,pgfheaps,pgfshade}
 \\usepackage{marvosym}
+\\usepackage[warn]{textcomp}
 \\usepackage{bm}
 \DeclareMathAlphabet{\mathbbm}{U}{bbm}{m}{n}
 \\usepackage{upgreek}
@@ -922,6 +923,7 @@ DOC_PACKAGES = '''
 \\usepackage{amssymb}
 \\usepackage{amsthm}
 \\usepackage{mathabx}
+\\usepackage[warn]{textcomp}
 \\newcommand\hmmax{0} % default 3
 \\usepackage{bm}
 \\usepackage{fixltx2e}
