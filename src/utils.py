@@ -108,7 +108,7 @@ def gettxtfromcmd(text):
     return '\n'.join(flist)
 
 
-def pdflatex(fname, text, vanilla=False, beamer = False):
+def pdflatex(fname, text, vanilla=False, beamer_institute = None):
     def empty(directory, name):
         for item in ['out','toc','aux','log','nav','snm','vrb']:
             item = os.path.join(directory, '{0}.{1}'.format(name, item))
@@ -138,14 +138,14 @@ def pdflatex(fname, text, vanilla=False, beamer = False):
     with codecs.open(fname + '.tex', 'w', encoding='utf-8') as f:
         f.writelines(text)
     # write sty file
-    if not beamer:
+    if beamer_institute is None:
         m = minted(tmp_dir)
         m.put()
     else:
         m = btheme(tmp_dir)
-        m.put()
+        m.put(beamer_institute)
     # compile
-    sys.stderr.write('Building {0} "{1}" ...\n'.format('document' if not beamer else 'slides', fname + '.pdf'))
+    sys.stderr.write('Building {0} "{1}" ...\n'.format('document' if beamer_institute is None else 'slides', fname + '.pdf'))
     for visit in [1,2]:
         # too bad we cannot pipe tex to pdflatex with the output behavior under ctrl ... have to write the disk
         tc = Popen(["pdflatex", "-shell-escape", "-halt-on-error", "-file-line-error", fname + '.tex'],

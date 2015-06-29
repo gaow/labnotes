@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os, codecs
+import os, codecs, re
 class btheme:
     def __init__(self, outdir):
         self.outdir = outdir
@@ -20,6 +20,10 @@ class btheme:
 
 \\definecolor{riceblue}{RGB}{0,36,106}
 \\definecolor{ricegray}{RGB}{94,96,98}
+% Add UChicago definition, 2015 
+\\definecolor{ucMaroon}{RGB}{128,0,0}
+\\definecolor{ucDarkGray}{RGB}{118,118,118}
+\\definecolor{ucLightGray}{RGB}{214,214,206}
 
 \\setbeamercolor*{normal text}{fg=black,bg=white}
 \\setbeamercolor*{alerted text}{fg=red}
@@ -624,9 +628,19 @@ class btheme:
 <all>
         '''
 
-    def put(self):
+    def __institute_hack(self, item, institute):
+        if institute == 'uchicago':
+            item = re.sub(r'(.*?)title(.*?)}{fg=(.*?),', r'\1title\2}{fg=ucDarkGray,', item)
+            # \\setbeamercolor{titlelike}{fg=riceblue, bg=white}
+# \\setbeamercolor{frametitle}{fg=riceblue, bg=white}
+# \\setbeamercolor{frametitle right}{fg=riceblue, bg=white}
+            return item.replace('riceblue', 'ucMaroon').replace('ricegray', 'ucDarkGray')
+        else:
+            return item
+
+    def put(self, institute = 'rice'):
         with codecs.open(os.path.join(self.outdir, 'beamercolorthemericeowl.sty'), 'w', encoding='UTF-8') as f:
-            f.write(self.beamercolorthemericeowl)
+            f.write(self.__institute_hack(self.beamercolorthemericeowl, institute))
         with codecs.open(os.path.join(self.outdir, 'beamerouterthemeinfolines.sty'), 'w', encoding='UTF-8') as f:
             f.write(self.beamerouterthemeinfolines)
         with codecs.open(os.path.join(self.outdir, 'beamerthemeBoadilla.sty'), 'w', encoding='UTF-8') as f:
@@ -636,7 +650,7 @@ class btheme:
         with codecs.open(os.path.join(self.outdir, 'beamerouterthemerice2.sty'), 'w', encoding='UTF-8') as f:
             f.write(self.beamerouterthemerice2)
         with codecs.open(os.path.join(self.outdir, 'beamerthemeRice.sty'), 'w', encoding='UTF-8') as f:
-            f.write(self.beamerthemeRice)
+            f.write(self.__institute_hack(self.beamerthemeRice, institute))
         return
 
 MODE = {'presentation':'\\documentclass[ignorenonframetext,mathserif,12pt,dvipsnames]{beamer}\n\\mode<presentation>\n\\setbeamertemplate{blocks}[rounded][shadow=true]\n',

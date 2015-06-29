@@ -28,7 +28,8 @@ def slides(args):
                       args.thank, args.filename, long_ref = args.long_ref)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output)
-    pdflatex(fname, tex.get(lite), vanilla=args.vanilla, beamer = True)
+    pdflatex(fname, tex.get(lite), vanilla = args.vanilla,
+             beamer_institute = args.color)
     return
 
 def html(args):
@@ -213,6 +214,11 @@ class LogOpts:
                         choices = ['heavy', 'compact', 'plain'],
                         default = 'compact',
                         help='''slides style theme''')
+        parser.add_argument('--color',
+                        type = str,
+                        choices = ['rice', 'uchicago'],
+                        default = 'rice',
+                        help='''color theme for non-plain slides''')
         parser.add_argument('--stoc',
                         action='store_true',
                         default = '',
