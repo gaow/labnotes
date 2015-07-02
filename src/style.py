@@ -630,7 +630,8 @@ class btheme:
 
     def __institute_hack(self, item, institute):
         if institute == 'uchicago':
-            item = re.sub(r'(.*?)title(.*?)}{fg=(.*?),', r'\1title\2}{fg=ucDarkGray,', item)
+            item = re.sub(r'(.*?)title(.*?)}{fg=(.*?),', r'\1title\2}{fg=white,', item)
+            item = re.sub(r'(.*?)title(.*?)}{fg=white, bg=(.*?)}', r'\1title\2}{fg=white, bg=ucMaroon}', item)
             # \\setbeamercolor{titlelike}{fg=riceblue, bg=white}
 # \\setbeamercolor{frametitle}{fg=riceblue, bg=white}
 # \\setbeamercolor{frametitle right}{fg=riceblue, bg=white}
