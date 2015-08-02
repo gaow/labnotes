@@ -14,16 +14,7 @@ import platform
 import time
 
 PROJECT="tigernotes"
-
-def ModifyVersion(version):
-    if version is not None:
-        with open('src/__init__.py', 'r') as init_file:
-            content = init_file.readlines()
-            new_content = ''.join(["VERSION='{0}'\n".format(version) if x.startswith('VERSION') else x for x in content])
-        with open('src/__init__.py', 'w') as init_file:
-            init_file.write(new_content)
-    from src import VERSION
-    return VERSION
+from src import VERSION as version
 
 def SetUpEnvironment(version):
     #
@@ -142,27 +133,17 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='''Create source distribution and executables for
         a variant tools release. In addition to optional parameters version and tag, extra parameters
         would be specified and will be passed directly to the 'python setup.py install' process. ''')
-    parser.add_argument('--version',
-        help='Modify source/__init__.py to the specified version string and make the release.')
-    # parser.add_argument('--tag', action='store_true',
-    #     help='If specified, tag this release')
-    # parser.add_argument('--purge', action='store_true',
-    #     help='If specified, remove build directory after installation')
     parser.add_argument('--pyinstaller_dir', default = '.',
         help='path to the directory where pyinstaller git clone is located.')
     # allow recognied parameters to be set to the build process
     args, argv = parser.parse_known_args()
     #
-    version = ModifyVersion(args.version)
     SetUpEnvironment(version)
     GenerateSWIGWrappers()
     InstallPackage(argv)
     BuildSourcePackage(version)
     pyinstaller_dir = ObtainPyInstaller(args.pyinstaller_dir)
     BuildExecutables(version, pyinstaller_dir)
-    # if everything is OK, tag the release
-    # if args.tag:
-    #     TagRelease(version)
     CleanUpEnvironment(True)
     # if everything is done
     print('Source packages and executables are successfully generated and saved to directory dist')
