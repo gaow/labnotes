@@ -62,7 +62,11 @@ def dokuwiki(args):
     if args.filename == fname + '.txt':
         raise ValueError('Cannot write output as "{0}": name conflict with source file. Please rename either of them')
     with codecs.open(fname + '.txt', 'w', encoding='UTF-8', errors='ignore') as f:
+        if args.permission:
+            f.write('<ifauth !{0}>\nThis post is only visible to authorized members. Please login if you are one of them.\n</ifauth>\n<ifauth {0}>\n'.format(args.permission.strip('\'"')))
         f.writelines(htm.get(lite))
+        if args.permission:
+            f.write('\n</ifauth>')
     return
 
 def pmwiki(args):
@@ -266,6 +270,10 @@ class LogOpts:
                         action='store_true',
                         default = '',
                         help='''unfold source code / output fields in page by default''')
+        parser.add_argument('--permission',
+                        metavar='user',
+                        type=str,
+                        help='''authorized user name or group name of this page''')
 
 
     def getAdminArguments(self, parser):
