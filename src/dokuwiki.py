@@ -84,7 +84,7 @@ class Dokuwiki(HtmlParser):
         ncols = list(set([len(x) for x in table]))
         if len(ncols) > 1:
             self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {0}".format(text))
-        body = '<WRAP center 80%>\n' + '^  ' + '  ^  '.join(table[0]) + '  ^\n' + '\n'.join(['|  ' + '  |  '.join(item) + '  |' for item in table[1:]]) + '\n</WRAP>\n' 
+        body = '<WRAP center 105%>\n' + '^  ' + '  ^  '.join(table[0]) + '  ^\n' + '\n'.join(['|  ' + '  |  '.join(item) + '  |' for item in table[1:]]) + '\n</WRAP>\n' 
         return body
 
     def _parsecmd(self, text, serial, numbered = False):
@@ -110,7 +110,7 @@ class Dokuwiki(HtmlParser):
         else:
             text = '<code {0} {1}>\n'.format(
                 k.lower() if k.lower() not in ['s', 'r'] else 'rsplus',
-                '{0}{1}'.format(os.path.splitext('_'.join(re.sub(r'[^a-zA-Z0-9]',' ', label).split()))[0] if label else 'download-source',
+                '{0}{1}'.format('_'.join(re.sub(r'[^a-zA-Z0-9]',' ', os.path.splitext(label)[0]).split()) if label else 'download-source',
                                 ('.' + SYNTAX[k.lower()]) if k.lower() != 'text' else '')
                 ) +  text + '\n</code>'        
         if self.show_all:
