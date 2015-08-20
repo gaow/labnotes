@@ -1,13 +1,27 @@
 #!/usr/bin/env python
+import sys, os, subprocess
 from distutils.core import setup
 try:
     from distutils.command.build_py import build_py_2to3 as build_py
 except ImportError:
     from distutils.command.build_py import build_py
+# Update version
 from src import VERSION
-import sys, os
-#if sys.version_info < (3, 1):
-#    sys.exit('The program requires Python 3.1 or higher. Please upgrade your version (%s) of Python and try again.' % (sys.version.split()[0]))
+main_version = VERSION.split('-')[0]
+revision = subprocess.check_output('cat src/.revision', shell = True).strip()
+version = '{}-rev{}'.format(main_version, revision)
+full_version = '{}, revision {}'.format(main_version, revision)
+content = []
+with open('{}/__init__.py'.format("src"), 'r') as init_file:
+    for x in init_file.readlines():
+        if x.startswith('VERSION'):
+            content.append("VERSION = '{}'".format(version))
+        elif x.startswith("FULL_VERSION"):
+            content.append("FULL_VERSION = '{}'".format(full_version))
+        else:
+            content.append(x.rstrip())
+with open('{}/__init__.py'.format("src"), 'w') as init_file:
+    init_file.write('\n'.join(content))
 #
 setup(name = 'tigernotes',
     version = VERSION,
