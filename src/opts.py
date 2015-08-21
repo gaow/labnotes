@@ -66,7 +66,7 @@ def dokuwiki(args):
             f.write('<ifauth !{0}>\nThis post is only visible to authorized members. Please login if you are one of them.\n</ifauth>\n<ifauth {0}>\n'.format(args.permission.strip('\'"')))
         f.writelines(htm.get(lite))
         if args.disqus:
-            f.write('\n~~DISQUS~~')
+            f.write('\n\\\\\n\\\\\n\\\\\n~~DISQUS~~')
         if args.permission:
             f.write('\n</ifauth>')
     return
