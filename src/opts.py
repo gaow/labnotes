@@ -65,10 +65,10 @@ def dokuwiki(args):
         if args.permission:
             f.write('<ifauth !{0}>\nThis post is only visible to authorized members. Please login if you are one of them.\n</ifauth>\n<ifauth {0}>\n'.format(args.permission.strip('\'"')))
         f.writelines(htm.get(lite))
-        if args.permission:
-            f.write('\n</ifauth>')
         if args.disqus:
             f.write('\n~~DISQUS~~')
+        if args.permission:
+            f.write('\n</ifauth>')
     return
 
 def pmwiki(args):
@@ -272,7 +272,8 @@ class LogOpts:
                         action='store_true',
                         default = '',
                         help='''unfold source code / output fields in page by default''')
-        group = parser.add_mutually_exclusive_group() 
+        # group = parser.add_mutually_exclusive_group() 
+        group = parser
         group.add_argument('--permission',
                         metavar='user',
                         type=str,
