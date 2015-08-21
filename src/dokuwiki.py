@@ -111,7 +111,7 @@ class Dokuwiki(HtmlParser):
             text = '<code {0} {1}>\n'.format(
                 k.lower() if k.lower() not in ['s', 'r'] else 'rsplus',
                 '{0}{1}'.format('_'.join(re.sub(r'[^a-zA-Z0-9]',' ', os.path.splitext(label)[0]).split()) if label else 'download-source',
-                                ('.' + SYNTAX[k.lower()]) if k.lower() != 'text' else '')
+                                ('.' + SYNTAX[k.lower()]) if k.lower() != 'text' else os.path.splitext(label)[1])
                 ) +  text + '\n</code>'        
         if self.show_all:
             text = '<hidden initialState="visible" -noprint>\n{0}\n</hidden>\\\\'.format(text)

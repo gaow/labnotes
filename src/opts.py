@@ -67,6 +67,8 @@ def dokuwiki(args):
         f.writelines(htm.get(lite))
         if args.permission:
             f.write('\n</ifauth>')
+        if args.disqus:
+            f.write('\n~~DISQUS~~')
     return
 
 def pmwiki(args):
@@ -131,7 +133,7 @@ class LogOpts:
     def run(self):
         args = self.master_parser.parse_args()
         # calling the associated functions
-#        args.func(args)
+        # args.func(args)
         try:
             args.func(args)
         except Exception as e:
@@ -270,10 +272,12 @@ class LogOpts:
                         action='store_true',
                         default = '',
                         help='''unfold source code / output fields in page by default''')
-        parser.add_argument('--permission',
+        group = parser.add_mutually_exclusive_group() 
+        group.add_argument('--permission',
                         metavar='user',
                         type=str,
                         help='''authorized user name or group name of this page''')
+        group.add_argument('--disqus', action = 'store_true', help = 'Add "disqus" comment section to page')
 
 
     def getAdminArguments(self, parser):
