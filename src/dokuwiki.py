@@ -80,7 +80,7 @@ class Dokuwiki(HtmlParser):
 
     def m_blockizeTable(self, text, k, label = None):
         self._checknest(text)
-        table = [[self.m_recode(iitem) for iitem in multispace2tab(item).split('\t')] for item in text.split('\n') if item]
+        table = [[self.m_recode_dokuwiki(iitem) for iitem in multispace2tab(item).split('\t')] for item in text.split('\n') if item]
         ncols = list(set([len(x) for x in table]))
         if len(ncols) > 1:
             self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {0}".format(text))
