@@ -146,14 +146,17 @@ def pdflatex(fname, text, vanilla=False, beamer_institute = None):
         m.put(beamer_institute)
     # compile
     sys.stderr.write('Building {0} "{1}" ...\n'.format('document' if beamer_institute is None else 'slides', fname + '.pdf'))
+    cmd = ["pdflatex", "-shell-escape", "-halt-on-error", "-file-line-error", fname + '.tex']
     for visit in [1,2]:
         # too bad we cannot pipe tex to pdflatex with the output behavior under ctrl ... have to write the disk
-        tc = Popen(["pdflatex", "-shell-escape", "-halt-on-error", "-file-line-error", fname + '.tex'],
-            stdin = PIPE, stdout = PIPE, stderr = PIPE)
+        tc = Popen(cmd, stdin = PIPE, stdout = PIPE, stderr = PIPE)
         out, error = tc.communicate()
         if visit == 2 and ((tc.returncode or error) and (not os.path.exists(fname + '.pdf'))):
             with codecs.open(os.path.join(cwd, '{0}-ERROR.txt'.format(fname)), 'w', encoding='utf-8') as f:
-                f.writelines(out.decode(sys.getdefaultencoding()) + error.decode(sys.getdefaultencoding()))
+                try:
+                    f.writelines(out.decode(sys.getdefaultencoding()) + error.decode(sys.getdefaultencoding()))
+                except:
+                    f.writelines("Error running: " + " ".join(cmd) + '\n')
             empty(tmp_dir, fname)
             sys.stderr.write('''
                     * * *
