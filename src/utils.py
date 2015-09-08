@@ -55,7 +55,7 @@ def wraptxt(line, sep, by, rmblank = True, prefix = ''):
         for k in range(j):
             if i == by:
                 # time to wrap
-                sline += item + sep + '\n' + (prefix if comment else '')
+                sline += item + sep + '\n' + (prefix + ' ' if comment else '')
                 i = 0
                 break
             else:

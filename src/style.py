@@ -1022,7 +1022,7 @@ body {
 	margin: 6em 3% 19em 3%;
 	background: #fff;
 	font-family: 'Lucida Grande', 'Lucida Sans', 'Lucida Sans Unicode', Tahoma, sans-serif;
-	font-size: 10pt;
+	font-size: 11pt;
 	line-height: 150%;
 	text-align:justify;
 	color: #555;
@@ -1451,7 +1451,13 @@ class TigerJournal:
  content="text/html; charset=ISO-8859-1">
   <title>{0}</title>
 <style>
-  body {{font-family: georgia;}}
+@font-face {{
+  font-family: 'PT Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('PT Sans'), local('PTSans-Regular'), url(http://themes.googleusercontent.com/static/fonts/ptsans/v4/LKf8nhXsWg5ybwEGXk8UBQ.woff) format('woff');
+}}
+  body {{font-family: 'PT Sans';}}
   ol {{list-style-type: circle;}}
 </style>
 {5}
