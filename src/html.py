@@ -48,12 +48,9 @@ class Html(HtmlParser):
                 else:
                     i = idx + 1
                 #
-                # cmd = '\n'.join([wraptxt(x, '\\', int(self.wrap_width)) for x in self.text[idx:i]])
-                # Disallow wrap in HTML for ease to copy-paste command to terminal
                 cmd = '\n'.join(self.text[idx:i])
-                cmd = cmd.split('\n')
                 self.text[idx] = self._parsecmd(cmd, idx)
-                if len(cmd) > 1:
+                if len(self.text[idx:i]) > 1:
                     for j in range(idx + 1, i):
                         self.text[j] = ''
                 idx = i

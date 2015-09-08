@@ -483,8 +483,8 @@ class HtmlParser(TexParser):
         return line
 
     def _parsecmd(self, line, idx):
-        return '<pre><code class = "nohighlight">{}</code></pre>'.\
-          format(wraptxt(line, '', int(self.wrap_width),)) 
+        return '<pre><code class = "nohighlight">{}</code></pre>\n'.\
+          format(wraptxt(line, '\\', int(self.wrap_width)))
         
     def m_recode(self, line):
         if not line:
@@ -637,7 +637,7 @@ class HtmlParser(TexParser):
         self._checknest(text)
         text = wraptxt(text, '', int(self.wrap_width), rmblank = True,
                        prefix = COMMENT[k.lower()])
-        text = '<pre><code class = "{0}">{3}{3}\n{3}{3} LANGUAGE: {0}, ID: {2}\n{3}{3}\n{1}</code></pre>'.\
+        text = '<pre><code class = "{0}">\n{3}{3}\n{3}{3} LANGUAGE: {0}, ID: {2}\n{3}{3}\n{1}</code></pre>'.\
           format(k.lower(), text, label if label else k.lower(), COMMENT[k.lower()])
         if self.html_tag:
             return '<HTML>\n' + text + '\n</HTML>\n'
@@ -646,7 +646,7 @@ class HtmlParser(TexParser):
 
     def m_blockizeOut(self, text, k, label = None):
         if text.startswith("file:///"): text = gettxtfromfile(text) 
-        if text.startswith("output:///"): text = gettxtfromcmd(text) 
+        if text.startswith("output:///"): text = gettxtfromcmd(text)
         self._checknest(text)
         nrow = len(text.split('\n'))
         text = '<center><textarea rows="%s", wrap="off">%s</textarea></center>' % (max(min(nrow, 30), 1), text)

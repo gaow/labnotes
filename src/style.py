@@ -1092,6 +1092,12 @@ a:hover
 	font-size: 11pt;
 }
 
+em
+{
+	font-family: Georgia, Helvetica, Arial, sans-serif;
+	font-size: 11pt;
+}
+
 .minorhead
 {
 	color: #666;
@@ -1335,6 +1341,129 @@ kbd
     text-shadow: 0.2px 0.2px 0.2px;
 }
 '''
+
+HTML_STYLE_LIGHT = r''' 
+@font-face {
+  font-family: 'PT Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('PT Sans'), local('PTSans-Regular'), url(http://themes.googleusercontent.com/static/fonts/ptsans/v4/LKf8nhXsWg5ybwEGXk8UBQ.woff) format('woff');
+}
+body
+{
+	margin:40px 0;
+	padding:0;
+	font-family: 'PT Sans', 'Lucida Grande', 'Lucida Sans', 'Lucida Sans Unicode', Tahoma, sans-serif;
+	font-size: 11pt;
+	text-align:justify;
+	line-height: 150%;
+	color: #333;
+}
+
+em
+{
+    font-style: italic;
+	font-family: Georgia, Helvetica, Arial, sans-serif;
+	font-size: 11pt;
+}
+
+ol {list-style-type: circle;}
+
+.minorhead
+{
+	color: #666;
+	font-family: monospace;
+	line-height: 30px;
+}
+
+.superheading
+{
+    break-inside: avoid;
+	margin: 1em 0 0 0;
+	padding: .5em;
+	font-size: 20pt;
+	line-height: 120%;
+	color: #666;
+}
+
+.heading
+{
+	margin-top: 30px;
+	font-size: 14pt;
+	line-height: 120%;
+	color: #666;
+}
+
+.subheading
+{
+	margin-top: 20px;
+	font-size: 12pt;
+	color: #304860;
+}
+
+.subsubheading
+{
+	margin-top: 15px;
+	font-size: 11pt;
+	font-weight: bold;
+	color: #304860;
+	/* font-style: oblique; */
+}
+
+#wrapper {
+	text-align: left;
+    width:95%;
+}
+
+.tip {
+	margin: 10px 0px 10px 0px;
+	padding: 10px 5px 10px 15px;
+    border-radius:12px;
+	box-shadow: 3px 3px 2px #888888;
+	background: #ddffdd no-repeat 20px;
+}
+
+.important {
+	margin: 10px 0px 10px 0px;
+	padding: 10px 5px 10px 15px;
+    border-radius:12px;
+	box-shadow: 3px 3px 2px #888888;
+	background: lightblue no-repeat 20px;
+}
+
+.note {
+	margin: 10px 0px 10px 0px;
+	padding: 10px 5px 10px 15px;
+    border-radius:12px;
+	box-shadow: 3px 3px 2px #888888;
+	background: #ffffcc no-repeat 20px;
+}
+
+.warning {
+	margin: 10px 0px 10px 0px;
+	padding: 10px 5px 10px 15px;
+    border-radius:12px;
+	box-shadow: 3px 3px 2px #888888;
+	background: #ffdddd no-repeat 20px;
+}
+/* .textborder {border: 1px dashed rgb(0, 36, 105); padding: 2px;} */
+.textborder {border: 1px dashed rgb(220, 20, 60); padding: 2px;}
+
+textarea
+{
+    border:1px solid #999999;
+    width:95%;
+    margin:5px 0;
+    padding:1%;
+    font-size: small;
+    font-family: "Lucida Console", Monaco, monospace;
+}
+kbd
+{
+    text-shadow: 0.2px 0.2px 0.2px;
+}
+'''
+
 HTML_SYN = r'''
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/solarized_light.min.css">
 <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
@@ -1451,14 +1580,7 @@ class TigerJournal:
  content="text/html; charset=ISO-8859-1">
   <title>{0}</title>
 <style>
-@font-face {{
-  font-family: 'PT Sans';
-  font-style: normal;
-  font-weight: 400;
-  src: local('PT Sans'), local('PTSans-Regular'), url(http://themes.googleusercontent.com/static/fonts/ptsans/v4/LKf8nhXsWg5ybwEGXk8UBQ.woff) format('woff');
-}}
-  body {{font-family: 'PT Sans';}}
-  ol {{list-style-type: circle;}}
+{6}
 </style>
 {5}
 </head>
@@ -1521,7 +1643,7 @@ class TigerJournal:
       </td>
     </tr>
             '''.format(title, self.title, 'http://tigerwang.org',
-                       self.logo, self.bg, HTML_SYN)
+                       self.logo, self.bg, HTML_SYN, HTML_STYLE_LIGHT)
 
         def GetLeftColumn(self, title, links):
             contents = '\n'.join(['<p><center><font size="-1"><b><a href="{0}">{1}</a></b></font></center></p>'.format(x[0], x[1]) for x in links])
