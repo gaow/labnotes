@@ -1705,7 +1705,7 @@ class TigerJournal:
             <table width="100%" cellpadding="4">
               <tbody>
                 <tr>
-                  <td bgcolor="#fefefe"><font size="-2">Page design of this journal is adapted from The Slackware's homepage, 2010</font> </td>
+                  <td bgcolor="#fefefe"><font size="-2">Page design is adapted from Slackware&reg; homepage, 2010</font> </td>
                 </tr>
               </tbody>
             </table>
