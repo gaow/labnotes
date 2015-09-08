@@ -10,7 +10,7 @@ class Env:
     def __init__(self):
         self.version = '0.0.1'
         self.editor = 'emacs'
-        self.root_dir = os.path.expanduser('~/Dropbox/Notes/Blog/Journal')
+        self.root_dir = os.path.expanduser('~/Dropbox/Journal')
         self.author = 'Gao T. Wang'
         self.title = "Journal of Gao T. Wang"
         self.url_root = '../'
