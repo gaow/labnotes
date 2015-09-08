@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from .style import HTML_STYLE, JS_SCRIPT
+from .style import HTML_STYLE, HTML_SYN
 from .base import *
 from .ordereddict import OrderedDict
 
@@ -140,16 +140,16 @@ class Html(HtmlParser):
             return '\n'.join(self.text), '', ''
         otext = '<!DOCTYPE html><html><head><title>{0}</title>\n'.format((self.title + ' | ' + self.author) if self.title or self.author else '')
         if separate:
-            otext += '<link href="style.css" rel="stylesheet" type="text/css"><script LANGUAGE="JavaScript" src="style.js"></script>'
+            otext += '<link href="style.css" rel="stylesheet" type="text/css">'
         else:
-            otext += '<style type="text/css">\n{0}</style><script LANGUAGE="JavaScript">\n{1}\n</script>'.format(HTML_STYLE, JS_SCRIPT)
-        # mathjax support
-        otext += '\n<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>\n'
+            otext += '<style type="text/css">\n{0}</style>'.format(HTML_STYLE)
+        # syntax highlight and mathjax support
+        otext += HTML_SYN
         otext += '</head><body><a name="top"></a>%s%s<div class="%s"><div class="content">%s</div></div></body></html>' % (self.m_title(self.title, self.author),
                        (self.m_toc(self.dtoc) if self.toc else ''),
                        self.frame, 
                        '\n'.join(self.text))
-        return otext, HTML_STYLE if separate else '', JS_SCRIPT if separate else ''
+        return otext, HTML_STYLE if separate else ''
 
     def m_title(self, title, author):
         return '''

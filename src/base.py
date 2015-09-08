@@ -5,7 +5,7 @@ from time import strftime, localtime
 from .ordereddict import OrderedDict
 import codecs
 from .utils import wraptxt, multispace2tab, getPaper, gettxtfromfile, gettxtfromcmd
-from .style import MODE, CONFIG, TITLE, THANK, THEME, DOC_PACKAGES, DOC_CONFIG, HTML_STYLE, JS_SCRIPT
+from .style import MODE, CONFIG, TITLE, THANK, THEME, DOC_PACKAGES, DOC_CONFIG, HTML_STYLE
 
 FONT = {'bch':'bch',
         'default':'default',
@@ -459,7 +459,6 @@ class HtmlParser(TexParser):
         self.keywords = list(set(SYNTAX.keys())) + self.alertbox + ['err', 'out', 'list', 'table']
         self.wrap_width = 90
         self.tablefont = 'small'
-        self.anchor_id = 0
         self.fig_support = ['jpg', 'jpeg', 'tif','png', 'pdf']
         self.html_tag = False
         if header:
@@ -626,26 +625,16 @@ class HtmlParser(TexParser):
         else:
             return text
 
-    def _parsecmd(self, text, serial, numbered = False):
-        head = '<div><div id="highlighter_{0}" class="syntaxhighlighter bash"><table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="gutter">'.format(serial)
-        numbers = ''.join(['<div class="line number{0} index{1} alt{2}">{0}</div>'.format(j+1 if numbered else ' ', j, 2 - j % 2) for j in range(len(text))]) + '</td><td class="code"><div class="container">'
-        lines = ''.join(['<div class="line number%s index%s alt%s"><code class="bash plain">%s</code></div>' % (j+1, j, 2 - j % 2, line) for j, line in enumerate(text)])
-        tail = '</div></td></tr></tbody></table></div></div>'
-        text = head + numbers + lines + tail
-        if self.html_tag:
-            return '<HTML>\n' + text + '\n</HTML>\n'
-        else:
-            return text
         
     def m_blockizeIn(self, text, k, label = None):
         if text.startswith("file:///"): text = gettxtfromfile(text) 
         if text.startswith("output:///"): text = gettxtfromcmd(text) 
         if k.lower() == 'raw' or k.lower() == '$': return text
         self._checknest(text)
-        self.anchor_id += 1
-        text = '<div style="color:rgb(220, 20, 60);font-weight:bold;text-align:right;padding-right:2em;"><span class="textborder">' + \
-                        (k.capitalize() if not label else self.m_recode(label)) + '</span></div>' + \
-                        self._parsecmd(wraptxt(text, '', int(self.wrap_width), rmblank = True, prefix = COMMENT[k.lower()]).split('\n'), str(self.anchor_id), numbered = True)
+        text = wraptxt(text, '', int(self.wrap_width), rmblank = True,
+                       prefix = COMMENT[k.lower()])
+        text = '<pre><code class = "{0}">{3}{3} LANGUAGE: {0}, ID: {2}\n{1}</code></pre>'.\
+          format(k.lower(), text, label if label else k.lower(), COMMENT[k.lower()])
         if self.html_tag:
             return '<HTML>\n' + text + '\n</HTML>\n'
         else:

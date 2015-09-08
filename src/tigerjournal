@@ -94,8 +94,10 @@ class PageGenerator:
             content = Html('', '', False, [fn], 1)
             # summary, date, text
             name = os.path.splitext(os.path.basename(fn))[0]
-            self.contents.append((content.text[0][4:-5], '{}-{}-{}'.format(name[:4], name[4:6], name[6:]),
-                             ''.join(content.text[1:])))
+            self.contents.append((content.text[0][4:-5], '{}-{}-{}'.\
+                                  format(name[:4], name[4:6], name[6:]),
+                                  ''.join(content.text[1:])))
+
         self.links = []
         for item in env.monthlist:
             self.links.append((os.path.join(env.url_root, date.year, item + '.html'), item))

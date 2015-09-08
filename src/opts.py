@@ -38,13 +38,11 @@ def html(args):
                long_ref = args.long_ref, fig_path = args.figure_path)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output, suffix='.html')
-    body, css, js = htm.get(lite, args.separate, args.plain)
+    body, css = htm.get(lite, args.separate, args.plain)
     if body:
         with codecs.open(fname + '.html', 'w', encoding='UTF-8', errors='ignore') as f: f.writelines(body)
     if css:
         with open('style.css', 'w') as f: f.writelines(css)
-    if js:
-        with open('script.js', 'w') as f: f.writelines(js)
     # woff = os.path.join(os.path.dirname(sys.modules['libtigernotes'].__file__), 'PTSans.woff')
     # if os.path.exists(woff):
     #     shutil.copy2(woff, '.')

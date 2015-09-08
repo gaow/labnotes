@@ -35,7 +35,7 @@ def wraptxt(line, sep, by, rmblank = True, prefix = ''):
     sline = ''
     i = 0
     for item in list(line):
-        if item == prefix and re.search(r'\n(\s*)$', sline):
+        if item == prefix and (re.search(r'\n(\s*)$', sline) or sline == ''):
             # time to comment
             comment = True
         if item == '\n' and i == 0:
