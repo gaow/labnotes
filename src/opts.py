@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import sys, shutil, os
+import sys, shutil, os, re
 from .argparse import ArgumentParser
 import codecs
 from .utils import getfname, pdflatex, indexhtml
@@ -61,7 +61,8 @@ def dokuwiki(args):
         raise ValueError('Cannot write output as "{0}": name conflict with source file. Please rename either of them')
     with codecs.open(fname + '.txt', 'w', encoding='UTF-8', errors='ignore') as f:
         if args.permission:
-            f.write('<ifauth !{0}>\nThis post is only visible to authorized members. Please login if you are one of them.\n</ifauth>\n<ifauth {0}>\n'.format(args.permission.strip('\'"')))
+            user = re.sub(r'^\\', '', re.sub(r'^"|^\'', '', args.permission))
+            f.write('<ifauth !{0}>\nThis post is only visible to authorized members. Please login if you are one of them.\n</ifauth>\n<ifauth {0}>\n'.format(user))
         f.writelines(htm.get(lite))
         if args.disqus:
             f.write('\n\\\\\n\\\\\n\\\\\n~~DISQUS~~')

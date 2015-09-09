@@ -1035,7 +1035,7 @@ body
 	margin:40px 0;
 	padding:0;
 	font-family: 'PT Sans', 'Lucida Grande', 'Lucida Sans', 'Lucida Sans Unicode', Tahoma, sans-serif;
-	font-size: 10pt;
+	font-size: 11pt;
 	text-align:justify;
 	line-height: 150%;
 	color: #333;
