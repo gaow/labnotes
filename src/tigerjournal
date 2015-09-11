@@ -10,12 +10,12 @@ class Env:
     def __init__(self):
         self.version = '0.0.1'
         self.editor = 'emacs'
-        self.root_dir = os.path.expanduser('~/Dropbox/Journal')
+        self.f_dir = '~/Dropbox/Journal'
         self.author = 'Gao T. Wang'
         self.title = "Journal of Gao T. Wang"
         self.url_root = '../'
         self.url = 'tigerwang.org'
-        self.sitedir = 'tigerwang'
+        self.p_dir = 'tigerwang'
         self.monthlist = ['January',
               'February',
               'March',
@@ -29,12 +29,17 @@ class Env:
               'November',
               'December']
 
+    def update(self, d):
+        for key, value in d.items():
+            setattr(self, key, value)
+        self.f_dir = os.path.expanduser(self.f_dir)
+
 env = Env()
 
 class Opts:
     def __init__(self):
         self.master_parser = ArgumentParser(
-        description = '''Journal of Gao T. Wang manager''',
+        description = '''Lab Journal Manager''',
         prog = 'tigerjournal',
         fromfile_prefix_chars = '@',
         epilog = '''Copyright 2012 Gao Wang <ewanggao@gmail.com> GNU General Public License''')
@@ -42,19 +47,31 @@ class Opts:
         subparsers = self.master_parser.add_subparsers()
         parser = subparsers.add_parser('edit', help='Edit journal page')
         parser.add_argument('-d', '--date', help='''Date to edit''')
+        parser.add_argument('--editor', default = 'emacs', help = SUPPRESS)
+        parser.add_argument('--file-dir', dest = 'f_dir',
+                            default = '~/Dropbox/Journal', help = SUPPRESS)
         parser.add_argument('--debug', action='store_true', help = SUPPRESS)
         parser.set_defaults(func=edit)
         parser = subparsers.add_parser('make', help='Generate journal page')
         parser.add_argument('-d', '--date', help='''Date to generate''')
         parser.add_argument('-u', '--user', help='''Trusted user name (user name that does not require input password). If unspecified, username and password will be asked for interactively.''')
+        parser.add_argument('--file-dir', dest = 'f_dir',
+                            default = '~/Dropbox/Journal', help = SUPPRESS)
+        parser.add_argument('--title', default = 'Journal of Gao T. Wang', help = SUPPRESS)
+        parser.add_argument('--url', default = 'tigerwang.org', help = SUPPRESS)
+        parser.add_argument('--page-dir', dest = 'p_dir',
+                            default = 'tigerwang/journal', help = SUPPRESS)
         parser.add_argument('--debug', action='store_true', help = SUPPRESS)
         parser.set_defaults(func=make)
         parser = subparsers.add_parser('show', help='Show journal pages')
+        parser.add_argument('--file-dir', dest = 'f_dir',
+                            default = '~/Dropbox/Journal', help = SUPPRESS)
         parser.add_argument('--debug', action='store_true', help = SUPPRESS)
         parser.set_defaults(func=show)
 
     def run(self):
         args = self.master_parser.parse_args()
+        env.update(vars(args))
         if args.debug:
             test(args) 
         try:
@@ -79,7 +96,7 @@ class DateParser:
             self.month = date[4:6]
             self.date = date[6:]
             self.month_name = datetime.datetime.strptime(date, "%Y%m%d").strftime("%B")
-        self.path = '{}/{}/{}'.format(env.root_dir, self.year, self.month_name)
+        self.path = '{}/{}/{}'.format(env.f_dir, self.year, self.month_name)
 
     def show(self):
         print self.name, self.year, self.month, self.date, self.month_name
@@ -88,7 +105,7 @@ class DateParser:
 class PageGenerator:
     def __init__(self, date):
         self.date = date
-        self.html_path = '{}/{}'.format(env.root_dir, date.year)
+        self.html_path = '{}/{}'.format(env.f_dir, date.year)
         self.html = os.path.join(self.html_path, '{}.html'.format(self.date.month_name))
         self.contents = []
         for fn in sorted(glob.glob(os.path.join(date.path, "*.notes")), reverse = True):
@@ -104,7 +121,7 @@ class PageGenerator:
             self.links.append((os.path.join(env.url_root, date.year, item + '.html'), item))
 
     def write(self):
-        page = TJ()
+        page = TJ(title = env.title)
         with open(self.html, 'w') as f:
             f.write(page.GetMeta('Journal of {}, {}'.format(self.date.month_name, self.date.year)) + \
                     page.GetLeftColumn('Journal of {}'.format(self.date.year), self.links) + \
@@ -128,16 +145,16 @@ def make(args):
     if not args.user:
         user = raw_input("Username: ")
         passwd = getpass.getpass("Password: ")
-        os.system('sshpass -p {} rsync -auzP {}/* {}@{}:./{}/journal --exclude=*.notes'.\
-                  format(passwd, env.root_dir, user, env.url, env.sitedir))
+        os.system('sshpass -p {} rsync -auzP {}/* {}@{}:./{} --exclude=*.notes'.\
+                  format(passwd, env.f_dir, user, env.url, env.p_dir))
     else:
-        os.system('rsync -auzP {}/* {}@{}:./{}/journal --exclude=*.notes'.\
-                  format(env.root_dir, args.user, env.url, env.sitedir))
+        os.system('rsync -auzP {}/* {}@{}:./{} --exclude=*.notes'.\
+                  format(env.f_dir, args.user, env.url, env.p_dir))
         
     return
 
 def show(args):
-    os.system('tree -h {}'.format(env.root_dir))
+    os.system('tree -h {}'.format(env.f_dir))
     return
 
 if __name__ == '__main__':
