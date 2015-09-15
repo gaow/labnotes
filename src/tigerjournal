@@ -5,6 +5,7 @@ from argparse import ArgumentParser, SUPPRESS
 from distutils.dir_util import mkpath
 from libtigernotes.html import Html
 from libtigernotes.style import TigerJournal as TJ
+from libtigernotes.utils import cd
 
 class Env:
     def __init__(self):
@@ -140,17 +141,15 @@ def edit(args):
 
 def make(args):
     date = DateParser(args.date)
-    pg = PageGenerator(date)
+    with cd(date.path):
+        pg = PageGenerator(date)
     pg.write()
     if not args.user:
         user = raw_input("Username: ")
         passwd = getpass.getpass("Password: ")
-        os.system('sshpass -p {} rsync -auzP {}/* {}@{}:./{} --exclude=*.notes'.\
-                  format(passwd, env.f_dir, user, env.url, env.p_dir))
+        os.system("sshpass -p {} rsync -auzP {}/* {}@{}:./{} --include '*/' --include '*.html' --exclude '*'".format(passwd, env.f_dir, user, env.url, env.p_dir))
     else:
-        os.system('rsync -auzP {}/* {}@{}:./{} --exclude=*.notes'.\
-                  format(env.f_dir, args.user, env.url, env.p_dir))
-        
+        os.system("rsync -auzP {}/* {}@{}:./{} --include '*/' --include '*.html' --exclude '*'".format(env.f_dir, args.user, env.url, env.p_dir))
     return
 
 def show(args):
