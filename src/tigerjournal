@@ -136,7 +136,10 @@ def test(args):
 def edit(args):
     date = DateParser(args.date)
     mkpath(date.path)
-    os.system('{} {}.notes &'.format(env.editor, os.path.join(date.path, date.name)))
+    if env.editor == 'emacs':
+        os.system('''emacsclient -c -F '((font . "Ubuntu Mono-14"))' -a 'emacs' {}.notes > /dev/null&'''.format(os.path.join(date.path, date.name)))
+    else:
+        os.system('{} {}.notes &'.format(env.editor, os.path.join(date.path, date.name)))
     return
 
 def make(args):
