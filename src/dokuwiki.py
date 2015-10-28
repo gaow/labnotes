@@ -245,6 +245,8 @@ class Dokuwiki(HtmlParser):
         otext = '\n'.join(self.text)
         # mathjax support
         # otext = '<HTML><script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><link href="style.css" rel="stylesheet" type="text/css"><script LANGUAGE="JavaScript" src="style.js"></script></HTML>\n' + otext
-        if not self.toc:
+        if self.toc == 0:
             otext = '~~NOTOC~~\n' + otext
+        if self.toc == 2:
+            otext = '{{INLINETOC}}\n' + otext
         return otext
