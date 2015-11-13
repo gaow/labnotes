@@ -54,7 +54,12 @@ def html(args):
     return
 
 def dokuwiki(args):
-    htm = Dokuwiki(args.title, args.author, args.filename, args.toc,
+    toc = 0
+    if args.toc:
+        toc = 1
+    if args.inline_toc:
+        toc = 2
+    htm = Dokuwiki(args.title, args.author, args.filename, toc,
                    args.showall, args.prefix, long_ref = args.long_ref)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output, suffix='.txt')
@@ -295,6 +300,10 @@ class LogOpts:
                         action='store_true',
                         default = '',
                         help='''unfold source code / output fields in page by default''')
+        parser.add_argument('--inline_toc',
+                        action='store_true',
+                        default = '',
+                        help='''generate table of contents inline (will override --toc)''')
         # group = parser.add_mutually_exclusive_group() 
         group = parser
         group.add_argument('--permission',
