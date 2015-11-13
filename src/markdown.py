@@ -73,7 +73,7 @@ class MarkDown(HtmlParser):
         text, mapping = self._holdblockplace(text, mode = 'hold')
         self._checkblockprefix(text)
         text = text.split('\n')
-        text = '\n'.join([x if x.startswith(self.blockph) else self.m_recode_markdown(re.sub(r'^{0}'.format(self.mark), '\t*\t', re.sub(r'^{0}'.format(self.mark*2), '\t\t*\t', x))) for x in text]) + '\n'
+        text = '\n'.join([x if x.startswith(self.blockph) else self.m_recode_markdown(re.sub(r'^{0}'.format(self.mark), '*\t', re.sub(r'^{0}'.format(self.mark*2), '\t*\t', x))) for x in text]) + '\n'
         text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
         return text
 
@@ -84,7 +84,7 @@ class MarkDown(HtmlParser):
         if len(ncols) > 1:
             self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {0}".format(text))
         hline = '|' + '|'.join([':{}:'.format('-' * (len(x) + 2)) for x in table[0]]) + '  |\n'
-        body = '|  ' + '  |  '.join(table[0]) + '  |\n' + hline + '\n'.join(['|  ' + '  |  '.join(item) + '  |' for item in table[1:]]) + '\n' 
+        body = '|  ' + '  |  '.join(table[0]) + '  |\n' + hline + '\n'.join(['|  ' + '  |  '.join(item) + '  |' for item in table[1:]]) + '\n'
         return body
 
     def _parsecmd(self, text, serial, numbered = False):
@@ -92,18 +92,18 @@ class MarkDown(HtmlParser):
         lines = '\n'.join(text)
         tail = '\n```\n'
         return head + lines + tail
-        
+
     def m_blockizeOut(self, text, k, label = None):
         return self.m_blockizeIn(text, k = '', label = None)
-    
+
     def m_blockizeIn(self, text, k, label = None):
-        if text.startswith("file:///"): text = gettxtfromfile(text) 
-        if text.startswith("output:///"): text = gettxtfromcmd(text) 
+        if text.startswith("file:///"): text = gettxtfromfile(text)
+        if text.startswith("output:///"): text = gettxtfromcmd(text)
         self._checknest(text)
         text = '\n'.join(['  ' + x for x in text.split('\n')])
         text = '```{1}\n{0}\n```\n'.format(text, k.lower() if k.lower() != "text" else '')
         return text
-        
+
     def m_blockizeAlert(self, text, k, label = None):
         self._checknest(text, kw = [r'box 80'])
         text = self._holdfigureplace(text)
@@ -168,7 +168,7 @@ class MarkDown(HtmlParser):
                 # too many #'s
                 self.quit("You have so many urgly '{0}' symbols in a regular line. Please clear them up in this line: '{1}'".format(self.mark, self.text[idx]))
             if self.text[idx].startswith(self.mark + '!!!'):
-                self.text[idx] = '**_' + self.m_recode_markdown(self.text[idx][len(self.mark)+3:]) + '_**\n'
+                self.text[idx] = '**_' + self.m_recode_markdown(self.text[idx][len(self.mark)+3:]).strip() + '_**\n'
                 idx += 1
                 continue
             if self.text[idx].startswith(self.mark + '!!'):
