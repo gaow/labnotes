@@ -9,6 +9,7 @@ from .slides import Beamer
 from .html import Html
 from .dokuwiki import Dokuwiki
 from .pmwiki import Pmwiki
+from .markdown import MarkDown
 from . import VERSION
 
 
@@ -80,6 +81,17 @@ def pmwiki(args):
         f.writelines(htm.get(lite))
     return
 
+def markdown(args):
+    toc = None
+    htm = MarkDown(args.title, args.author, args.filename, toc, args.prefix, long_ref = args.long_ref)
+    lite = 1 if args.lite else 0
+    fname = getfname(args.filename, args.output, suffix='.md')
+    if args.filename == fname + '.md':
+        raise ValueError('Cannot write output as "{0}": name conflict with source file. Please rename either of them')
+    with codecs.open(fname + '.md', 'w', encoding='UTF-8', errors='ignore') as f:
+        f.writelines(htm.get(lite))
+    return
+
 def admin(args):
     if args.action == 'index_html':
         fname = 'index.html'
@@ -124,6 +136,11 @@ class LogOpts:
         self.getTexArguments(parser)
         self.getPmwikiArguments(parser)
         parser.set_defaults(func=pmwiki)
+        # markdown
+        parser = subparsers.add_parser('markdown', help='Generate markdown text from notes file(s)')
+        self.getTexArguments(parser)
+        self.getMarkDownArguments(parser)
+        parser.set_defaults(func=markdown)
         # admin
         parser = subparsers.add_parser('admin', help='A collection of utility features')
         self.getAdminArguments(parser)
@@ -263,7 +280,14 @@ class LogOpts:
         parser.add_argument('--prefix',
                         metavar='PATH',
                         type=str,
-                        help='''remote relative path for image, usually is the namespace a dokuwiki page belongs to''')
+                        help='''remote relative path for image, usually is the namespace a wiki page belongs to''')
+        
+    def getMarkDownArguments(self, parser):
+        parser.add_argument('--prefix',
+                        metavar='PATH',
+                        type=str,
+                        help='''remote relative path for image''')
+
 
     def getDokuwikiArguments(self, parser):
         self.getPmwikiArguments(parser)
