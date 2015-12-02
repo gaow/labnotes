@@ -93,7 +93,7 @@ class Dokuwiki(HtmlParser):
         tail = '\n</code>\\\\'
         return head + lines + tail
 
-    def m_blockizeIn(self, text, k, label = None, sxh3 = True):
+    def m_blockizeIn(self, text, k, label = None, sxh3 = False):
         if text.startswith("file:///"): text = gettxtfromfile(text)
         if text.startswith("output:///"): text = gettxtfromcmd(text)
         if k.lower() == 'raw' or k.lower() == '$': return text
