@@ -84,7 +84,7 @@ class Dokuwiki(HtmlParser):
         ncols = list(set([len(x) for x in table]))
         if len(ncols) > 1:
             self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {0}".format(text))
-        body = '<WRAP center 105%>\n' + '^  ' + '  ^  '.join(table[0]) + '  ^\n' + '\n'.join(['|  ' + '  |  '.join(item) + '  |' for item in table[1:]]) + '\n</WRAP>\n' 
+        body = '<WRAP center 105%>\n' + '^  ' + '  ^  '.join(table[0]) + '  ^\n' + '\n'.join(['|  ' + '  |  '.join(item) + '  |' for item in table[1:]]) + '\n</WRAP>\n'
         return body
 
     def _parsecmd(self, text, serial, numbered = False):
@@ -92,14 +92,14 @@ class Dokuwiki(HtmlParser):
         lines = '\n'.join(text)
         tail = '\n</code>\\\\'
         return head + lines + tail
-        
-    def m_blockizeIn(self, text, k, label = None, sxh3 = False):
-        if text.startswith("file:///"): text = gettxtfromfile(text) 
-        if text.startswith("output:///"): text = gettxtfromcmd(text) 
+
+    def m_blockizeIn(self, text, k, label = None, sxh3 = True):
+        if text.startswith("file:///"): text = gettxtfromfile(text)
+        if text.startswith("output:///"): text = gettxtfromcmd(text)
         if k.lower() == 'raw' or k.lower() == '$': return text
         self._checknest(text)
         # no wrap, totally rely on dokuwiki
-        # text = wraptxt(text, '', 1000, rmblank = True)  
+        # text = wraptxt(text, '', 1000, rmblank = True)
         # require sxh3 plugin
         if sxh3:
             text = '<sxh {0}{1};gutter: false;>\n\n'.format(
@@ -111,17 +111,17 @@ class Dokuwiki(HtmlParser):
             text = '<code {0} {1}>\n'.format(
                 k.lower() if k.lower() not in ['s', 'r'] else 'rsplus',
                 '{0}{1}'.format('_'.join(re.sub(r'[^a-zA-Z0-9]',' ', os.path.splitext(label)[0]).split()) if label else 'download-source',
-                                ('.' + SYNTAX[k.lower()]) if k.lower() != 'text' else os.path.splitext(label)[1])
-                ) +  text + '\n</code>'        
+                                ('.' + SYNTAX[k.lower()]) if k.lower() != 'text' else (os.path.splitext(label)[1] if label else '.txt'))
+                ) +  text + '\n</code>'
         if self.show_all:
             text = '<hidden initialState="visible" -noprint>\n{0}\n</hidden>\\\\'.format(text)
         else:
             text = '<hidden -noprint>\n{0}\n</hidden>\\\\'.format(text)
         return text
-    
+
     def m_blockizeOut(self, text, k, label = None):
-        if text.startswith("file:///"): text = gettxtfromfile(text) 
-        if text.startswith("output:///"): text = gettxtfromcmd(text) 
+        if text.startswith("file:///"): text = gettxtfromfile(text)
+        if text.startswith("output:///"): text = gettxtfromcmd(text)
         self._checknest(text)
         text = '\n'.join(['  ' + x for x in text.split('\n')])
         if self.show_all:
@@ -141,7 +141,7 @@ class Dokuwiki(HtmlParser):
             return 'blue'
         else:
             return 'black'
-        
+
     def m_blockizeAlert(self, text, k, label = None):
         self._checknest(text, kw = [r'box 80'])
         text = self._holdfigureplace(text)
