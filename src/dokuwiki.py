@@ -250,7 +250,7 @@ class Dokuwiki(HtmlParser):
         if self.toc == 2:
             otext = otext.split('\n')
             insert_point = [idx for idx, item in enumerate(otext) if item.startswith('=====') and item.endswith("=====")]
-            if len(insert_point) == 0:
+            if len(insert_point) != 1:
                 otext = '{{INLINETOC}}\n\\\\\n' + '\n'.join(otext)
             else:
                 otext.insert(insert_point[0] + 1,  '{{INLINETOC}}\n\\\\')
