@@ -248,5 +248,5 @@ class Dokuwiki(HtmlParser):
         if self.toc == 0:
             otext = '~~NOTOC~~\n' + otext
         if self.toc == 2:
-            otext = '{{INLINETOC}}\n' + otext
+            otext = '{{INLINETOC}}\n\\\\\n' + otext
         return otext

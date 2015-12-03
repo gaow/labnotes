@@ -56,9 +56,9 @@ def html(args):
 def dokuwiki(args):
     toc = 0
     if args.toc:
-        toc = 1
-    if args.inline_toc:
         toc = 2
+    if args.compact_toc:
+        toc = 1
     htm = Dokuwiki(args.title, args.author, args.filename, toc,
                    args.showall, args.prefix, long_ref = args.long_ref)
     lite = 1 if args.lite else 0
@@ -300,10 +300,10 @@ class LogOpts:
                         action='store_true',
                         default = '',
                         help='''unfold source code / output fields in page by default''')
-        parser.add_argument('--inline_toc',
+        parser.add_argument('--compact_toc',
                         action='store_true',
                         default = '',
-                        help='''generate table of contents inline (will override --toc)''')
+                        help='''generate compact table of contents (will override --toc)''')
         # group = parser.add_mutually_exclusive_group() 
         group = parser
         group.add_argument('--permission',
