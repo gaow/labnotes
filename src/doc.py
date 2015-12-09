@@ -1,3 +1,4 @@
+from builtins import range
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from .style import DOC_PACKAGES, DOC_CONFIG
@@ -32,7 +33,7 @@ class Tex(TexParser):
         self.landscape = landscape
         self.bclogo = {'warning':'\\bcattention', 'tip':'\\bclampe',
                        'important':'\\bctakecare', 'note':'\\bccrayon'}
-        self.keywords = list(set(SYNTAX.keys())) + self.bclogo.keys() + ['out', 'list', 'table']
+        self.keywords = list(set(SYNTAX.keys())) + list(self.bclogo.keys()) + ['out', 'list', 'table']
         self.text = self.m_parseBlocks(self.text)
         self.m_parseComments()
         self.m_parseText()
@@ -164,7 +165,7 @@ class Tex(TexParser):
                     if idx in range(item[0], item[1]):
                         self.text[idx] = ''
                         break
-        self.text = filter(None, self.text)
+        self.text = [_f for _f in self.text if _f]
         return '\\documentclass[oneside%s%s]{%s}' % (',twocolumn' if self.twocols else '',
                                                      ',landscape' if self.landscape else '', self.doctype) + \
                                                      DOC_PACKAGES + \

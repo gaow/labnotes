@@ -1,3 +1,4 @@
+from builtins import object
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import sys, shutil, os, re
@@ -107,7 +108,7 @@ def admin(args):
             f.writelines(otext)
     return
 
-class LogOpts:
+class LogOpts(object):
     def __init__(self):
         self.master_parser = ArgumentParser(
         description = '''Compile formatted notes into various publishable formats''',

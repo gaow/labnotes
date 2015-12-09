@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 import sys, os, subprocess
+
+from sys import version_info
+if not version_info >= (3, 0, 0):
+    sys.exit("This program requires Python 3")
+
 from distutils.core import setup
-try:
-    from distutils.command.build_py import build_py_2to3 as build_py
-except ImportError:
-    from distutils.command.build_py import build_py
+from distutils.command.build_py import build_py
 # Update version
 from src import VERSION
 main_version = VERSION.split('-')[0]
-revision = subprocess.check_output('cat src/.revision', shell = True).strip()
+revision = subprocess.check_output('cat src/.revision', shell = True).decode("utf-8").strip()
 version = '{}-rev{}'.format(main_version, revision)
 full_version = '{}, revision {}'.format(main_version, revision)
 content = []

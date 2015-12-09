@@ -60,6 +60,12 @@ All other classes in this module are considered implementation details.
 considered public as object names -- the API of the formatter objects is
 still considered an implementation detail.)
 """
+from builtins import zip
+from builtins import map
+from builtins import str
+from builtins import range
+from past.builtins import basestring
+from builtins import object
 
 __version__ = '1.2.1'
 __all__ = [

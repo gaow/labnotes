@@ -1,7 +1,8 @@
+from builtins import object
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os, codecs
-class minted:
+class minted(object):
     def __init__(self, outdir):
         self.outdir = outdir
         # two modifications to original minted.sty
@@ -302,5 +303,5 @@ fi
             f.write(self.sty)
         with codecs.open(os.path.join(self.outdir, 'pygmentize'), 'w', encoding='UTF-8') as f:
             f.write(self.pygmentize)
-        os.chmod(os.path.join(self.outdir, 'pygmentize'), 0755)
+        os.chmod(os.path.join(self.outdir, 'pygmentize'), 0o755)
         return os.path.join(self.outdir, 'pygmentize')

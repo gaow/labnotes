@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import division
+from builtins import str
+from builtins import range
+from builtins import object
+from past.utils import old_div
 import os, sys, re
 from time import strftime, localtime
 from .ordereddict import OrderedDict
@@ -41,7 +46,7 @@ COMMENT = {'r':'#',
           }
 
 # base class
-class TexParser:
+class TexParser(object):
     def __init__(self, title, author, fname, long_ref = True):
         self.title = title.replace('\\n', '\n')
         self.author = author.replace('\\n', '\n')
@@ -125,9 +130,9 @@ class TexParser:
                 k = re.sub('\W', '', m.group('a'))
                 if not k:
                     self.quit("Invalid citation keyword for reference item '{0}'.".format(m.group('b')))
-                if k in self.bib.keys():
+                if k in list(self.bib.keys()):
                     if self.bib[k] != [m.group('a'), m.group('b')]:
-                        k += str(len(self.bib.keys()))
+                        k += str(len(list(self.bib.keys())))
                 self.bib[k] = [m.group('a'), m.group('b')]
                 #line = line.replace(m.group(0), '\\cite[%s]{%s}' % (m.group('a'), k))
                 line = line.replace(m.group(0), '{\\color{MidnightBlue}%s}~\\cite{%s}' % (m.group('a'), k))
@@ -267,7 +272,7 @@ class TexParser:
             text = ''.join([item for idx, item in enumerate(text) if idx in idxes])
         elif mode == 'release':
             mapping = rule
-            for k, item in mapping.items():
+            for k, item in list(mapping.items()):
                 text = text.replace(k, item)
         elif mode == 'remove':
             text = re.sub(r'{0}|{1}'.format('BEGIN' + self.blockph, 'END' + self.blockph), '', text)
@@ -330,7 +335,7 @@ class TexParser:
                 self.quit('Unknown tag for figure {0}'.format(tag))
         if tag == 'tex':
             if len(lines) > 1:
-                w_minipage = int(1.0 / (1.0 * len(lines)) * 90) / 100.0
+                w_minipage = old_div(int(1.0 / (1.0 * len(lines)) * 90), 100.0)
                 lines = ['\\subfigure{' + x + '}\n' for x in lines]
                 lines[0] = '\\begin{figure}[H]\n\\centering\n\\mbox{\n' + lines[0]
                 lines[-1] += '\n}\n\\end{figure}\n'
@@ -415,7 +420,7 @@ class TexParser:
         if len(ncols) > 1:
             self.quit("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'. {0}".format(text))
         try:
-            cols = ''.join(['c' if len([item[i] for item in table if item[i].startswith('\\seqsplit')]) == 0 else 'p{{{}pt}}'.format((480-(ncols[0]-nseqsplit)*10)/nseqsplit) for i in range(ncols[0])])
+            cols = ''.join(['c' if len([item[i] for item in table if item[i].startswith('\\seqsplit')]) == 0 else 'p{{{}pt}}'.format(old_div((480-(ncols[0]-nseqsplit)*10),nseqsplit)) for i in range(ncols[0])])
             head = '\\begin{center}\n{\\%s\\begin{longtable}{%s}\n\\hline\n' % (self.tablefont, cols)
             body = '&'.join(table[0]) + '\\\\\n' + '\\hline\n' + '\\\\\n'.join(['&'.join(item) for item in table[1:]]) + '\\\\\n'
             tail = '\\hline\n\\end{longtable}}\n\\end{center}\n'
@@ -534,9 +539,9 @@ class HtmlParser(TexParser):
                 k = re.sub('\W', '', m.group('a'))
                 if not k:
                     self.quit("Invalid citation keyword for reference item '{0}'.".format(m.group('b')))
-                if k in self.bib.keys():
+                if k in list(self.bib.keys()):
                     if self.bib[k] != [m.group('a'), m.group('b')]:
-                        k += str(len(self.bib.keys()))
+                        k += str(len(list(self.bib.keys())))
                 self.bib[k] = [m.group('a'), self._parseUrl(m.group('b'))]
                 line = line.replace(m.group(0), '<a href="#footnote-{0}">{1}</a>'.format(k, m.group('a')))
         # standalone url
