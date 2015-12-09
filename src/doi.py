@@ -6,7 +6,7 @@ try:
 except:
     # python2
     from urllib.request import urlopen
-from .ordereddict import OrderedDict 
+from collections import OrderedDict 
 import json
 import sys, os
 from time import sleep

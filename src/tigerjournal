@@ -31,7 +31,7 @@ class Env:
               'December']
 
     def update(self, d):
-        for key, value in d.items():
+        for key, value in list(d.items()):
             setattr(self, key, value)
         self.f_dir = os.path.expanduser(self.f_dir)
 
@@ -45,7 +45,8 @@ class Opts:
         fromfile_prefix_chars = '@',
         epilog = '''Copyright 2012 Gao Wang <ewanggao@gmail.com> GNU General Public License''')
         self.master_parser.add_argument('--version', action='version', version='%(prog)s {0}'.format(env.version))
-        subparsers = self.master_parser.add_subparsers()
+        subparsers = self.master_parser.add_subparsers(dest = "command-name")
+        subparsers.required = True
         parser = subparsers.add_parser('edit', help='Edit journal page')
         parser.add_argument('-d', '--date', help='''Date to edit''')
         parser.add_argument('--editor', default = 'emacs', help = SUPPRESS)
@@ -74,7 +75,7 @@ class Opts:
         args = self.master_parser.parse_args()
         env.update(vars(args))
         if args.debug:
-            test(args) 
+            test(args)
         try:
             args.func(args)
         except Exception as e:
@@ -100,7 +101,7 @@ class DateParser:
         self.path = '{}/{}/{}'.format(env.f_dir, self.year, self.month_name)
 
     def show(self):
-        print self.name, self.year, self.month, self.date, self.month_name
+        print(self.name, self.year, self.month, self.date, self.month_name)
 
 
 class PageGenerator:
@@ -148,7 +149,7 @@ def make(args):
         pg = PageGenerator(date)
     pg.write()
     if not args.user:
-        user = raw_input("Username: ")
+        user = input("Username: ")
         passwd = getpass.getpass("Password: ")
         os.system("sshpass -p {} rsync -auzP {}/* {}@{}:./{} --include '*/' --include '*.html' --exclude '*'".format(passwd, env.f_dir, user, env.url, env.p_dir))
     else:

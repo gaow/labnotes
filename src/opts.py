@@ -15,7 +15,7 @@ from . import VERSION
 
 def doc(args):
     tex = Tex(args.title, args.author, args.date, args.toc, args.footnote, args.font, args.font_size,
-                   args.filename, long_ref = args.long_ref, no_num = args.no_section_number, 
+                   args.filename, long_ref = args.long_ref, no_num = args.no_section_number,
                    no_page = args.no_page_number, no_ref = False, twocols = args.twocols,
                    landscape = args.landscape)
     lite = 1 if args.lite else 0
@@ -115,7 +115,8 @@ class LogOpts:
         fromfile_prefix_chars = '@',
         epilog = '''Copyright 2012 Gao Wang <ewanggao@gmail.com> GNU General Public License''')
         self.master_parser.add_argument('--version', action='version', version='%(prog)s {0}'.format(VERSION))
-        subparsers = self.master_parser.add_subparsers()
+        subparsers = self.master_parser.add_subparsers(dest = 'command-name')
+        subparsers.required = True
         # latex
         parser = subparsers.add_parser('doc', help='Generate text document from notes file(s)')
         self.getTexArguments(parser)
@@ -158,6 +159,7 @@ class LogOpts:
         try:
             args.func(args)
         except Exception as e:
+            raise
             sys.exit('Unexpected error occurred while processing {0}: {1}'.format('-'.join(args.filename), e))
 
     def getTexArguments(self, parser):
@@ -286,7 +288,7 @@ class LogOpts:
                         metavar='PATH',
                         type=str,
                         help='''remote relative path for image, usually is the namespace a wiki page belongs to''')
-        
+
     def getMarkDownArguments(self, parser):
         parser.add_argument('--prefix',
                         metavar='PATH',
@@ -304,7 +306,7 @@ class LogOpts:
                         action='store_true',
                         default = '',
                         help='''generate compact table of contents (will override --toc)''')
-        # group = parser.add_mutually_exclusive_group() 
+        # group = parser.add_mutually_exclusive_group()
         group = parser
         group.add_argument('--permission',
                         metavar='user',

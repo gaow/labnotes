@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from .style import HTML_STYLE, HTML_SYN
 from .base import *
-from .ordereddict import OrderedDict
+from collections import OrderedDict
 
 class Html(HtmlParser):
     def __init__(self, title, author, toc, filename, columns, long_ref = True, fig_path = ''):

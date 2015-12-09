@@ -7,7 +7,7 @@ import tempfile
 from .minted import minted
 from .style import btheme, HTML_INDEX
 from .doi import PaperList
-from .ordereddict import OrderedDict
+from collections import OrderedDict
 import codecs
 import stat
 
