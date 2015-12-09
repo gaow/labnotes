@@ -302,5 +302,5 @@ fi
             f.write(self.sty)
         with codecs.open(os.path.join(self.outdir, 'pygmentize'), 'w', encoding='UTF-8') as f:
             f.write(self.pygmentize)
-        os.chmod(os.path.join(self.outdir, 'pygmentize'), 0755)
+        os.chmod(os.path.join(self.outdir, 'pygmentize'), 0o755)
         return os.path.join(self.outdir, 'pygmentize')

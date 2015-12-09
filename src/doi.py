@@ -5,7 +5,7 @@ try:
     from urllib.request import urlopen
 except:
     # python2
-    from urllib2 import urlopen
+    from urllib.request import urlopen
 from .ordereddict import OrderedDict 
 import json
 import sys, os
@@ -72,7 +72,7 @@ class PaperList:
 
     def getDoi(self):
         doi = set()
-        for key, value in self.db.items():
+        for key, value in list(self.db.items()):
             doi.add(key)
         return list(doi)
 
@@ -108,7 +108,7 @@ class PaperList:
             try:
                 info = info['year']
             except:
-                info = [x['year'] for x in info if 'year' in x.keys()][0]
+                info = [x['year'] for x in info if 'year' in list(x.keys())][0]
         except:
             info = ''
         return info
@@ -168,4 +168,4 @@ class PapersDB:
         cur.execute(self.create_query)
         cur.executemany(self.insert_query, data)
         writer.commit()
-        print("\n".join(writer.iterdump()))
+        print(("\n".join(writer.iterdump())))

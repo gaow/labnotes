@@ -125,9 +125,9 @@ class TexParser:
                 k = re.sub('\W', '', m.group('a'))
                 if not k:
                     self.quit("Invalid citation keyword for reference item '{0}'.".format(m.group('b')))
-                if k in self.bib.keys():
+                if k in list(self.bib.keys()):
                     if self.bib[k] != [m.group('a'), m.group('b')]:
-                        k += str(len(self.bib.keys()))
+                        k += str(len(list(self.bib.keys())))
                 self.bib[k] = [m.group('a'), m.group('b')]
                 #line = line.replace(m.group(0), '\\cite[%s]{%s}' % (m.group('a'), k))
                 line = line.replace(m.group(0), '{\\color{MidnightBlue}%s}~\\cite{%s}' % (m.group('a'), k))
@@ -267,7 +267,7 @@ class TexParser:
             text = ''.join([item for idx, item in enumerate(text) if idx in idxes])
         elif mode == 'release':
             mapping = rule
-            for k, item in mapping.items():
+            for k, item in list(mapping.items()):
                 text = text.replace(k, item)
         elif mode == 'remove':
             text = re.sub(r'{0}|{1}'.format('BEGIN' + self.blockph, 'END' + self.blockph), '', text)
@@ -534,9 +534,9 @@ class HtmlParser(TexParser):
                 k = re.sub('\W', '', m.group('a'))
                 if not k:
                     self.quit("Invalid citation keyword for reference item '{0}'.".format(m.group('b')))
-                if k in self.bib.keys():
+                if k in list(self.bib.keys()):
                     if self.bib[k] != [m.group('a'), m.group('b')]:
-                        k += str(len(self.bib.keys()))
+                        k += str(len(list(self.bib.keys())))
                 self.bib[k] = [m.group('a'), self._parseUrl(m.group('b'))]
                 line = line.replace(m.group(0), '<a href="#footnote-{0}">{1}</a>'.format(k, m.group('a')))
         # standalone url
