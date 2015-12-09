@@ -1,4 +1,3 @@
-from builtins import range
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from .style import HTML_STYLE, HTML_SYN
@@ -195,5 +194,5 @@ class Html(HtmlParser):
             return ''
         head = '<b>Contents:</b><ul id="toc">\n'
         tail = '\n</ul>'
-        body = '\n'.join(['<li><span style="{0}">{1}</span><a href="#{2}">{3}</a></li>'.format(self._isize(k), self._csize(v,k),k,'&clubs;') for k, v in list(dtoc.items())])
+        body = '\n'.join(['<li><span style="{0}">{1}</span><a href="#{2}">{3}</a></li>'.format(self._isize(k), self._csize(v,k),k,'&clubs;') for k, v in dtoc.items()])
         return '<div class="frame">' + head + body + tail + '</div>'

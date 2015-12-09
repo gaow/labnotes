@@ -1,5 +1,3 @@
-from builtins import range
-from builtins import object
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os, sys, re
@@ -218,7 +216,7 @@ def indexhtml(fnames):
     #
     #otext = '\n'.join(['<li><span>{0}{1}</span>{4}<a href="{2}">{3}</a></li>'.format(v[0].replace('_', ' '), '&nbsp;&nbsp;<em><small>by {}</small></em>'.format(v[1]) if v[1] else '', k, '[view]', '<a href="{}">{}</a>'.format(k.replace('.html', '.pdf'), '&nbsp;&nbsp;[download]') if os.path.exists(k.replace('.html', '.pdf')) else '') for k, v in d.items()])
     otext = ''
-    for k, v in list(d.items()):
+    for k, v in d.items():
         if not k.startswith(','):
             otext += '<li><span>{0}{1}</span>{4}<a href="{2}">{3}</a></li>'.format(re.sub(r'(\s*)-(\s*)', ' - ', v[0].replace('_', ' ')), '&nbsp;&nbsp;<em><sub>Last edited: {}</sub></em>'.format(v[1]) if v[1] else '', k, '[view]', '<a href="{}">{}</a>'.format(k.replace('.html', '.pdf'), '&nbsp;&nbsp;[download]') if os.path.exists(k.replace('.html', '.pdf')) else '') + '\n'
         else:
@@ -241,7 +239,7 @@ def getPaper(doi, longref):
     finder.dump()
     # format citation
     info = finder.extract(doi)
-    for k, value in list(info.items()):
+    for k, value in info.items():
         if len(info[k]) == 0:
             return doi
     if longref:
@@ -260,7 +258,7 @@ def getPaper(doi, longref):
     else:
         return info
 
-class cd(object):
+class cd:
     """Context manager for changing the current working directory"""
     def __init__(self, newPath):
         self.newPath = newPath

@@ -1,4 +1,3 @@
-from builtins import range
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from .base import *
@@ -220,7 +219,7 @@ class Beamer(TexParser):
                     if idx in range(item[0], item[1]):
                         self.text[idx] = ''
                         break
-        self.text = [_f for _f in self.text if _f]
+        self.text = filter(None, self.text)
         otext = '{0}'.format(MODE[self.mode]) + \
                 CONFIG + '{0}'.format(THEME[self.theme.lower()]) + TITLE
         if self.title or self.author:

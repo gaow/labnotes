@@ -1,9 +1,8 @@
-from builtins import object
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os, codecs, re
 from time import strftime, localtime
-class btheme(object):
+class btheme:
     def __init__(self, outdir):
         self.outdir = outdir
         self.beamercolorthemericeowl = '''
@@ -1566,7 +1565,7 @@ hr {
 'tail':'</ul><h4>Last updated: %s</h4></div></body></html>' % strftime("%a %d %b %Y %H:%M:%S", localtime())
         }
 
-class TigerJournal(object):
+class TigerJournal:
         def __init__(self, url = 'http://tigerwang.org/uploads/', title = 'Journal of Gao T. Wang', logo = 'logo.png', background = 'bg.jpg'):
             self.title = title
             self.logo = url + logo

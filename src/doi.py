@@ -1,15 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import print_function
-from future import standard_library
-standard_library.install_aliases()
-from builtins import object
 try:
     # python3
     from urllib.request import urlopen
 except:
     # python2
-    from urllib.request import urlopen
+    from urllib2 import urlopen
 from .ordereddict import OrderedDict 
 import json
 import sys, os
@@ -39,7 +35,7 @@ def doi2papers(doi):
         raise ValueError('{0}'.format(msg))
     return paper
 
-class PaperList(object):
+class PaperList:
     def __init__(self, db, ext = '.json'):
         self.db_ext = ext
         self.filename = db if db.endswith(self.db_ext) else db + self.db_ext
@@ -76,7 +72,7 @@ class PaperList(object):
 
     def getDoi(self):
         doi = set()
-        for key, value in list(self.db.items()):
+        for key, value in self.db.items():
             doi.add(key)
         return list(doi)
 
@@ -112,7 +108,7 @@ class PaperList(object):
             try:
                 info = info['year']
             except:
-                info = [x['year'] for x in info if 'year' in list(x.keys())][0]
+                info = [x['year'] for x in info if 'year' in x.keys()][0]
         except:
             info = ''
         return info
@@ -152,7 +148,7 @@ class PaperList(object):
             with open(self.filename, 'w') as f:
                 f.write(json.dumps(self.db))
 
-class PapersDB(object):
+class PapersDB:
     def __init__(self, tblname, fields):
         self.name = tblname
         self.fields = [(x, 'VARCHAR (255)') for x in fields]
