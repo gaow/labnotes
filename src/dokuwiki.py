@@ -160,7 +160,7 @@ class Dokuwiki(HtmlParser):
     def m_addVersionInfo(self, version_info):
         if version_info is None:
             return
-        text = ['#{table', 'Property\tValue']
+        text = ['#-----', '#{table', 'Page Info\t ']
         res = []
         if 'time' in version_info:
             res.append(['Last modified', 'date'])
@@ -168,7 +168,7 @@ class Dokuwiki(HtmlParser):
             res.append(['Git version', 'git rev-parse HEAD'])
         for value in res:
             try:
-                value[1] = Popen(shlex.split(value[1]), stdout=PIPE).communicate()[0].decode('utf-8')
+                value[1] = Popen(shlex.split(value[1]), stdout=PIPE).communicate()[0].decode('utf-8').strip()
             except:
                 value[1] = '-'
             text.append('\t'.join(value))
