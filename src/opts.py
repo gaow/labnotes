@@ -60,7 +60,7 @@ def dokuwiki(args):
     if args.compact_toc:
         toc = 1
     htm = Dokuwiki(args.title, args.author, args.filename, toc,
-                   args.showall, args.prefix, long_ref = args.long_ref)
+                   args.showall, args.prefix, long_ref = args.long_ref, version_info = args.stamps)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output, suffix='.txt')
     if args.filename == fname + '.txt':
@@ -306,6 +306,8 @@ class LogOpts:
                         action='store_true',
                         default = '',
                         help='''generate compact table of contents (will override --toc)''')
+        parser.add_argument('--stamps', nargs = "*", choices = ['time', 'git-version'],
+                            help = '''Additional version information to be appended to wiki page''')
         # group = parser.add_mutually_exclusive_group()
         group = parser
         group.add_argument('--permission',

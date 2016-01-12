@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from .base import *
+from subprocess import PIPE, Popen
+import shlex
+
 class Dokuwiki(HtmlParser):
-    def __init__(self, title, author, fname, toc, show_all, img_path, long_ref = True):
+    def __init__(self, title, author, fname, toc, show_all, img_path,
+                 long_ref = True, version_info = None):
         HtmlParser.__init__(self, title, author, fname, header=True, long_ref = long_ref)
         self.toc = toc
         self.show_all = show_all
@@ -12,6 +16,7 @@ class Dokuwiki(HtmlParser):
         else:
             self.img_path = img_path
         self.wrap_width = -1
+        self.m_addVersionInfo(version_info)
         self.text = self.m_parseBlocks(self.text)
         self.m_parseComments()
         self.m_parseText()
@@ -151,6 +156,24 @@ class Dokuwiki(HtmlParser):
         text = self._holdblockplace(text, mode = 'release', rule = mapping)[0]
         text = '<box 80% round {0}|**__{1}__**>\n{2}\n</box>'.format(self._alertcolor(k), k.lower().capitalize() if label is None else label, text)
         return text
+
+    def m_addVersionInfo(self, version_info):
+        if version_info is None:
+            return
+        text = ['#{table', 'Property\tValue']
+        res = []
+        if 'time' in version_info:
+            res.append(['Last modified', 'date'])
+        if 'git-version' in version_info:
+            res.append(['Git version', 'git rev-parse HEAD'])
+        for value in res:
+            try:
+                value[1] = Popen(shlex.split(value[1]), stdout=PIPE).communicate()[0].decode('utf-8')
+            except:
+                value[1] = '-'
+            text.append('\t'.join(value))
+        text.append('#}')
+        self.text.extend(text)
 
     def m_parseText(self):
         skip = []
