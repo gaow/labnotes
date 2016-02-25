@@ -46,13 +46,17 @@ class MarkDown(HtmlParser):
         # single/double quotes translated from latex syntax
         line = re.sub(r"``(.*?)''", r'"\1"', line)
         line = re.sub(r"`(.*?)'", r"'\1'", line)
-        pattern = re.compile(r'@@(.*?)@@')
-        for m in re.finditer(pattern, line):
-            line = line.replace(m.group(0), "`{0}`".format(m.group(1)))
         # adjust __xx__
         pattern = re.compile(r'__(.*?)__')
         for m in re.finditer(pattern, line):
             line = line.replace(m.group(0), "\\__{0}__".format(m.group(1)))
+        pattern = re.compile(r'@@(.*?)@@')
+        for m in re.finditer(pattern, line):
+            # FIXME: do not understand why some __ was converted to \\__
+            # Use regex to remove all \ to solve it for now ...
+            # if '\\__' in m.group(1):
+            #     print(m.group(1))
+            line = line.replace(m.group(0), "`{0}`".format(re.sub(r'(\\)+__', '__', m.group(1))))
         # footnote and link
         pattern = re.compile('\[(\s*)(?P<a>.+?)(\s*)\|(\s*)(?P<b>.+?)(\s*)\]')
         for m in re.finditer(pattern, line):
