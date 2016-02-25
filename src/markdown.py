@@ -46,10 +46,13 @@ class MarkDown(HtmlParser):
         # single/double quotes translated from latex syntax
         line = re.sub(r"``(.*?)''", r'"\1"', line)
         line = re.sub(r"`(.*?)'", r"'\1'", line)
-        # Adjust -- in texttt such that it is not translated into a single slash
         pattern = re.compile(r'@@(.*?)@@')
         for m in re.finditer(pattern, line):
             line = line.replace(m.group(0), "`{0}`".format(m.group(1)))
+        # adjust __xx__
+        pattern = re.compile(r'__(.*?)__')
+        for m in re.finditer(pattern, line):
+            line = line.replace(m.group(0), "\\__{0}__".format(m.group(1)))
         # footnote and link
         pattern = re.compile('\[(\s*)(?P<a>.+?)(\s*)\|(\s*)(?P<b>.+?)(\s*)\]')
         for m in re.finditer(pattern, line):
