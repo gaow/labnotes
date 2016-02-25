@@ -90,7 +90,18 @@ def markdown(args):
     toc = None
     htm = MarkDown(args.title, args.author, args.filename, toc, args.prefix, long_ref = args.long_ref)
     lite = 1 if args.lite else 0
-    fname = getfname(args.filename, args.output, suffix='.md')
+    out = os.path.split(args.output)
+    if out[-1] == '-':
+        # Github wiki style output, will use first line (title section) of the document as title
+        for idx, item in enumerate(htm.text):
+            if not item:
+                continue
+            else:
+                fname = os.path.join(os.path.join(*out[:-1]), item.replace('#', '').strip().replace(':', '').replace(' ', '-'))
+                htm.text = htm.text[(idx + 1):]
+                break
+    else:
+        fname = getfname(args.filename, args.output, suffix='.md')
     if args.filename == fname + '.md':
         raise ValueError('Cannot write output as "{0}": name conflict with source file. Please rename either of them')
     with codecs.open(fname + '.md', 'w', encoding='UTF-8', errors='ignore') as f:

@@ -315,12 +315,12 @@ class TexParser:
                     lines[idx] = '<p><center><img src="{0}" alt="{1}" width="{2}%" /></center></p>'.format(fig, fname, int(width * 100))
             elif tag.endswith("wiki"):
                 if tag == 'dokuwiki':
-                    # dokuwiki style 
+                    # dokuwiki style
                     if extension == 'pdf':
                         lines[idx] = "[[{0}|{1}]]\n".format(os.path.join(remote_path, fname), 'Download Image "{0}"'.format(fname))
                     else:
                         sep = ':' if not '://' in remote_path else '/'
-                        lines[idx] = '{{%s%s%s?%s}}' % (remote_path, sep, fname, width) 
+                        lines[idx] = '{{%s%s%s?%s}}' % (remote_path, sep, fname, width)
                 if tag == 'pmwiki':
                     if extension == 'pdf':
                         lines[idx] = "[[{0}|{1}]]\n".format(os.path.join(remote_path, fname), 'Download Image "{0}"'.format(fname))
@@ -479,13 +479,13 @@ class HtmlParser(TexParser):
         pattern = re.compile('@(\S*?)@')
         for m in re.finditer(pattern, line):
             prefix, address = self._parseUrlPrefix(m.group(1))
-            line = line.replace(m.group(0), '<a href="{0}{1}">{1}</a>'.format(prefix, address, address))      
+            line = line.replace(m.group(0), '<a href="{0}{1}">{1}</a>'.format(prefix, address, address))
         return line
 
     def _parsecmd(self, line, idx):
         return '<pre><code class = "nohighlight">{}</code></pre>\n'.\
           format(wraptxt(line, '\\', int(self.wrap_width)))
-        
+
     def m_recode(self, line):
         if not line:
             return ''
@@ -592,7 +592,7 @@ class HtmlParser(TexParser):
             return '<HTML>\n' + text + '\n</HTML>\n'
         else:
             return text
-        
+
     def m_blockizeTable(self, text, k, label = None):
         self._checknest(text)
         table = [[self.m_recode(iitem) for iitem in multispace2tab(item).split('\t')] for item in text.split('\n') if item]
@@ -629,10 +629,10 @@ class HtmlParser(TexParser):
         else:
             return text
 
-        
+
     def m_blockizeIn(self, text, k, label = None):
-        if text.startswith("file:///"): text = gettxtfromfile(text) 
-        if text.startswith("output:///"): text = gettxtfromcmd(text) 
+        if text.startswith("file:///"): text = gettxtfromfile(text)
+        if text.startswith("output:///"): text = gettxtfromcmd(text)
         if k.lower() == 'raw' or k.lower() == '$': return text
         self._checknest(text)
         text = wraptxt(text, '', int(self.wrap_width), rmblank = True,
@@ -645,7 +645,7 @@ class HtmlParser(TexParser):
             return text
 
     def m_blockizeOut(self, text, k, label = None):
-        if text.startswith("file:///"): text = gettxtfromfile(text) 
+        if text.startswith("file:///"): text = gettxtfromfile(text)
         if text.startswith("output:///"): text = gettxtfromcmd(text)
         self._checknest(text)
         nrow = len(text.split('\n'))
@@ -654,7 +654,7 @@ class HtmlParser(TexParser):
             return '<HTML>\n' + text + '\n</HTML>\n'
         else:
             return text
-        
+
     def m_blockizeAlert(self, text, k, label = None):
         self._checknest(text, kw = [r'id="wrapper"'])
         text = self._holdfigureplace(text)
