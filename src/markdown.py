@@ -101,7 +101,8 @@ class MarkDown(HtmlParser):
         return head + lines + tail
 
     def m_blockizeOut(self, text, k, label = None):
-        return self.m_blockizeIn(text, k = '', label = None)
+        k = label if label is not None else ''
+        return self.m_blockizeIn(text, k = k, label = None)
 
     def m_blockizeIn(self, text, k, label = None):
         if text.startswith("file:///"): text = gettxtfromfile(text)
