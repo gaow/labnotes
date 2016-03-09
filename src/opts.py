@@ -10,6 +10,7 @@ from .html import Html
 from .dokuwiki import Dokuwiki
 from .pmwiki import Pmwiki
 from .markdown import MarkDown
+from .markdown_toclify import markdown_toclify
 from . import VERSION
 
 
@@ -106,6 +107,8 @@ def markdown(args):
         raise ValueError('Cannot write output as "{0}": name conflict with source file. Please rename either of them')
     with codecs.open(fname + '.md', 'w', encoding='UTF-8', errors='ignore') as f:
         f.writelines(htm.get(lite))
+    if args.toc:
+        markdown_toclify(input_file = fname + '.md', output_file = fname + '.md', github = True, back_to_top = True)
     return
 
 def admin(args):
