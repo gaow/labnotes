@@ -114,13 +114,15 @@ def tag_and_collect(lines, id_tag=True, back_links=False, exclude_h=None):
     """
     out_contents = []
     headlines = []
+    inside_block = False
     for l in lines:
         saw_headline = False
 
         orig_len = len(l)
         # l = l.lstrip()
-
-        if l.startswith(('# ', '## ', '### ', '#### ', '##### ', '###### ')):
+        if l.startswith('```'):
+            inside_block = not inside_block
+        if not inside_block and l.startswith(('# ', '## ', '### ', '#### ', '##### ', '###### ')):
 
             # comply with new markdown standards
 
