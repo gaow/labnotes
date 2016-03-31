@@ -21,7 +21,7 @@ class btheme:
 
 \\definecolor{riceblue}{RGB}{0,36,106}
 \\definecolor{ricegray}{RGB}{94,96,98}
-% Add UChicago definition, 2015 
+% Add UChicago definition, 2015
 \\definecolor{ucMaroon}{RGB}{128,0,0}
 \\definecolor{ucDarkGray}{RGB}{118,118,118}
 \\definecolor{ucLightGray}{RGB}{214,214,206}
@@ -279,7 +279,7 @@ class btheme:
 {%
   \\leavevmode%
   \\hbox{\\begin{beamercolorbox}[wd=.5\\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm]{author in head/foot}%
-   \\ifbeamer@riceb {\\footnotesize \\trjnfamily RICE} \\fi \\hfill 
+   \\ifbeamer@riceb {\\footnotesize \\trjnfamily RICE} \\fi \\hfill
     \\usebeamerfont{author in head/foot} \\hfill\\insertshortauthor
   \\end{beamercolorbox}%
   \\begin{beamercolorbox}[wd=.5\\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm plus1fil]{title in head/foot}%
@@ -294,7 +294,7 @@ class btheme:
 {%
   \\leavevmode%
 %  \\hbox{\\begin{beamercolorbox}[wd=.5\\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm plus1fill,rightskip=.3cm]{author in head/foot}%
-  \\hbox{\\begin{beamercolorbox}[wd=.5\\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm]{author in head/foot}   \\ifbeamer@riceb {\\footnotesize \\trjnfamily RICE} \\fi \\hfill 
+  \\hbox{\\begin{beamercolorbox}[wd=.5\\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm]{author in head/foot}   \\ifbeamer@riceb {\\footnotesize \\trjnfamily RICE} \\fi \\hfill
     \\usebeamerfont{author in head/foot}\\insertshortauthor
   \\end{beamercolorbox}%
   \\begin{beamercolorbox}[wd=.5\\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm plus1fil]{title in head/foot}%
@@ -669,6 +669,7 @@ CONFIG = '''
 %%%%%%%%%%%%%%%%%%
 \\usepackage{amsmath}
 \\usepackage{amssymb}
+\\usepackage{mathtools}
 \\usepackage{url}
 %% \\usepackage{mathpazo}
 %% \\usepackage{mathptmx}
@@ -694,12 +695,12 @@ CONFIG = '''
 \\usepackage{subfigure}
 \\usepackage{multicol}
 \\usepackage{multirow}
-\\usepackage[multidot]{grffile}  
+\\usepackage[multidot]{grffile}
 \\usepackage[numbered]{bookmark}
 %%Make sure it comes last of your loaded packages
 \\usepackage{hyperref}
 %%%%%%%%%%%%%%%%%%
-%%%% 
+%%%%
 %%%%%%%%%%%%%%%%%%
 \\DeclareMathOperator*{\\dif}{\\mathrm{d}}
 \\DeclareMathOperator*{\\diff}{\\,\\dif}
@@ -935,6 +936,7 @@ THANK = '''
 DOC_PACKAGES = '''
 \\usepackage[text={6.5in,8.9in}, marginparwidth=0.5in]{geometry}
 \\usepackage{amsmath}
+\\usepackage{mathtools}
 \\usepackage{booktabs}
 \\usepackage{amssymb}
 \\usepackage{amsthm}
@@ -957,7 +959,7 @@ DOC_PACKAGES = '''
 \\usepackage{longtable}
 \\usepackage{seqsplit}
 \\usepackage{subfigure}
-\\usepackage[multidot]{grffile}  
+\\usepackage[multidot]{grffile}
 \\usepackage{float}
 \\usepackage{varwidth}
 \\usepackage[tikz]{bclogo}
@@ -1006,7 +1008,7 @@ DOC_CONFIG = '''
 '''
 ######################################################
 
-HTML_STYLE = r''' 
+HTML_STYLE = r'''
 @font-face {
   font-family: 'PT Sans';
   font-style: normal;
@@ -1342,7 +1344,7 @@ kbd
 }
 '''
 
-HTML_STYLE_LIGHT = r''' 
+HTML_STYLE_LIGHT = r'''
 @font-face {
   font-family: 'PT Sans';
   font-style: normal;
@@ -1570,8 +1572,8 @@ class TigerJournal:
             self.title = title
             self.logo = url + logo
             self.bg = url + background
-            
-        def GetMeta(self, title): 
+
+        def GetMeta(self, title):
             return '''
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -1691,7 +1693,7 @@ class TigerJournal:
 
 
         def GetRightColumn(self, contents):
-                '''input format [(summary, date, text)], properly ordered'''    
+                '''input format [(summary, date, text)], properly ordered'''
                 start = '<td><!--Document Contents-->\n'
                 end = '''
     </td>
