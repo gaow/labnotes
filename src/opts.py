@@ -92,6 +92,7 @@ def markdown(args):
     htm = MarkDown(args.title, args.author, args.filename, toc, args.prefix, long_ref = args.long_ref)
     lite = 1 if args.lite else 0
     out = os.path.split(args.output)
+    fname = None
     if out[-1] == '-':
         # Github wiki style output, will use first line (title section) of the document as title
         for idx, item in enumerate(htm.text):
@@ -103,6 +104,8 @@ def markdown(args):
                 break
     else:
         fname = getfname(args.filename, args.output, suffix='.md')
+    if fname is None:
+        return
     if args.filename == fname + '.md':
         raise ValueError('Cannot write output as "{0}": name conflict with source file. Please rename either of them')
     with codecs.open(fname + '.md', 'w', encoding='UTF-8', errors='ignore') as f:
