@@ -6,7 +6,7 @@ try:
 except:
     # python2
     from urllib.request import urlopen
-from collections import OrderedDict 
+from collections import OrderedDict
 import json
 import sys, os
 from time import sleep
@@ -18,7 +18,7 @@ except ImportError:
 
 def doi2papers(doi):
     '''search a paper via doi in crossref database; return a json object'''
-    url = "http://api.labs.crossref.org/{0}.json".format(doi)
+    url = "http://api.crossref.org/works/{0}".format(doi)
     count = 0
     limit = 5
     msg = ''
@@ -101,7 +101,7 @@ class PaperList:
         except:
             info = ''
         return info
-    
+
     def getDate(self, paper):
         try:
             info = paper['doi_record']['crossref']['journal']['journal_article']['publication_date']
@@ -119,7 +119,7 @@ class PaperList:
         except:
             info = '-'
         return info
-        
+
     def getInfo(self, paper, info):
         text = eval('self.get{0}'.format(info.capitalize()))(paper)
         if sys.version_info[0] == 2:
