@@ -228,7 +228,7 @@ def getPaper(doi, longref):
     datadir = os.path.expanduser('~/.tigernotes')
     if not os.path.isdir(datadir):
         os.makedirs(datadir)
-    database = os.path.join(datadir, 'references.json')
+    database = os.path.join(datadir, 'references')
     finder = PaperList(database)
     sys.stderr.write('Searching for {0} ...\r'.format(doi))
     sys.stderr.flush()

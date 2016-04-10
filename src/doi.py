@@ -7,7 +7,7 @@ except:
     # python2
     from urllib.request import urlopen
 from collections import OrderedDict
-import json
+import yaml, json
 import sys, os
 from time import sleep
 try:
@@ -36,7 +36,7 @@ def doi2papers(doi):
     return paper
 
 class PaperList:
-    def __init__(self, db, ext = '.json'):
+    def __init__(self, db, ext = '.yml'):
         self.db_ext = ext
         self.filename = db if db.endswith(self.db_ext) else db + self.db_ext
         self.db = self.loadDB(self.filename)
@@ -45,12 +45,12 @@ class PaperList:
     def loadDB(self, fn):
         '''load data if database file exists, otherwise create a new one'''
         try:
-            return json.load(open(fn))
+            return yaml.load(open(fn))
         except:
-            return json.loads(json.dumps({}))
+            return {}
 
     def addPaper(self, doi, paper = None, overwrite = False):
-        ''' add a new paper (json format) into paperlist, return a pair of boolean:
+        ''' add a new paper (dictionary) into paperlist, return a pair of boolean:
         first to say if sucess to add; second to say if find a existing one'''
         if doi in self.getDoi():
             if overwrite:
@@ -78,8 +78,8 @@ class PaperList:
 
     def getAuthors(self, paper):
         try:
-            info = paper['doi_record']['crossref']['journal']['journal_article']['contributors']
-            info = [x['given_name'] + ' ' + x['surname'] for x in info if x['contributor_role'] == 'author']
+            info = paper['message']['author']
+            info = [x['given'] + ' ' + x['family'] for x in info]
             if len(info) == 1:
                 info = info[0]
             else:
@@ -90,32 +90,28 @@ class PaperList:
 
     def getTitle(self, paper):
         try:
-            info = paper['doi_record']['crossref']['journal']['journal_article']['titles']['title']
+            info = paper['message']['title'][0]
         except:
             info = ''
         return info
 
     def getJournal(self, paper):
         try:
-            info = paper['doi_record']['crossref']['journal']['journal_metadata']['full_title']
+            info = paper['message']['container-title'][0]
         except:
             info = ''
         return info
 
     def getDate(self, paper):
         try:
-            info = paper['doi_record']['crossref']['journal']['journal_article']['publication_date']
-            try:
-                info = info['year']
-            except:
-                info = [x['year'] for x in info if 'year' in list(x.keys())][0]
+            info = str(paper['message']['issued']['date-parts'][0][0])
         except:
             info = ''
         return info
 
     def getLink(self, paper):
         try:
-            info = paper['doi_record']['crossref']['journal']['journal_article']['doi_data']['resource']
+            info = paper['message']['URL']
         except:
             info = '-'
         return info
@@ -146,7 +142,7 @@ class PaperList:
     def dump(self):
         if self.updated == True:
             with open(self.filename, 'w') as f:
-                f.write(json.dumps(self.db))
+                f.write(yaml.dump(self.db))
 
 class PapersDB:
     def __init__(self, tblname, fields):
