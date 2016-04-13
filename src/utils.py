@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 import os, sys, re
 import glob, shutil, shlex
+import yaml
+from io import StringIO
 from subprocess import PIPE, Popen
 import tempfile
 from .minted import minted
@@ -11,7 +13,37 @@ from collections import OrderedDict
 import codecs
 import stat
 
-# functions
+class Environment:
+    def __init__(self):
+        self.get_tmpdir()
+
+    def get_tmpdir(self):
+        self.tmp_dir = None
+        pattern = re.compile(r'tigernotes_cache_*(.*)')
+        for fn in os.listdir(tempfile.gettempdir()):
+            if pattern.match(fn):
+                self.tmp_dir = os.path.join(tempfile.gettempdir(), fn)
+                break
+        if self.tmp_dir is None:
+            self.reset_tmpdir()
+
+    def reset_tmpdir(self):
+        if self.tmp_dir:
+            shutil.rmtree(self.tmp_dir)
+            sys.stderr.write('INFO: cache folder {0} is removed\n'.format(self.tmp_dir))
+            self.tmp_dir = tempfile.mkdtemp(prefix='tigernotes_cache_')
+        else:
+            self.tmp_dir = tempfile.mkdtemp(prefix='tigernotes_cache_')
+        if (not os.access(self.tmp_dir, os.R_OK)) or \
+          (not os.access(self.tmp_dir, os.W_OK)) or \
+          (os.stat(self.tmp_dir).st_mode & stat.S_ISVTX == 512):
+                home_dir = os.getenv("HOME")
+                self.tmp_dir = os.path.join(home_dir, '.tigernotes/cache')
+                if not os.path.exists(self.tmp_dir):
+                        os.makedirs(self.tmp_dir)
+
+env = Environment()
+
 def getfname(innames, outname, suffix='.pdf'):
     if not outname:
         fname = '-'.join([os.path.splitext(name)[0] for name in innames])
@@ -24,7 +56,7 @@ def getfname(innames, outname, suffix='.pdf'):
         if directory is not '':
             if not os.path.exists(directory):
                 os.makedirs(directory)
-    return fname 
+    return fname
 
 def wraptxt(line, sep, by, rmblank = True, prefix = ''):
     # will also remove blank lines, if any
@@ -107,7 +139,6 @@ def gettxtfromcmd(text):
             flist[idx] = Popen(shlex.split(item[10:]), stdout=PIPE).communicate()[0].decode('utf-8')
     return '\n'.join(flist)
 
-
 def pdflatex(fname, text, vanilla=False, beamer_institute = None):
     def empty(directory, name):
         for item in ['out','toc','aux','log','nav','snm','vrb']:
@@ -116,33 +147,17 @@ def pdflatex(fname, text, vanilla=False, beamer_institute = None):
     # setup temp dir
     dest_dir = os.path.dirname(os.path.abspath(os.path.expanduser(fname)))
     fname = os.path.split(fname)[-1]
-    tmp_dir = None
-    pattern = re.compile(r'tigernotes_cache_*(.*)')
-    for fn in os.listdir(tempfile.gettempdir()):
-        if pattern.match(fn):
-            tmp_dir = os.path.join(tempfile.gettempdir(), fn)
-            break
-    if tmp_dir and vanilla:
-        shutil.rmtree(tmp_dir)
-        sys.stderr.write('INFO: cache folder {0} is removed\n'.format(tmp_dir))
-        tmp_dir = tempfile.mkdtemp(prefix='tigernotes_cache_')
-    if not tmp_dir:
-        tmp_dir = tempfile.mkdtemp(prefix='tigernotes_cache_')
-    if (not os.access(tmp_dir, os.R_OK)) or (not os.access(tmp_dir, os.W_OK)) or (os.stat(tmp_dir).st_mode & stat.S_ISVTX == 512):
-            home_dir = os.getenv("HOME")
-            tmp_dir = os.path.join(home_dir, '.tigernotes/cache')
-            if not os.path.exists(tmp_dir): os.makedirs(tmp_dir)
     cwd = os.getcwd()
-    os.chdir(tmp_dir)
+    os.chdir(env.tmp_dir)
     # write tex file
     with codecs.open(fname + '.tex', 'w', encoding='utf-8') as f:
         f.writelines(text)
     # write sty file
     if beamer_institute is None:
-        m = minted(tmp_dir)
+        m = minted(env.tmp_dir)
         m.put()
     else:
-        m = btheme(tmp_dir)
+        m = btheme(env.tmp_dir)
         m.put(beamer_institute)
     # compile
     sys.stderr.write('Building {0} "{1}" ...\n'.format('document' if beamer_institute is None else 'slides', fname + '.pdf'))
@@ -157,7 +172,7 @@ def pdflatex(fname, text, vanilla=False, beamer_institute = None):
                     f.writelines(out.decode(sys.getdefaultencoding()) + error.decode(sys.getdefaultencoding()))
                 except:
                     f.writelines("Error running: " + " ".join(cmd) + '\n')
-            empty(tmp_dir, fname)
+            empty(env.tmp_dir, fname)
             sys.stderr.write('''
                     * * *
                     * Oops! One of the following problems occurred:
@@ -174,8 +189,9 @@ def pdflatex(fname, text, vanilla=False, beamer_institute = None):
         if visit == 1:
             sys.stderr.write('Still working ...\n')
         else:
-            shutil.move(os.path.join(tmp_dir, (fname + '.pdf')), os.path.join(dest_dir, fname + '.pdf'))
-            empty(tmp_dir, fname)
+            shutil.move(os.path.join(env.tmp_dir, (fname + '.pdf')),
+                        os.path.join(dest_dir, fname + '.pdf'))
+            empty(env.tmp_dir, fname)
             ferr = os.path.join(cwd, '{0}-ERROR.txt'.format(fname))
             if os.path.exists(ferr): os.remove(ferr)
     sys.stderr.write('Done!\n')
@@ -269,3 +285,12 @@ class cd:
 
     def __exit__(self, etype, value, traceback):
         os.chdir(self.savedPath)
+
+def dict2str(value, replace = []):
+    out = StringIO()
+    yaml.dump(value, out, default_flow_style=False)
+    res = out.getvalue()
+    out.close()
+    for item in replace:
+        res = res.replace(item[0], item[1])
+    return res

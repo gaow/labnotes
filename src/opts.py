@@ -11,10 +11,10 @@ from .dokuwiki import Dokuwiki
 from .pmwiki import Pmwiki
 from .markdown import MarkDown
 from .markdown_toclify import markdown_toclify
+from .bookdown import prepare_bookdown
 from . import VERSION
 
-
-def doc(args):
+def doc(args, unknown_args):
     tex = Tex(args.title, args.author, args.date, args.toc, args.footnote, args.font, args.font_size,
                    args.filename, long_ref = args.long_ref, no_num = args.no_section_number,
                    no_page = args.no_page_number, no_ref = False, twocols = args.twocols,
@@ -24,7 +24,7 @@ def doc(args):
     pdflatex(fname, tex.get(lite), vanilla=args.vanilla)
     return
 
-def slides(args):
+def slides(args, unknown_args):
     tex = Beamer(args.title, args.author, args.date, args.institute,
                       args.toc, args.stoc, args.mode, args.theme,
                       args.thank, args.filename, long_ref = args.long_ref)
@@ -34,7 +34,7 @@ def slides(args):
              beamer_institute = args.color)
     return
 
-def html(args):
+def html(args, unknown_args):
     htm = Html(args.title, args.author, args.toc,
                args.filename, args.columns,
                long_ref = args.long_ref, fig_path = args.figure_path)
@@ -54,7 +54,7 @@ def html(args):
     #         sys.stderr.write("WARNING: font file 'PTSans.woff' might be missing (http://www.google.com/webfonts/specimen/PT+Sans)\n")
     return
 
-def dokuwiki(args):
+def dokuwiki(args, unknown_args):
     toc = 0
     if args.toc:
         toc = 2
@@ -77,7 +77,7 @@ def dokuwiki(args):
             f.write('\n</ifauth>')
     return
 
-def pmwiki(args):
+def pmwiki(args, unknown_args):
     htm = Pmwiki(args.title, args.author, args.filename, args.toc, args.prefix, long_ref = args.long_ref)
     lite = 1 if args.lite else 0
     fname = getfname(args.filename, args.output, suffix='.txt')
@@ -87,13 +87,13 @@ def pmwiki(args):
         f.writelines(htm.get(lite))
     return
 
-def markdown(args):
+def markdown(args, unknown_args):
     toc = None
     htm = MarkDown(args.title, args.author, args.filename, toc, args.prefix, long_ref = args.long_ref)
     lite = 1 if args.lite else 0
-    out = os.path.split(args.output)
+    out = os.path.split(args.output) if args.output else None
     fname = None
-    if out[-1] == '-':
+    if out and out[-1] == '-':
         # Github wiki style output, will use first line (title section) of the document as title
         for idx, item in enumerate(htm.text):
             if not item:
@@ -114,14 +114,18 @@ def markdown(args):
         markdown_toclify(input_file = fname + '.md', output_file = fname + '.md', github = True, back_to_top = True)
     return
 
-def admin(args):
-    if args.action == 'index_html':
+def admin(args, unknown_args):
+    if args.html:
         fname = 'index.html'
         if args.output:
             fname = getfname([], args.output, suffix='.html') + '.html'
-        otext = indexhtml([x for x in args.filename if x != fname])
+        otext = indexhtml([x for x in args.html if x != fname])
         with codecs.open(fname, 'w', encoding='UTF-8', errors='ignore') as f:
             f.writelines(otext)
+    if args.md:
+        prepare_bookdown(args.md, args.title, args.author, args.date,
+                         args.description, args.url, args.url_edit,
+                         args.repo, args.pdf, args.output)
     return
 
 class LogOpts:
@@ -130,7 +134,7 @@ class LogOpts:
         description = '''Compile formatted notes into various publishable formats''',
         prog = 'tigernotes',
         fromfile_prefix_chars = '@',
-        epilog = '''Copyright 2012 Gao Wang <ewanggao@gmail.com> GNU General Public License''')
+        epilog = '''Copyright 2012 Gao Wang <gaow@uchicago.edu> GNU General Public License''')
         self.master_parser.add_argument('--version', action='version', version='%(prog)s {0}'.format(VERSION))
         subparsers = self.master_parser.add_subparsers(dest = 'command-name')
         subparsers.required = True
@@ -170,11 +174,11 @@ class LogOpts:
         parser.set_defaults(func=admin)
 
     def run(self):
-        args = self.master_parser.parse_args()
+        args, unknown_args = self.master_parser.parse_known_args()
         # calling the associated functions
         # args.func(args)
         try:
-            args.func(args)
+            args.func(args, unknown_args)
         except Exception as e:
             raise
             sys.exit('Unexpected error occurred while processing {0}: {1}'.format('-'.join(args.filename), e))
@@ -210,7 +214,6 @@ class LogOpts:
 #        parser.add_argument('--no_reference',
 #                        action='store_true',
 #                        help='''do not include reference in the document''')
-
 
     def getDocArguments(self, parser):
         parser.add_argument('-d', '--date',
@@ -333,17 +336,49 @@ class LogOpts:
                         help='''authorized user name or group name of this page''')
         group.add_argument('--disqus', action = 'store_true', help = 'Add "disqus" comment section to page')
 
-
     def getAdminArguments(self, parser):
-        parser.add_argument('filename',
-                        metavar = 'FN',
-                        nargs = '+',
-                        help='''name of the input file(s)''')
-        parser.add_argument('-a', '--action',
-                        type=str,
-                        choices=['index_html'],
-                        help='''action to be applied to input files''')
+        group = parser.add_argument_group('Index HTML')
         parser.add_argument('-o', '--output',
                         metavar='name',
                         type=str,
-                        help='''name of output file''')
+                        help='''name of output file prefix''')
+        group.add_argument('--html',
+                        metavar = 'FN',
+                        nargs = '+',
+                        help='''name of the input file(s)''')
+        group = parser.add_argument_group('Prepare bookdown')
+        group.add_argument('--md',
+                        metavar = 'FN',
+                        nargs = '+',
+                        help='''name of the input file(s)''')
+        group.add_argument('-a', '--author',
+                        action='store',
+                        default = '',
+                        help='''author's name''')
+        group.add_argument('-t', '--title',
+                        action='store',
+                        default = '',
+                        help='''title of document''')
+        group.add_argument('-d', '--date',
+                        action='store',
+                        default = '',
+                        help='''date, leave empty for current date''')
+        group.add_argument('--description',
+                        action='store',
+                        default = '',
+                        help='''description, a message string or a file name''')
+        group.add_argument('--url',
+                        action='store',
+                        default = '',
+                        help='''URL of the website to publish''')
+        group.add_argument('--url-edit', dest = 'url_edit',
+                        action='store',
+                        default = '',
+                        help='''URL of the source to edit''')
+        group.add_argument('--repo',
+                        action='store',
+                        default = '',
+                        help='''github repo, if available''')
+        group.add_argument('--pdf',
+                        action='store_true',
+                        help='''generate PDF file''')

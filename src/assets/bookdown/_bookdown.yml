@@ -1,0 +1,8 @@
+#book_filename: bookdown
+chapter_name: ""
+repo: ""
+output_dir: _book
+clean: []
+rmd_files:
+  html: []
+  latex: []

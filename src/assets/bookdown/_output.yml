@@ -1,0 +1,35 @@
+title: "Lab Notes"
+author: "&copy; J. Doe"
+date: "`r Sys.Date()`"
+knit: "bookdown::render_book"
+documentclass: book
+bibliography: [~/.tigernotes/reference.bib]
+biblio-style: apalike
+link-citations: yes
+site: bookdown::bookdown_site
+description: "Labnotes bookdown template"
+url: "https://bookdown.org/"
+github-repo: ''
+# cover-image: ''
+bookdown::gitbook:
+  css: style.css
+  split_by: section
+  config:
+    toc:
+      collapse: subsection
+      before: <li><a href="./"> VALUE </a></li>
+      after:  <li> VALUE </li>
+    download: [pdf]
+    edit:
+      link: ""
+      text: "Edit"
+bookdown::html_chapters:
+  css: [style.css, toc.css]
+bookdown::pdf_book:
+  includes:
+    in_header: preamble.tex
+  keep_tex: yes
+  latex_engine: xelatex
+  citation_package: natbib
+bookdown::epub_book:
+  stylesheet: style.css

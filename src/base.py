@@ -326,8 +326,10 @@ class TexParser:
                         lines[idx] = "[[{0}|{1}]]\n".format(os.path.join(remote_path, fname), 'Download Image "{0}"'.format(fname))
                     else:
                         lines[idx] = '%center% Attach:%s' % (fname)
+            elif tag == 'markdown':
+                    lines[idx] = '![]({})'.format(os.path.join(remote_path, fname))
             else:
-                self.quit('Unknown tag for figure {0}'.format(tag))
+                self.quit('Unknown tag "{0}" for figures!'.format(tag))
         if tag == 'tex':
             if len(lines) > 1:
                 w_minipage = int(1.0 / (1.0 * len(lines)) * 90) / 100.0
