@@ -2,7 +2,7 @@ notes := example.notes
 slides := example.snotes
 PDF := latex1 latex2 beamer1
 MD := md1
-objects := $(addsuffix .pdf, $(PDF)) $(addsuffix .rmd, $(MD)) bookdown/index.html
+objects := $(addsuffix .pdf, $(PDF)) $(addsuffix .rmd, $(MD)) labnotes/index.html
 all: $(objects)
 
 latex1.pdf: $(notes)
@@ -20,8 +20,8 @@ beamer1.pdf: $(slides)
 md1.rmd: $(notes)
 	tigernotes markdown $(notes) -o md1 --suffix rmd
 
-bookdown/index.html:
-	tigernotes admin --md md1.rmd --pdf $(notes) -o bookdown
+labnotes/index.html:
+	tigernotes admin --md md1.rmd --pdf $(notes) -o labnotes
 
 clean:
 	rm -f $(objects)

@@ -6,8 +6,7 @@ if not version_info >= (3, 4, 0):
     sys.exit("This program requires Python 3.5")
 
 import yaml
-from distutils.core import setup
-from distutils.command.build_py import build_py
+from setuptools import setup
 REV = subprocess.check_output('git rev-list --count HEAD', shell = True).decode().strip()
 VERSION = '0.0.1'
 FULL_VERSION = '0.0.1-rev{}'.format(REV)
@@ -33,7 +32,7 @@ with open('src/__init__.py', 'w') as f:
 #
 setup(name = 'tigernotes',
     version = VERSION,
-    description = "tigernotes",
+    description = "Compile formatted notes into various publishable formats",
     author = 'Gao Wang',
     author_email = 'gaow@uchicago.edu',
     url = 'http://tigerwang.org/software/tigernotes',
@@ -55,7 +54,7 @@ setup(name = 'tigernotes',
         'libtigernotes.bookdown'
     ],
     scripts = ['src/tigernotes', 'src/tigerjournal'],
-    cmdclass = {'build_py': build_py },
     package_dir = {'libtigernotes': 'src'},
     packages = ['libtigernotes'],
+    install_requires = ['sos>=0.5.7']
     )

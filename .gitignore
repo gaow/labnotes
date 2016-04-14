@@ -1,0 +1,6 @@
+vignette/*.pdf
+vignette/*.rmd
+vignette/*.md
+vignette/.sos
+vignette/labnotes
+src/__init__.py
