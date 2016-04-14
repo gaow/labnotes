@@ -21,7 +21,9 @@ md1.rmd: $(notes)
 	tigernotes markdown $(notes) -o md1 --suffix rmd
 
 labnotes/index.html:
-	tigernotes admin --md md1.rmd --pdf $(notes) -o labnotes
+	tigernotes admin --md md1.rmd --pdf $(notes) -o labnotes \
+		-a "Gao T. Wang" -t "My Text Processor" --description \
+		"This is a tool that I built and use to manage pieces of notes since 2011. It compiles formatted notes into various types publishable documents."
 
 clean:
 	rm -f $(objects)

@@ -1,5 +1,5 @@
 title: "Lab Notes"
-author: "&copy; J. Doe"
+author: "J. Doe"
 date: "`r Sys.Date()`"
 knit: "bookdown::render_book"
 documentclass: book

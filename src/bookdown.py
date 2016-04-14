@@ -52,7 +52,7 @@ for (fmt in formats) {
 input: '%s'
 output: '%s/_main.pdf'
 run:
-    tigernotes doc ${input} -o ${output} %s
+    tigernotes doc ${input!q} -o ${output!q} %s
 ''' % (pdf[0], pdf[1], pdf[2])
     else:
         pdf_section = ''
@@ -88,6 +88,7 @@ def prepare_bookdown(files, title, author, date, description, url, url_edit, rep
     else:
         del idx['github-repo']
         del cfg['repo']
+    idx['author'] = '&copy; ' + idx['author']
     out['bookdown::gitbook']['css'] = os.path.join(env.tmp_dir, 'style.css')
     out['bookdown::html_chapters']['css'] = [os.path.join(env.tmp_dir, 'style.css'),
                                              os.path.join(env.tmp_dir, 'toc.css')]
@@ -104,9 +105,9 @@ def prepare_bookdown(files, title, author, date, description, url, url_edit, rep
     cfg['rmd_files']['latex'] = list(files)
     if pdf:
         pdf = (pdf, cfg['output_dir'], '{} {} {} --toc --long_ref --font_size 12'.\
-               format('-a {}'.format(author) if author else '',
-                      '-t {}'.format(title) if title else '',
-                      '-d {}'.format(date) if date else ''))
+               format('-a {}'.format(repr(author)) if author else '',
+                      '-t {}'.format(repr(title)) if title else '',
+                      '-d {}'.format(repr(date)) if date else ''))
     #
     if os.path.exists(os.path.join(env.tmp_dir, env.time) + '.deps'):
         check_deps = False
