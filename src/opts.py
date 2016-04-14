@@ -128,7 +128,7 @@ def admin(args, unknown_args):
     if args.md:
         prepare_bookdown(args.md, args.title, args.author, args.date,
                          args.description, args.url, args.url_edit,
-                         args.repo, args.pdf, args.output)
+                         args.repo, args.pdf, args.output, unknown_args)
     return
 
 class LogOpts:
@@ -395,4 +395,5 @@ class LogOpts:
                         help='''github repo, if available''')
         group.add_argument('--pdf',
                         action='store',
+                        nargs = '+',
                         help='''source notes to generate PDF file from''')

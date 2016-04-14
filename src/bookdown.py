@@ -58,7 +58,8 @@ run:
         pdf_section = ''
     return(bookdown_header + check_section + bookdown_section + pdf_section)
 
-def prepare_bookdown(files, title, author, date, description, url, url_edit, repo, pdf, output):
+def prepare_bookdown(files, title, author, date, description,
+                     url, url_edit, repo, pdf, output, pdf_args):
     # write resources
     with codecs.open(os.path.join(env.tmp_dir, 'style.css'), 'w', encoding='UTF-8') as f:
             f.write(style)
@@ -107,10 +108,11 @@ def prepare_bookdown(files, title, author, date, description, url, url_edit, rep
         out['bookdown::gitbook']['config']['toc']['after'].replace('VALUE',
                                                                    '{} {}'.format(env.year, idx['author'])))
     if pdf:
-        pdf = (pdf, cfg['output_dir'], '{} {} {} --toc --long_ref --font_size 12'.\
+        pdf = (pdf, cfg['output_dir'], '{} {} {} --toc --long_ref --font_size 12 {}'.\
                format('-a {}'.format(repr(author)) if author else '',
                       '-t {}'.format(repr(title)) if title else '',
-                      '-d {}'.format(repr(date)) if date else ''))
+                      '-d {}'.format(repr(date)) if date else '',
+                      ' '.join(pdf_args)))
     #
     if os.path.exists(os.path.join(env.tmp_dir, env.time) + '.deps'):
         check_deps = False
