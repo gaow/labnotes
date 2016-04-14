@@ -2,7 +2,6 @@
 #! Getting started
 ###
 
-
 #{ ----
 ###
 # ths section is commented out
@@ -14,28 +13,38 @@
 # Dependencies
 ###
 #On Debian GNU/Linux based computer:
-sudo apt-get install texlive texlive-xetex texlive-latex-extra texlive-fonts-extra texlive-extra-utils texlive-font-utils latex-beamer pgf latexmk latex-xcolor texlive-pstricks python-pygments 
+sudo apt-get install texlive texlive-xetex texlive-latex-extra texlive-fonts-extra texlive-extra-utils texlive-font-utils latex-beamer pgf latexmk latex-xcolor texlive-pstricks python-pygments
 ###
 # Installation
 ###
 # compile & install the program:
-cd path/to/some/folder
-svn co svn+ssh://usrname@csg.bcmd.bcm.edu/nfs/usr/local/svn/tigernotes ./
-svn up
-sudo python3 setup.py install
+git clone http://github.com/gaow/labnotes
+cd labnotes
+python3 setup.py install
 
 ###
 # Try it out!
 ###
-# Run the following script and read the output
-#{bash
+# Check the command interface first,
+#{out tigernotes options
 tigernotes -h
+output:///tigernotes -h
 tigernotes doc -h
+output:///tigernotes doc -h
 tigernotes slides -h
-tigernotes doc demo.notes --author "John Doe" --title "Example log documentation" -f --lite --output d1.pdf
-tigernotes doc demo.notes --author "John Doe" --title "Example log documentation" --toc --output d2.pdf
+output:///tigernotes slides -h
+tigernotes html -h
+output:///tigernotes html -h
+tigernotes dokuwiki -h
+output:///tigernotes dokuwiki -h
+tigernotes pmwiki -h
+output:///tigernotes pmwiki -h
+tigernotes markdown -h
+output:///tigernotes markdown -h
+tigernotes admin -h
+output:///tigernotes admin -h
 #}
-
+# Then run @@make@@ and check out the product!
 ###
 #! usage
 ###
@@ -45,7 +54,7 @@ tigernotes doc demo.notes --author "John Doe" --title "Example log documentation
 # Syntax
 ###
 #! Basic formatting
-#!! Emphasis symbols 
+#!! Emphasis symbols
 # ``double quote'', `single quote',  "italics", ""bold"", """bold italics""", @@monospaced@@, @www.google.com@
 #!!! sentence emphasized
 #!! Raw {$\LaTeXe$} syntax
@@ -56,7 +65,7 @@ tigernotes doc demo.notes --author "John Doe" --title "Example log documentation
 p(\theta|y_1 \ldots y_6) & = \frac{p(y_1 \ldots y_6|\theta) p(\theta)}{p(y_1 \dots y_6)} \\
 & = \frac{p(y_1|\theta) \dots p(y_6|\theta) p(\theta)}{p(y_1 \dots y_6)} \\
 & = \frac{1/10}{0.02} \ \ \ (10.2 < \theta < 10.4) \\
-& = \left\{ 
+& = \left\{
   \begin{array}{l l}
     5 & \quad \text{if $10.2 < \theta < 10.4$}\\
     0 & \quad \text{otherwise}
@@ -65,13 +74,13 @@ p(\theta|y_1 \ldots y_6) & = \frac{p(y_1 \ldots y_6|\theta) p(\theta)}{p(y_1 \do
 #}
 #!! Reference note
 # I visit the [BCM website|Baylor College of Medicine, @@www.bcm.edu@@] daily, [BCM|@http://www.bcm.edu@]
-# Check out this paper : @DOI://10.1086/280899@ [reference|@DOI://10.1086/280899@]
+# Check out this paper : @DOI://10.1098/rspa.1946.0056@ [reference|@DOI://10.1098/rspa.1946.0056@]
 #!! Blocks
 #{ list
 #this
 #
 #is
-  
+
 #a list block
 ## and you can indent it further
 ### but not any further
@@ -132,7 +141,7 @@ def map( fun, list ):
 using namespace std;
 void main()
 {
-  cout << "Hello World!" << endl; 
+  cout << "Hello World!" << endl;
 }
 #}
 #{ sql
@@ -167,7 +176,7 @@ print "hi"
 # a message
 #}
 #!! Special boxes contents from file
-# The @@file:///filename start end@@ (or simply @@file:///@@ to include the whole file) syntax allows inclusion of contents of external file into a special box.
+# The @@file:///filename start end@@ (or simply @@file:///@@ to include the whole file) syntax allows inclusion of contents of external file into a special box. Here I extract lines 21 - 26 and lines 60 - 65 of this labnotes file:
 #{out
 file:///example.notes 21 26
 ------------------
@@ -175,7 +184,7 @@ file:///example.notes 60 65
 #}
 #! Figures
 #Support pdf, png and jpg. This is bcm logo
-#* bcm.png 
+#* bcm.png
 # and smaller ...
 #* bcm.png 0.5
 # and side by side
@@ -195,7 +204,7 @@ chr	pos	sample_size_SNV	beta_x_SNV	pvalue_SNV
 #}
 
 ###
-# Nested blocks 
+# Nested blocks
 ###
 # these blocks supports nesting of other blocks: list, warning, note, tip, important
 #! nested list/list/list
@@ -264,7 +273,6 @@ print('HELLO WORLD')
 # Ok that's enough
 #}
 #}
-
 #}
 
 #! nested warning/out
@@ -301,7 +309,7 @@ print("HELLO WORLD")
 #! Another chapter
 ###
 ###
-# dokuwiki specific 
+# dokuwiki specific
 ###
 #! hide stuff
 #++++ dokuwiki hidden text |

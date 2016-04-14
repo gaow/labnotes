@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import sys, datetime, os, glob, getpass
+import sys, os, glob, getpass, datetime
 from argparse import ArgumentParser, SUPPRESS
 from distutils.dir_util import mkpath
 from libtigernotes.html import Html
 from libtigernotes.style import TigerJournal as TJ
-from libtigernotes.utils import cd
+from libtigernotes.utils import env as genv, cd
 
 class Env:
     def __init__(self):
@@ -86,12 +86,11 @@ class DateParser:
         '''Input date has to be in format YYYYMMDD'''
         if date is None:
             # Figure out the date
-            time = datetime.datetime.now()
-            self.year = time.strftime("%Y")
-            self.month = time.strftime("%m")
-            self.date = time.strftime("%d")
-            self.month_name = time.strftime("%B")
-            self.name = self.year + self.month + self.date
+            self.year = genv.year
+            self.month = genv.month
+            self.date = genv.date
+            self.month_name = genv.month_name
+            self.name = genv.time
         else:
             self.name = date
             self.year = date[:4]

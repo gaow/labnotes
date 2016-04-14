@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import sys, shutil, os, re
-from argparse import ArgumentParser
+import sys, shutil, os, re, argparse
 import codecs
 from .utils import getfname, pdflatex, indexhtml
 from .doc import Tex
@@ -88,6 +87,7 @@ def pmwiki(args, unknown_args):
     return
 
 def markdown(args, unknown_args):
+    args.suffix = '.' + args.suffix
     toc = None
     htm = MarkDown(args.title, args.author, args.filename, toc, args.prefix, long_ref = args.long_ref)
     lite = 1 if args.lite else 0
@@ -103,15 +103,16 @@ def markdown(args, unknown_args):
                 htm.text = htm.text[(idx + 1):]
                 break
     else:
-        fname = getfname(args.filename, args.output, suffix='.md')
+        fname = getfname(args.filename, args.output, suffix = args.suffix)
     if fname is None:
         return
-    if args.filename == fname + '.md':
+    if args.filename == fname + args.suffix:
         raise ValueError('Cannot write output as "{0}": name conflict with source file. Please rename either of them')
-    with codecs.open(fname + '.md', 'w', encoding='UTF-8', errors='ignore') as f:
+    with codecs.open(fname + args.suffix, 'w', encoding='UTF-8', errors='ignore') as f:
         f.writelines(htm.get(lite))
     if args.toc:
-        markdown_toclify(input_file = fname + '.md', output_file = fname + '.md', github = True, back_to_top = True)
+        markdown_toclify(input_file = fname + args.suffix,
+                         output_file = fname + args.suffix, github = True, back_to_top = True)
     return
 
 def admin(args, unknown_args):
@@ -130,7 +131,7 @@ def admin(args, unknown_args):
 
 class LogOpts:
     def __init__(self):
-        self.master_parser = ArgumentParser(
+        self.master_parser = argparse.ArgumentParser(
         description = '''Compile formatted notes into various publishable formats''',
         prog = 'tigernotes',
         fromfile_prefix_chars = '@',
@@ -139,37 +140,44 @@ class LogOpts:
         subparsers = self.master_parser.add_subparsers(dest = 'command-name')
         subparsers.required = True
         # latex
-        parser = subparsers.add_parser('doc', help='Generate text document from notes file(s)')
+        parser = subparsers.add_parser('doc', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                       help='Generate text document from notes file(s)')
         self.getTexArguments(parser)
         self.getDocArguments(parser)
         parser.set_defaults(func=doc)
         # beamer
-        parser = subparsers.add_parser('slides', help='Generate slides from notes file(s)')
+        parser = subparsers.add_parser('slides', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                       help='Generate slides from notes file(s)')
         self.getTexArguments(parser)
         self.getSlidesArguments(parser)
         parser.set_defaults(func=slides)
         # html
-        parser = subparsers.add_parser('html', help='Generate HTML page from notes file(s)')
+        parser = subparsers.add_parser('html', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                       help='Generate HTML page from notes file(s)')
         self.getTexArguments(parser)
         self.getHtmlArguments(parser)
         parser.set_defaults(func=html)
         # dokuwiki
-        parser = subparsers.add_parser('dokuwiki', help='Generate dokuwiki text from notes file(s)')
+        parser = subparsers.add_parser('dokuwiki', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                       help='Generate dokuwiki text from notes file(s)')
         self.getTexArguments(parser)
         self.getDokuwikiArguments(parser)
         parser.set_defaults(func=dokuwiki)
         # pmwiki
-        parser = subparsers.add_parser('pmwiki', help='Generate pmwiki text from notes file(s)')
+        parser = subparsers.add_parser('pmwiki', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                       help='Generate pmwiki text from notes file(s)')
         self.getTexArguments(parser)
         self.getPmwikiArguments(parser)
         parser.set_defaults(func=pmwiki)
         # markdown
-        parser = subparsers.add_parser('markdown', help='Generate markdown text from notes file(s)')
+        parser = subparsers.add_parser('markdown', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                       help='Generate markdown text from notes file(s)')
         self.getTexArguments(parser)
         self.getMarkDownArguments(parser)
         parser.set_defaults(func=markdown)
         # admin
-        parser = subparsers.add_parser('admin', help='A collection of utility features')
+        parser = subparsers.add_parser('admin', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                       help='A collection of utility features')
         self.getAdminArguments(parser)
         parser.set_defaults(func=admin)
 
@@ -314,7 +322,11 @@ class LogOpts:
                         metavar='PATH',
                         type=str,
                         help='''remote relative path for image''')
-
+        parser.add_argument('--suffix',
+                        metavar='EXT',
+                        type=str,
+                        default='.md',
+                        help='''output file suffix''')
 
     def getDokuwikiArguments(self, parser):
         self.getPmwikiArguments(parser)
@@ -380,5 +392,5 @@ class LogOpts:
                         default = '',
                         help='''github repo, if available''')
         group.add_argument('--pdf',
-                        action='store_true',
-                        help='''generate PDF file''')
+                        action='store',
+                        help='''source notes to generate PDF file from''')

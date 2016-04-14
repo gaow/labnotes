@@ -85,28 +85,28 @@ class PaperList:
             else:
                 info = ', '.join(info[:-1]) + ' and ' + info[-1]
         except:
-            info = ''
+            info = '.'
         return info
 
     def getTitle(self, paper):
         try:
             info = paper['message']['title'][0]
         except:
-            info = ''
+            info = '.'
         return info
 
     def getJournal(self, paper):
         try:
             info = paper['message']['container-title'][0]
         except:
-            info = ''
+            info = '.'
         return info
 
     def getDate(self, paper):
         try:
             info = str(paper['message']['issued']['date-parts'][0][0])
         except:
-            info = ''
+            info = '.'
         return info
 
     def getLink(self, paper):

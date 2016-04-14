@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os, sys, re
+import os, sys, re, datetime
 import glob, shutil, shlex
 import yaml
 from io import StringIO
@@ -16,6 +16,12 @@ import stat
 class Environment:
     def __init__(self):
         self.get_tmpdir()
+        self.raw_time = datetime.datetime.now()
+        self.year = self.raw_time.strftime("%Y")
+        self.month = self.raw_time.strftime("%m")
+        self.date = self.raw_time.strftime("%d")
+        self.month_name = self.raw_time.strftime("%B")
+        self.time = self.year + self.month + self.date
 
     def get_tmpdir(self):
         self.tmp_dir = None

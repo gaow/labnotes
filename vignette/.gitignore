@@ -1,0 +1,5 @@
+*.pdf
+*.rmd
+*.md
+.sos
+bookdown
