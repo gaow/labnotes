@@ -99,20 +99,22 @@ def markdown(args, unknown_args):
             if not item:
                 continue
             else:
-                fname = os.path.join(os.path.join(*out[:-1]), item.replace('#', '').strip().replace(':', '').replace(' ', '-'))
+                fname = os.path.join(os.path.join(*out[:-1]),
+                                     item.replace('#', '').strip().replace(':', '').replace(' ', '-'))
                 htm.text = htm.text[(idx + 1):]
                 break
     else:
         fname = getfname(args.filename, args.output, suffix = args.suffix)
     if fname is None:
         return
-    if args.filename == fname + args.suffix:
+    fname += args.suffix
+    if args.filename == fname:
         raise ValueError('Cannot write output as "{0}": name conflict with source file. Please rename either of them')
-    with codecs.open(fname + args.suffix, 'w', encoding='UTF-8', errors='ignore') as f:
+    with codecs.open(fname, 'w', encoding='UTF-8', errors='ignore') as f:
         f.writelines(htm.get(lite))
     if args.toc:
-        markdown_toclify(input_file = fname + args.suffix,
-                         output_file = fname + args.suffix, github = True, back_to_top = True)
+        markdown_toclify(input_file = fname,
+                         output_file = fname, github = True, back_to_top = True)
     return
 
 def admin(args, unknown_args):
@@ -325,7 +327,7 @@ class LogOpts:
         parser.add_argument('--suffix',
                         metavar='EXT',
                         type=str,
-                        default='.md',
+                        default='md',
                         help='''output file suffix''')
 
     def getDokuwikiArguments(self, parser):

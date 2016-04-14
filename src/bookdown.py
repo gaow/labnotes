@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import codecs, os
+import codecs, os, shutil
 from . import BOOKDOWN_CFG as cfg, BOOKDOWN_OUT as out, \
      BOOKDOWN_TEX as tex, BOOKDOWN_STYLE as style, \
      BOOKDOWN_TOC as toc, BOOKDOWN_IDX as idx
-from .utils import env, dict2str
+from .utils import env, dict2str, cd
 from pysos.sos_script import SoS_Script
 
-def get_sos(files, pdf, check_deps):
+def get_sos(files, pdf, check_deps, workdir):
     bookdown_header = '''
 [1]
 # Build bookdown in HTML
@@ -24,7 +24,7 @@ check_command('pandoc')
 quiet = 'T'
 formats = ['bookdown::gitbook']
 input: %s
-R:
+R: workdir = %s
 ###
 # Code below are copied from
 # https://github.com/rstudio/bookdown/blob/master/inst/examples/_render.R
@@ -39,21 +39,21 @@ if (length(formats) == 0) formats = c(
 )
 # render the book to all formats unless they are specified via command-line args
 for (fmt in formats) {
-  cmd = sprintf("bookdown::render_book(c(${input!r,}), '%%s', quiet = %%s, preview = T)", fmt, quiet)
+  cmd = sprintf("bookdown::render_book(c(${input!r,}), '%%s', preview = T, quiet = %%s)", fmt, quiet)
   res = bookdown:::Rscript(c('-e', shQuote(cmd)))
   if (res != 0) stop('Failed to compile the book to ', fmt)
   if (travis && fmt == 'bookdown::epub_book')
     bookdown::calibre('bookdown.epub', 'mobi')
 }
-''' % (repr(files))
+''' % (repr([os.path.join(workdir, f) for f in files]), repr(workdir))
     if pdf:
         pdf_section = '''
 [2]
-input: '%s'
-output: '%s/_main.pdf'
+input: %s
+output: %s
 run:
     tigernotes doc ${input!q} -o ${output!q} %s
-''' % (pdf[0], pdf[1], pdf[2])
+''' % (repr(pdf[0]), repr(os.path.join(workdir, pdf[1], '_main.pdf')), pdf[2])
     else:
         pdf_section = ''
     return(bookdown_header + check_section + bookdown_section + pdf_section)
@@ -94,15 +94,18 @@ def prepare_bookdown(files, title, author, date, description, url, url_edit, rep
                                              os.path.join(env.tmp_dir, 'toc.css')]
     out['bookdown::epub_book']['stylesheet'] = os.path.join(env.tmp_dir, 'style.css')
     out['bookdown::pdf_book']['includes']['in_header'] = os.path.join(env.tmp_dir, 'preamble.tex')
+    workdir = os.getcwd()
     if output:
-        cfg['output_dir'] = output
+        os.makedirs(output, exist_ok = True)
+        cfg['output_dir'] = os.path.basename(output)
+        workdir = os.path.dirname(output)
+    else:
+        os.mkdirs(cfg['output_dir'], exist_ok = True)
     out['bookdown::gitbook']['config']['toc']['before'] = '{}'.format(
         out['bookdown::gitbook']['config']['toc']['before'].replace('VALUE', idx['title']))
     out['bookdown::gitbook']['config']['toc']['after'] = '{}'.format(
         out['bookdown::gitbook']['config']['toc']['after'].replace('VALUE',
                                                                    '{} {}'.format(env.year, idx['author'])))
-    cfg['rmd_files']['html'] = list(files)
-    cfg['rmd_files']['latex'] = list(files)
     if pdf:
         pdf = (pdf, cfg['output_dir'], '{} {} {} --toc --long_ref --font_size 12'.\
                format('-a {}'.format(repr(author)) if author else '',
@@ -113,21 +116,37 @@ def prepare_bookdown(files, title, author, date, description, url, url_edit, rep
         check_deps = False
     else:
         check_deps = True
-    #
-    with open('_output.yml', 'w') as f:
-        f.write(dict2str(out))
-    with open('_bookdown.yml', 'w') as f:
-        f.write(dict2str(cfg))
-    tmp_fn = files[0]
-    with open(tmp_fn) as f:
+    # Move files around to resolve path problem for bookdown
+    filenames = ['index.rmd' if idx == 0 else '{}_{}'.format(str(idx).zfill(4), os.path.basename(x))
+                 for idx, x in enumerate(files)]
+    for x, y in zip(files[1:], filenames[1:]):
+        shutil.copy(x, os.path.join(workdir, y))
+    with open(files[0]) as f:
         tmp = f.read()
-    os.rename(tmp_fn, os.path.join(env.tmp_dir, tmp_fn))
-    files[0] = 'index.rmd'
-    with open(files[0], 'w') as f:
-        f.write('---\n{}\n---\n{}'.format(dict2str(idx), tmp))
-    SoS_Script(get_sos(files, pdf, check_deps)).workflow().run()
-    os.rename(os.path.join(env.tmp_dir, tmp_fn), tmp_fn)
-    os.remove('_output.yml')
-    os.remove('_bookdown.yml')
-    os.remove('index.rmd')
-    os.system('touch %s' % os.path.join(env.tmp_dir, env.time) + '.deps')
+    for f in files:
+        os.rename(f, os.path.join(env.tmp_dir, os.path.basename(f)))
+    with cd(workdir):
+        with open(filenames[0], 'w') as f:
+            f.write('---\n{}\n---\n{}'.format(dict2str(idx), tmp))
+        cfg['rmd_files']['html'] = list(filenames)
+        cfg['rmd_files']['latex'] = list(filenames)
+        with open('_output.yml', 'w') as f:
+            f.write(dict2str(out))
+        with open('_bookdown.yml', 'w') as f:
+            f.write(dict2str(cfg))
+    error_msg = None
+    try:
+        SoS_Script(get_sos(filenames, pdf, check_deps, workdir)).workflow().run()
+    except Exception as e:
+        error_msg = e
+    for f in files:
+        os.rename(os.path.join(env.tmp_dir, os.path.basename(f)), f)
+    with cd(workdir):
+        os.remove('_output.yml')
+        os.remove('_bookdown.yml')
+        for f in filenames:
+            os.remove(f)
+    if error_msg is None:
+        os.system('touch %s' % os.path.join(env.tmp_dir, env.time) + '.deps')
+    else:
+        raise RuntimeError(e)
