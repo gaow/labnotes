@@ -7,13 +7,20 @@ from . import BOOKDOWN_CFG as cfg, BOOKDOWN_OUT as out, \
 from .utils import env, dict2str
 from pysos.sos_script import SoS_Script
 
-def get_sos(files, pdf):
-    bookdown_section = '''
+def get_sos(files, pdf, check_deps):
+    bookdown_header = '''
 [1]
 # Build bookdown in HTML
+'''
+    if check_deps:
+        check_section = '''
 check_R_library('rstudio/bookdown')
 check_R_library('rstudio/DT')
 check_command('pandoc')
+'''
+    else:
+        check_section = ''
+    bookdown_section = '''
 quiet = 'T'
 formats = ['bookdown::gitbook']
 input: %s
@@ -49,7 +56,7 @@ run:
 ''' % (pdf[0], pdf[1], pdf[2])
     else:
         pdf_section = ''
-    return(bookdown_section + pdf_section)
+    return(bookdown_header + check_section + bookdown_section + pdf_section)
 
 def prepare_bookdown(files, title, author, date, description, url, url_edit, repo, pdf, output):
     # write resources
@@ -101,6 +108,11 @@ def prepare_bookdown(files, title, author, date, description, url, url_edit, rep
                       '-t {}'.format(title) if title else '',
                       '-d {}'.format(date) if date else ''))
     #
+    if os.path.exists(os.path.join(env.tmp_dir, env.time) + '.deps'):
+        check_deps = False
+    else:
+        check_deps = True
+    #
     with open('_output.yml', 'w') as f:
         f.write(dict2str(out))
     with open('_bookdown.yml', 'w') as f:
@@ -108,13 +120,13 @@ def prepare_bookdown(files, title, author, date, description, url, url_edit, rep
     tmp_fn = files[0]
     with open(tmp_fn) as f:
         tmp = f.read()
-    os.remove(tmp_fn)
+    os.rename(tmp_fn, os.path.join(env.tmp_dir, tmp_fn))
     files[0] = 'index.rmd'
     with open(files[0], 'w') as f:
         f.write('---\n{}\n---\n{}'.format(dict2str(idx), tmp))
-    SoS_Script(get_sos(files, pdf)).workflow().run()
-    with open(tmp_fn, 'w') as f:
-        f.write(tmp)
+    SoS_Script(get_sos(files, pdf, check_deps)).workflow().run()
+    os.rename(os.path.join(env.tmp_dir, tmp_fn), tmp_fn)
     os.remove('_output.yml')
     os.remove('_bookdown.yml')
     os.remove('index.rmd')
+    os.system('touch %s' % os.path.join(env.tmp_dir, env.time) + '.deps')

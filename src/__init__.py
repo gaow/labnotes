@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 VERSION = "0.0.1"
-FULL_VERSION = "0.0.1-rev335"
-BOOKDOWN_CFG = {'chapter_name': '', 'repo': '', 'output_dir': '_book', 'rmd_files': {'html': [], 'latex': []}, 'clean': []}
-BOOKDOWN_OUT = {'bookdown::gitbook': {'split_by': 'section', 'config': {'toolbar': {'position': 'fixed'}, 'search': True, 'edit': {'link': '', 'text': 'Edit'}, 'toc': {'scroll_highlight': True, 'after': '<center> VALUE </center>', 'collapse': 'subsection', 'before': '<li><a href="./"> VALUE </a></li>'}, 'download': ['pdf'], 'fontsettings': {'theme': 'white', 'size': 2, 'family': 'sans'}, 'sharing': {'vk': False, 'facebook': True, 'google': False, 'instapper': False, 'weibo': False, 'all': ['facebook', 'google', 'twitter', 'weibo', 'instapaper'], 'twitter': True}}, 'css': 'style.css'}, 'bookdown::html_chapters': {'css': ['style.css', 'toc.css']}, 'bookdown::pdf_book': {'citation_package': 'natbib', 'keep_tex': True, 'includes': {'in_header': 'preamble.tex'}, 'latex_engine': 'xelatex'}, 'bookdown::epub_book': {'stylesheet': 'style.css'}}
-BOOKDOWN_IDX = {'site': 'bookdown::bookdown_site', 'url': 'https://bookdown.org/', 'description': 'Labnotes bookdown template', 'title': 'Lab Notes', 'date': '`r Sys.Date()`', 'documentclass': 'book', 'author': '&copy; J. Doe', 'link-citations': True, 'bibliography': ['~/.tigernotes/reference.bib'], 'knit': 'bookdown::render_book', 'github-repo': '', 'biblio-style': 'apalike'}
+FULL_VERSION = "0.0.1-rev336"
+BOOKDOWN_CFG = {'chapter_name': '', 'repo': '', 'output_dir': '_book', 'rmd_files': {'latex': [], 'html': []}, 'clean': []}
+BOOKDOWN_OUT = {'bookdown::epub_book': {'stylesheet': 'style.css'}, 'bookdown::gitbook': {'config': {'toc': {'collapse': 'subsection', 'after': '<center> VALUE </center>', 'scroll_highlight': True, 'before': '<li><a href="./"> VALUE </a></li>'}, 'search': True, 'fontsettings': {'theme': 'white', 'family': 'sans', 'size': 2}, 'sharing': {'google': False, 'all': ['facebook', 'google', 'twitter', 'weibo', 'instapaper'], 'vk': False, 'weibo': False, 'instapper': False, 'facebook': True, 'twitter': True}, 'download': ['pdf'], 'edit': {'text': 'Edit', 'link': ''}, 'toolbar': {'position': 'fixed'}}, 'split_by': 'section', 'css': 'style.css'}, 'bookdown::html_chapters': {'css': ['style.css', 'toc.css']}, 'bookdown::pdf_book': {'latex_engine': 'xelatex', 'includes': {'in_header': 'preamble.tex'}, 'keep_tex': True, 'citation_package': 'natbib'}}
+BOOKDOWN_IDX = {'description': 'Labnotes bookdown template', 'site': 'bookdown::bookdown_site', 'knit': 'bookdown::render_book', 'biblio-style': 'apalike', 'url': 'https://bookdown.org/', 'documentclass': 'book', 'link-citations': True, 'github-repo': '', 'title': 'Lab Notes', 'bibliography': ['~/.tigernotes/reference.bib'], 'date': '`r Sys.Date()`', 'author': '&copy; J. Doe'}
 BOOKDOWN_TEX = r"""
 \usepackage{booktabs}
 \usepackage{longtable}
