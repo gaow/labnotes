@@ -1,6 +1,0 @@
-#!/usr/bin/env sos-runner
-#fileformat=SOS1.0
-
-[upload]
-run:
- rsync -auzP labnotes ${CONFIG.business_webspace}/
