@@ -5,7 +5,7 @@ bookdown::gitbook:
     toc:
       collapse: subsection
       scroll_highlight: true
-      before: <li><a href="./"> VALUE </a></li>
+      before: <li><a href="index.html"> VALUE </a></li>
       after:  <center> VALUE </center>
     download: [pdf]
     edit:

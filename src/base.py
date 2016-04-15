@@ -297,7 +297,7 @@ class TexParser:
                 width = 0.9
             if (not tag.endswith('wiki')) and width > 1:
                 width = 0.9
-            fname = os.path.split(fig)[-1]
+            fname = os.path.basename(fig)
             if not '.' in fname:
                 self.quit("Cannot determine graphic file format for '{0}'. Valid extensions are {1}".format(fname, ' '.join(support)))
             extension = fname.split('.')[-1]
@@ -305,29 +305,35 @@ class TexParser:
                 self.quit("Input file format '{0}' not supported. Valid extensions are {1}".format(extension, ' '.join(support)))
             if not os.path.exists(fig):
                 self.quit("Cannot find file %s" % fig)
+            if not remote_path:
+                fig = os.path.abspath(fig)
+            else:
+                fig = os.path.join(remote_path, fname)
             # syntax images
             if tag == 'tex':
-                lines[idx] = '\\includegraphics[width=%s\\textwidth]{%s}\n' % (width, os.path.abspath(fig))
+                lines[idx] = '\\includegraphics[width=%s\\textwidth]{%s}\n' % (width, fig)
             elif tag == 'html':
                 if extension == 'pdf':
-                    lines[idx] = '<a style="text-shadow: 1px 1px 1px #999;" href="{0}">{1}</a>\n'.format(os.path.join(remote_path, fname), 'Download Image "{0}"'.format(fname))
+                    lines[idx] = '<a style="text-shadow: 1px 1px 1px #999;" href="{0}">{1}</a>\n'.\
+                      format(fig, 'Download Image "{0}"'.format(fname))
                 else:
-                    lines[idx] = '<p><center><img src="{0}" alt="{1}" width="{2}%" /></center></p>'.format(fig, fname, int(width * 100))
+                    lines[idx] = '<p><center><img src="{0}" alt="{1}" width="{2}%" /></center></p>'.\
+                      format(fig, fname, int(width * 100))
             elif tag.endswith("wiki"):
                 if tag == 'dokuwiki':
                     # dokuwiki style
                     if extension == 'pdf':
-                        lines[idx] = "[[{0}|{1}]]\n".format(os.path.join(remote_path, fname), 'Download Image "{0}"'.format(fname))
+                        lines[idx] = "[[{0}|{1}]]\n".format(fig, 'Download Image "{0}"'.format(fname))
                     else:
                         sep = ':' if not '://' in remote_path else '/'
                         lines[idx] = '{{%s%s%s?%s}}' % (remote_path, sep, fname, width)
                 if tag == 'pmwiki':
                     if extension == 'pdf':
-                        lines[idx] = "[[{0}|{1}]]\n".format(os.path.join(remote_path, fname), 'Download Image "{0}"'.format(fname))
+                        lines[idx] = "[[{0}|{1}]]\n".format(fig, 'Download Image "{0}"'.format(fname))
                     else:
                         lines[idx] = '%center% Attach:%s' % (fname)
             elif tag == 'markdown':
-                    lines[idx] = '![]({})'.format(os.path.join(remote_path, fname))
+                    lines[idx] = '![]({})'.format(fig)
             else:
                 self.quit('Unknown tag "{0}" for figures!'.format(tag))
         if tag == 'tex':
