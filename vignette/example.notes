@@ -1,0 +1,345 @@
+###
+#! Getting started
+###
+
+#{ ----
+###
+# ths section is commented out
+###
+# with the #{---- mark, a section will show up only in full version.
+#} ----
+
+###
+# Dependencies
+###
+#On Debian GNU/Linux based computer:
+sudo apt-get install texlive texlive-xetex texlive-latex-extra texlive-fonts-extra texlive-extra-utils texlive-font-utils latex-beamer pgf latexmk latex-xcolor texlive-pstricks python-pygments
+###
+# Installation
+###
+# compile & install the program:
+git clone http://github.com/gaow/labnotes
+cd labnotes
+python3 setup.py install
+
+###
+# Try it out!
+###
+# Check the command interface first,
+#{out labnotes options
+labnotes -h
+output:///labnotes -h
+  .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-
+ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \
+`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'
+labnotes doc -h
+output:///labnotes doc -h
+  .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-
+ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \
+`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'
+labnotes slides -h
+output:///labnotes slides -h
+  .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-
+ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \
+`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'
+labnotes html -h
+output:///labnotes html -h
+  .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-
+ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \
+`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'
+labnotes dokuwiki -h
+output:///labnotes dokuwiki -h
+  .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-
+ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \
+`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'
+labnotes pmwiki -h
+output:///labnotes pmwiki -h
+  .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-
+ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \
+`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'
+labnotes markdown -h
+  .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-
+ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \
+`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'
+output:///labnotes markdown -h
+  .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-
+ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \
+`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'
+labnotes admin -h
+output:///labnotes admin -h
+#}
+# Then run @@make@@ and check out the product!
+###
+#! usage
+###
+
+
+###
+# Syntax
+###
+#! Basic formatting
+#!! Emphasis symbols
+# ``double quote'', `single quote',  "italics", ""bold"", """bold italics""", @@monospaced@@, @www.google.com@
+#!!! sentence emphasized
+#!! Raw {$\LaTeXe$} syntax
+#Display math: {$\[\hat{\beta} = (\frac{1}{n}\sum_i^n \mathbf{x}_i\mathbf{x}_i^T)^{-1} (\frac{1}{n}\sum_i^n\mathbf{x}_iy_i)\]$}
+#Inline math: {$\(\hat{\beta} = (\frac{1}{n}\sum_i^n \mathbf{x}_i\mathbf{x}_i^T)^{-1} (\frac{1}{n}\sum_i^n\mathbf{x}_iy_i)\)$}
+#{raw
+\begin{align*}
+p(\theta|y_1 \ldots y_6) & = \frac{p(y_1 \ldots y_6|\theta) p(\theta)}{p(y_1 \dots y_6)} \\
+& = \frac{p(y_1|\theta) \dots p(y_6|\theta) p(\theta)}{p(y_1 \dots y_6)} \\
+& = \frac{1/10}{0.02} \ \ \ (10.2 < \theta < 10.4) \\
+& = \left\{
+  \begin{array}{l l}
+    5 & \quad \text{if $10.2 < \theta < 10.4$}\\
+    0 & \quad \text{otherwise}
+  \end{array} \right.
+\end{align*}
+#}
+#!! Reference note
+# I visit the [BCM website|Baylor College of Medicine, @@www.bcm.edu@@] daily, [BCM|@http://www.bcm.edu@]
+# Check out this paper : @DOI://10.1098/rspa.1946.0056@ [reference|@DOI://10.1098/rspa.1946.0056@]
+#!! Blocks
+#{ list
+#this
+#
+#is
+
+#a list block
+## and you can indent it further
+### but not any further
+# so you only have two levels to use
+#}
+#{ warning
+# this is a warning block
+#
+
+# warnings ....
+#}
+#{ note
+# this is a note block
+#}
+#{ important
+# this is an important block
+#}
+#{ tip
+# this is a tip block
+#}
+#! Special boxes
+#!! terminal output
+#{ out
+ESP6900.chr10.May02.release.vcf.gz      ESP6900.chr20.May02.release.vcf.gz.tbi
+ESP6900.chr10.May02.release.vcf.gz.tbi  ESP6900.chr21.May02.release.vcf.gz
+ESP6900.chr11.May02.release.vcf.gz      ESP6900.chr21.May02.release.vcf.gz.tbi
+ESP6900.chr11.May02.release.vcf.gz.tbi  ESP6900.chr22.May02.release.vcf.gz
+ESP6900.chr12.May02.release.vcf.gz      ESP6900.chr22.May02.release.vcf.gz.tbi
+#}
+#!! terminal command
+echo "Hello, world!"
+#!! languages
+#{ bash
+vtools init esp69h
+chrs='X 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22'
+for chr in $chrs
+do
+        vtools import --format cache/esp.fmt /home/HD1/ESP6900/May02/ESP6900.chr$chr.May02.release.vcf.gz --build hg19 -j7
+        echo "sleeping for 1 min ... (time to kill me if you've planned so!)"
+        sleep 60
+done
+vtools admin --merge_samples
+#}
+#{ r
+argsv <- commandArgs(trailingOnly = TRUE)
+dat <- read.table(pipe('cat /dev/stdin'), header=TRUE, sep = "\t")
+for (i in argsv) get(i)(dat)
+#}
+#{ python
+def map( fun, list ):
+    nlist = []
+    for item in list:
+        nlist.append( fun( item ) )
+    return nlist
+#}
+#{ cpp
+#include <iostream>
+using namespace std;
+void main()
+{
+  cout << "Hello World!" << endl;
+}
+#}
+#{ sql
+SELECT
+  kEntity, sTranType, sItemType,
+  COUNT(*) AS SaleLineCount,
+  SUM(mAmount) AS sum_mAmount
+
+FROM aTranLine
+
+WHERE
+  sTranType IN
+    ('CashSale','CustInvc','CustChrg','CustCred')
+ AND
+   bDocMain = False
+ AND
+   sEntity2Type = 'CustJob'
+
+GROUP BY kEntity, sTranType, sItemType
+#}
+#{text
+this is plain text
+#}
+#!! Alternative box names
+#{out screen output
+output
+#}
+#{python an example
+print "hi"
+#}
+#{warning Careful!
+# a message
+#}
+#!! Special boxes contents from file
+# The @@file:///filename start end@@ (or simply @@file:///@@ to include the whole file) syntax allows inclusion of contents of external file into a special box. Here I extract lines 21 - 26 and lines 60 - 65 of this labnotes file:
+#{out
+file:///example.notes 21 26
+------------------
+file:///example.notes 60 65
+#}
+#! Figures
+#Support pdf, png and jpg.
+# This is a notebook sheet of original size
+#* tae.jpg
+# and smaller ...
+#* tae.jpg 0.5
+# and side by side
+#* tae.jpg 0.45; tae.jpg 0.45
+#!Tables
+#{table
+chr	pos	sample_size_SNV	beta_x_SNV	pvalue_SNV
+1	1138931	268	0.417457	0.643625
+1	1179385	268	0.0731516	0.878491
+1	1418004	268	-0.272227	0.464371
+1	1454412	268	0.771052	0.372779
+1	1670537	268	0.0178782	0.976594
+1	2160304	268	0.429178	0.449485
+1	2445748	268	-0.425785	0.546444
+1	2461373	268	0.599755	0.490808
+1	6530254	268	0.115223	0.825298
+#}
+
+###
+# Nested blocks
+###
+# these blocks supports nesting of other blocks: list, warning, note, tip, important
+#! nested list/list/list
+#{list
+# this is item 1
+## this item 1-1
+#{list
+# this is a list in item 1-1
+## and ..
+## still ...
+#{list
+# keep nesting!
+#}
+# Ok that's enough
+#}
+#}
+
+#! nested list/out
+#{list
+# this is item 1
+#{ out
+HELLO WORLD
+#}
+# this is item 2
+#}
+
+#! nested list/python
+#{list
+# this is item 1
+#{ python
+print('HELLO WORLD')
+#}
+# this is item 2
+#}
+
+#! nested list/warning
+#{list
+# this is item 1
+#{ warning
+# I am nested
+#}
+# this is item 2
+#}
+
+#! nested warning/list
+#{ warning
+# I am nested
+#{list
+# this is item 1
+## this item 1-1
+#{list
+# this is a list in item 1-1
+## and ..
+## still ...
+# Ok that's enough
+#}
+#}
+# I am a duplicate
+#{list
+# this is item 1
+## this item 1-1
+#{list
+# this is a list in item 1-1
+## and ..
+## still ...
+# Ok that's enough
+#}
+#}
+#}
+
+#! nested warning/out
+#{warning
+# this is item 1
+#{ out
+HELLO WORLD
+#}
+# this is item 2
+#}
+
+#! nested warning/python
+#{warning
+# this is item 1
+#{ python
+print("HELLO WORLD")
+#}
+# this is item 2
+#}
+
+#! nested figure/list
+#{list
+# this is a list in item 1-1
+## and ..
+## a figure here ...
+#* tae.jpg 0.3
+# Ok that's enough
+#}
+#{note
+# a figure here ...
+#* tae.jpg 0.3
+#}
+###
+#! Another chapter
+###
+###
+# dokuwiki specific
+###
+#! hide stuff
+#++++ dokuwiki hidden text |
+# these text will be hidden, via ``folded'' plugin
+#++++
+#<hidden>
+# these will be hidden via ``hidden'' plugin. Usually I use this for codes folding
+#</hidden>
