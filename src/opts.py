@@ -3,18 +3,25 @@
 import sys, shutil, os, re, argparse
 import codecs
 from .utils import env, regulate_output, pdflatex, indexhtml
-from .encoder import LaTeX
+from .encoder import LaTeX, Beamer
 from .parser import ParserCore
 
 def doc(args, unknown_args):
-    fname = regulate_output(args.filename, args.output)
-    runner = ParserCore(args.filename, 'tex', long if args.long_ref else 'short', args.lite)
+    runner = ParserCore(args.filename, 'tex', 'long' if args.long_ref else 'short', args.lite)
     worker = LaTeX(args.title, args.author, args.date, args.toc, args.footnote, args.font, args.font_size,
                    table_font_size = 'footnotesize', no_num = args.no_section_number,
                    no_page = args.no_page_number, no_ref = False, twocols = args.twocols,
                    landscape = args.landscape)
-    pdflatex(fname, runner(worker), vanilla=args.vanilla)
+    pdflatex(regulate_output(args.filename, args.output), runner(worker), vanilla=args.vanilla)
     return
+
+def slides(args, unknown_args):
+    runner = ParserCore(args.filename, 'tex', 'long' if args.long_ref else 'short', args.lite)
+    worker = Beamer(args.title, args.author, args.date, args.institute,
+                      args.toc, args.stoc, False, table_font_size = 'tiny',
+                      mode = args.mode, theme = args.theme, thank = args.thank)
+    pdflatex(regulate_output(args.filename, args.output), runner(worker), vanilla = args.vanilla,
+             beamer_institute = args.color)
 
 class Main:
     def __init__(self, version):
@@ -33,11 +40,11 @@ class Main:
         self.getDocArguments(parser)
         parser.set_defaults(func=doc)
         # beamer
-        # parser = subparsers.add_parser('slides', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        #                                help='Generate slides from notes file(s)')
-        # self.getCommonArguments(parser)
-        # self.getSlidesArguments(parser)
-        # parser.set_defaults(func=slides)
+        parser = subparsers.add_parser('slides', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                       help='Generate slides from notes file(s)')
+        self.getCommonArguments(parser)
+        self.getSlidesArguments(parser)
+        parser.set_defaults(func=slides)
         # # html
         # parser = subparsers.add_parser('html', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         #                                help='Generate HTML page from notes file(s)')

@@ -50,7 +50,7 @@ class ParserCore:
         self.bib = {}
         for fn in filename:
             with codecs.open(fn, 'r', encoding='UTF-8', errors='ignore') as f:
-                lines = [l.rstrip() for l in f.readlines() if l.rstrip()]
+                lines = [l.rstrip() for l in f.readlines()]
                 # in case I need to parse source code
                 if len(lines) > 0 and lines[0].startswith('#!/') \
                   and fn.split('.')[-1].lower() in lines[0].lower():
@@ -60,8 +60,7 @@ class ParserCore:
 
     def __call__(self, worker):
         env.logger.info("Evaluating input document ...")
-        if self.purge_comment:
-            self.PurgeComment()
+        self.PurgeComment()
         self.text = self.ParseBlock(self.text, worker)
         self.ParseText(worker)
         if worker.no_ref:
@@ -81,7 +80,7 @@ class ParserCore:
                 endidx = None
                 for i in range(idx+1, len(self.text)):
                     if self.text[i].startswith(M + '{') and '--' in self.text[i]:
-                        raise ValueError("Nested use of blocks is disallowed: ``{0}``, near ``{1}``".\
+                        raise ValueError("Nested comments not allowed: ``{0}``, near ``{1}``".\
                                          format(self.text[i],
                                                 self.text[i+1] if idx + 1 < len(self.text)
                                                 else "end of document"))
@@ -95,11 +94,12 @@ class ParserCore:
                 comments.append([idx, endidx])
                 self.text[idx] = ''
                 self.text[endidx] = ''
-        for idx in range(len(self.text)):
-            for item in comments:
-                if idx in range(item[0], item[1]):
-                    self.text[idx] = None
-                    break
+        if self.purge_comment:
+            for idx in range(len(self.text)):
+                for item in comments:
+                    if idx in range(item[0], item[1]):
+                        self.text[idx] = None
+                        break
         self.text = [_f for _f in self.text if _f is not None]
 
     def ParseBlock(self, text, worker):
@@ -182,6 +182,10 @@ class ParserCore:
                 self.text[idx] = self.__ReserveBlock(item, mode = 'remove')[0]
                 skip.append(idx)
         idx = 0
+        # Keep track of section positions to add some section spec info
+        # such as version, date, potentially
+        subsection_start = 0
+        subsection_end = 0
         while idx < len(self.text):
             if idx in skip or self.text[idx] == '':
                 # no need to process
@@ -206,18 +210,28 @@ class ParserCore:
             if self.text[idx].startswith(M * 3) and self.text[idx+1].startswith(M + '!') \
               and self.text[idx+2].startswith(M * 3):
                 # chapter
+                previous_ended = False
+                if subsection_start > subsection_end:
+                    previous_ended  = True
+                    subsection_end += 1
                 self.text[idx] = ''
                 self.text[idx + 1] = worker.GetChapter(
-                    self.Capitalize(self.Recode(self.text[idx + 1][len(M)+1:], worker)))
+                    self.Capitalize(self.Recode(self.text[idx + 1][len(M)+1:], worker)),
+                    add_head = previous_ended)
                 self.text[idx + 2] = ''
                 idx += 3
                 continue
             if self.text[idx].startswith(M * 3) and self.text[idx+1].startswith(M) \
               and (not self.text[idx+1].startswith(M * 2)) and self.text[idx+2].startswith(M * 3):
                 # section
+                previous_ended = False
+                if subsection_start > subsection_end:
+                    previous_ended  = True
+                    subsection_end += 1
                 self.text[idx] = ''
                 self.text[idx + 1] = worker.GetSection(
-                    self.Capitalize(self.Recode(self.text[idx + 1][len(M):], worker)))
+                    self.Capitalize(self.Recode(self.text[idx + 1][len(M):], worker)),
+                    add_head = previous_ended)
                 self.text[idx + 2] = ''
                 idx += 3
                 continue
@@ -230,13 +244,21 @@ class ParserCore:
                 idx += 1
                 continue
             if self.text[idx].startswith(M + '!!'):
+                if idx > 0:
+                    worker.RaiseSubsubsection(self.text[idx - 1])
                 # subsubsection
                 self.text[idx] = worker.GetSubsubsection(self.Recode(self.text[idx][len(M)+2:], worker))
                 idx += 1
                 continue
             if self.text[idx].startswith(M + '!'):
                 # subsection
-                self.text[idx] = worker.GetSubsection(self.Recode(self.text[idx][len(M)+1:], worker))
+                previous_ended = False
+                if subsection_start > subsection_end:
+                    previous_ended  = True
+                    subsection_end += 1
+                subsection_start += 1
+                self.text[idx] = worker.GetSubsection(self.Recode(self.text[idx][len(M)+1:], worker),
+                                                      add_head = previous_ended)
                 idx += 1
                 continue
             if self.text[idx].startswith(M + '*'):
@@ -250,6 +272,9 @@ class ParserCore:
                 self.text[idx] = '\n' + self.Recode(self.text[idx][len(M):], worker) + '\n'
                 idx += 1
                 continue
+        if subsection_start > subsection_end:
+            self.text.append(worker.GetSubsectionTail())
+        self.text.append(worker.GetDocumentTail())
         return
 
     def ParseBib(self, worker):
@@ -331,6 +356,7 @@ class ParserCore:
         return out
 
     def PrepareBlock(self, text, worker, name, label):
+        label = self.Recode(label, worker)
         if name == 'list':
             return self.PrepareList(text, worker, label)
         elif name == 'out':

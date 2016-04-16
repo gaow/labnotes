@@ -1,21 +1,21 @@
 notes := example.notes
 slides := example.snotes
-PDF := latex1 latex2 beamer1
+PDF := l1 l2 b1
 MD := md1
 objects := $(addsuffix .pdf, $(PDF)) $(addsuffix .rmd, $(MD)) labnotes/index.html
 all: $(objects)
 
-latex1.pdf: $(notes)
+l1.pdf: $(notes)
 	labnotes doc $(notes) --author "J. Doe" \
-		--title "Example documentation" -f --lite --output latex1
+		--title "Example documentation" --lite --output l1
 
-latex2.pdf: $(notes)
+l2.pdf: $(notes)
 	labnotes doc $(notes) --author "J. Doe" \
-		--title "Example documentation" -f --output latex2
+		--title "Example documentation" --footnote --output l2
 
-beamer1.pdf: $(slides)
+b1.pdf: $(slides)
 	labnotes slides $(slides) --author "J. Doe" \
-		--title "Example documentation" -f --output beamer1
+		--title "Example documentation" --output b1
 
 md1.rmd: $(notes)
 	labnotes markdown $(notes) -o md1 --suffix rmd
