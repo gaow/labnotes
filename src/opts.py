@@ -19,7 +19,7 @@ def doc(args, unknown_args):
 class Main:
     def __init__(self, version):
         self.master_parser = argparse.ArgumentParser(
-        description = '''Compile formatted notes into various publishable formats''',
+        description = '''Dynamically compile formatted notes into various publishable formats''',
         prog = 'labnotes',
         fromfile_prefix_chars = '@',
         epilog = '''Copyright 2012 Gao Wang <gaow@uchicago.edu> GNU General Public License''')

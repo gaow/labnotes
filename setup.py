@@ -32,7 +32,7 @@ with open('src/__init__.py', 'w') as f:
 #
 setup(name = 'labnotes',
     version = VERSION,
-    description = "Compile formatted notes into various publishable formats",
+    description = "Dynamically compile formatted notes into various publishable formats",
     author = 'Gao Wang',
     author_email = 'gaow@uchicago.edu',
     url = 'http://github.com/gaow/labnotes',
