@@ -847,7 +847,8 @@ class Dokuwiki(BaseEncoder):
 class Markdown(BaseEncoder):
     def __init__(self, title, author, date):
         super().__init__()
-        self.swaps = [(r'^__', r'\\__', r'^__(.*?)__$')]
+        self.swaps = [(r'(\b|^)__', r'\\__', r'(\b|^)__(.*?)__(\b|$)'),
+                      (r'(\b|^|@@)__', r'\\__', r'(\b|^)@@__(.*?)__@@($|\b)')]
         self.bl = r"**_\1_**" 
         self.bd = r'**\1**'
         self.it = r'*\1*'
@@ -877,7 +878,7 @@ class Markdown(BaseEncoder):
         return [m.group(1) for m in re.finditer(re.compile('"#footnote-(.*?)"'), value)]
 
     def FmtListItem(self, value, level):
-        return re.sub(r'^{0}'.format(M * level), ('\t' * level - 1) + '* ', value)
+        return re.sub(r'^{0}'.format(M * level), ('\t' * (level - 1)) + '* ', value)
 
     def GetTable(self, table, label = None):
         ncols = list(set([len(x) for x in table]))
@@ -897,7 +898,7 @@ class Markdown(BaseEncoder):
         return self.GetCodes(text, k, label = None)
 
     def GetBox(self, text, k, label = None):
-        return '**_{0}_**\n\n{1}\n'.format(k.lower().capitalize() if label is None else label, text)
+        return '**_{0}_**\n\n{1}\n'.format(label if label else k.lower().capitalize(), text)
 
     def GetCMD(self, value, index = None):
         cmd = '\n'.join([wraptxt(x, '\\', int(self.wrap_width)) for x in value])
@@ -912,7 +913,7 @@ class Markdown(BaseEncoder):
         return '## ' + value
 
     def GetHighlight(self, value):
-        return '\n</wrap>\n' + value + '_**\n'
+        return '**_' + value + '_**\n'
 
     def GetSubsubsection(self, value, index = None):
         return '#### ' + value

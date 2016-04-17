@@ -67,7 +67,7 @@ class ParserCore:
         self.ParseText(worker)
         if not worker.no_ref:
             self.ParseBib(worker)
-        return worker.Write(self.text)
+        return worker.Write([_f for _f in self.text if _f]).strip()
 
     def PurgeComment(self):
         comments = []
@@ -98,9 +98,8 @@ class ParserCore:
             for idx in range(len(self.text)):
                 for item in comments:
                     if idx in range(item[0], item[1]):
-                        self.text[idx] = None
+                        self.text[idx] = ''
                         break
-        self.text = [_f for _f in self.text if _f]
 
     def ParseBlock(self, text, worker):
         idx = 0

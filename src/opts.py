@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import sys, shutil, os, re, argparse
-import codecs
+import sys, shutil, os, re, argparse, codecs
 from .utils import env, regulate_output, pdflatex, indexhtml
-from .encoder import LaTeX, Beamer, Html, Dokuwiki
 from .parser import ParserCore
+from .encoder import LaTeX, Beamer, Html, Dokuwiki, Markdown
+from .markdown_toclify import markdown_toclify
 
 def doc(args, unknown_args):
     runner = ParserCore(args.filename, 'tex', 'long' if args.long_ref else 'short', args.lite)
@@ -53,11 +53,37 @@ def dokuwiki(args, unknown_args):
                       args.disqus)
     fname = regulate_output(args.filename, args.output, suffix='.txt')
     if args.filename == fname + '.txt':
-        raise ValueError('Cannot write output to ``{0}`` due to name conflict with input!')
+        raise ValueError('Cannot write output to ``{0}`` due to name conflict with input!'.format(fname + '.txt'))
     with codecs.open(fname + '.txt', 'w', encoding='UTF-8', errors='ignore') as f:
         f.writelines(runner(worker))
     return
 
+def markdown(args, unknown_args):
+    args.suffix = '.' + args.suffix
+    runner = ParserCore(args.filename, 'markdown', 'long' if args.long_ref else 'short', args.lite,
+                        figure_path = args.figure_path)
+    # Currently none of these 3 input variables is used
+    worker = Markdown(args.title, args.author, args.date)
+    text = runner(worker).split('\n')
+    fname = None
+    if args.output:
+        # check if output name is a directory name
+        # then use the Github wiki style output:
+        # the first line of file as filename
+        if os.path.isdir(args.output):
+            for idx, item in enumerate(text):
+                if item:
+                    fname = os.path.join(args.out, re.sub(r'#|:', '', item).strip().replace(' ', '-'))
+                    text = text[(idx + 1):]
+                    break
+    if not fname:
+        fname = regulate_output(args.filename, args.output, suffix=args.suffix)
+    fname += args.suffix
+    if args.filename == fname:
+        raise ValueError('Cannot write output to ``{0}`` due to name conflict with input!'.format(fname))
+    with codecs.open(fname, 'w', encoding='UTF-8', errors='ignore') as f:
+        f.writelines('\n'.join(text))
+    return
 
 class Main:
     def __init__(self, version):
@@ -93,12 +119,12 @@ class Main:
         self.getCommonArguments(parser)
         self.getDokuwikiArguments(parser)
         parser.set_defaults(func=dokuwiki)
-        # # markdown
-        # parser = subparsers.add_parser('markdown', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        #                                help='Generate markdown text from notes file(s)')
-        # self.getCommonArguments(parser)
-        # self.getMarkDownArguments(parser)
-        # parser.set_defaults(func=markdown)
+        # markdown
+        parser = subparsers.add_parser('markdown', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                       help='Generate markdown text from notes file(s)')
+        self.getCommonArguments(parser)
+        self.getMarkDownArguments(parser)
+        parser.set_defaults(func=markdown)
         # # admin
         # parser = subparsers.add_parser('admin', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         #                                help='A collection of utility features')
@@ -119,9 +145,19 @@ class Main:
 
     def getCommonArguments(self, parser):
         parser.add_argument('filename',
-                        metavar = 'FN',
+                        metavar = 'filename',
                         nargs = '+',
                         help='''name of the input notes file(s)''')
+        parser.add_argument('-a', '--author',
+                        metavar='name',
+                        help='''author's name''')
+        parser.add_argument('-t', '--title',
+                        metavar='text',
+                        help='''title of document''')
+        parser.add_argument('-d', '--date',
+                        metavar='date',
+                        default = env.nice_time,
+                        help='''date, leave empty for current date''')
         parser.add_argument('-o', '--output',
                         metavar='name',
                         type=str,
@@ -129,16 +165,6 @@ class Main:
         parser.add_argument('--toc',
                         action='store_true',
                         help='''generate table of contents''')
-        parser.add_argument('-a', '--author',
-                        action='store',
-                        help='''author's name''')
-        parser.add_argument('-t', '--title',
-                        action='store',
-                        help='''title of document''')
-        parser.add_argument('-d', '--date',
-                        action='store',
-                        default = env.nice_time,
-                        help='''date, leave empty for current date''')
         parser.add_argument('-l', '--lite',
                         action='store_true',
                         help='''mask commented-out text from output''')
@@ -216,7 +242,7 @@ class Main:
                         action='store_true',
                         help='''plain html code for text body (no style, no title / author, etc.)''')
         parser.add_argument('--figure_path',
-                        metavar = 'PATH',
+                        metavar = 'dir',
                         default = '',
                         help='''path to where figures are saved''')
 
@@ -234,6 +260,17 @@ class Main:
                         help='''authorized user name or group name of this page''')
         parser.add_argument('--disqus', action = 'store_true', help = 'Add "disqus" comment section to page')
         parser.add_argument('--figure_path',
-                        metavar = 'PATH',
+                        metavar = 'dir',
                         default = '',
                         help='''path to where figures are saved''')
+
+    def getMarkDownArguments(self, parser):
+        parser.add_argument('--suffix',
+                        metavar='EXT',
+                        default='md',
+                        help='''output file suffix''')
+        parser.add_argument('--figure_path',
+                        metavar = 'dir',
+                        default = '',
+                        help='''path to where figures are saved''')
+
