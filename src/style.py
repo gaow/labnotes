@@ -733,7 +733,7 @@ BM_CONFIG = '''
 \\hypersetup{
 	pdftitle={Beamer Presentation},
 	pdfsubject={Beamer Presentation},
-	pdfauthor={tigernotes},
+	pdfauthor={labnotes},
 %%	pdfpagemode={FullScreen},
 	pdfkeywords={acrobat, Beamer}%%,
 %%	colorlinks={true},
@@ -1567,11 +1567,12 @@ hr {
 'tail':'</ul><h4>Last updated: %s</h4></div></body></html>' % strftime("%a %d %b %Y %H:%M:%S", localtime())
         }
 
-class TigerJournal:
-        def __init__(self, url = 'http://tigerwang.org/uploads/', title = 'Journal of Gao T. Wang', logo = 'logo.png', background = 'bg.jpg'):
+class BlogCSS:
+        def __init__(self, url, title, media_path, logo = 'logo.png', background = 'bg.jpg'):
             self.title = title
-            self.logo = url + logo
-            self.bg = url + background
+            self.logo = os.path.join(media_path, logo)
+            self.bg = os.path.join(media_path, background)
+            self.url = url
 
         def GetMeta(self, title):
             return '''
@@ -1644,7 +1645,7 @@ class TigerJournal:
       </table>
       </td>
     </tr>
-            '''.format(title, self.title, 'http://tigerwang.org',
+            '''.format(title, self.title, self.url,
                        self.logo, self.bg, HTML_SYN, HTML_STYLE_LIGHT)
 
         def GetLeftColumn(self, title, links):

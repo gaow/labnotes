@@ -67,7 +67,7 @@ class ParserCore:
         self.ParseText(worker)
         if not worker.no_ref:
             self.ParseBib(worker)
-        return worker.Write([_f for _f in self.text if _f]).strip()
+        return worker.Write([_f for _f in self.text if _f])
 
     def PurgeComment(self):
         comments = []

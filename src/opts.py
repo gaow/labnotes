@@ -5,6 +5,7 @@ from .utils import env, regulate_output, pdflatex, indexhtml
 from .parser import ParserCore
 from .encoder import LaTeX, Beamer, Html, Dokuwiki, Markdown
 from .markdown_toclify import markdown_toclify
+from .blog import BlogCFG, edit_blog, upload_blog
 
 def doc(args, unknown_args):
     runner = ParserCore(args.filename, 'tex', 'long' if args.long_ref else 'short', args.lite)
@@ -83,6 +84,17 @@ def markdown(args, unknown_args):
         raise ValueError('Cannot write output to ``{0}`` due to name conflict with input!'.format(fname))
     with codecs.open(fname, 'w', encoding='UTF-8', errors='ignore') as f:
         f.writelines('\n'.join(text))
+    if args.toc:
+        markdown_toclify(input_file = fname,
+                         output_file = fname, github = True, back_to_top = True)
+    return
+
+def blog(args, unknown_args):
+    config = BlogCFG(args.config, args.date)
+    if args.make:
+        upload_blog(config, args.user)
+    else:
+        edit_blog(config)
     return
 
 class Main:
@@ -125,6 +137,11 @@ class Main:
         self.getCommonArguments(parser)
         self.getMarkDownArguments(parser)
         parser.set_defaults(func=markdown)
+        # markdown
+        parser = subparsers.add_parser('blog', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                       help='A simple HTML blog manager')
+        self.getBlogArguments(parser)
+        parser.set_defaults(func=blog)
         # # admin
         # parser = subparsers.add_parser('admin', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         #                                help='A collection of utility features')
@@ -274,3 +291,8 @@ class Main:
                         default = '',
                         help='''path to where figures are saved''')
 
+    def getBlogArguments(self, parser):
+        parser.add_argument('-d', '--date', help='''Date to edit''')
+        parser.add_argument('-c', dest = 'config', default = '~/.labnotes/blog.yml', help = 'blog configuration file')
+        parser.add_argument('-u', '--user', help='''username to web host''')
+        parser.add_argument('-m', '--make', action='store_true', help = 'generate and upload pages')
