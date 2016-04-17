@@ -1,14 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-try:
-    # python3
-    from urllib.request import urlopen
-except:
-    # python2
-    from urllib.request import urlopen
+import os, yaml, json
+from urllib.request import urlopen
 from collections import OrderedDict
-import yaml, json
-import os
 from time import sleep
 try:
     import sqlite3
@@ -156,9 +150,12 @@ class PapersDB:
 
     def write(self, data):
         data = [x + [None] for x in data]
-        writer = sqlite3.connect(":memory:")
-        cur = writer.cursor()
-        cur.execute(self.create_query)
-        cur.executemany(self.insert_query, data)
-        writer.commit()
-        print(("\n".join(writer.iterdump())))
+        if HAS_SQLITE3:
+            writer = sqlite3.connect(":memory:")
+            cur = writer.cursor()
+            cur.execute(self.create_query)
+            cur.executemany(self.insert_query, data)
+            writer.commit()
+            print(("\n".join(writer.iterdump())))
+        else:
+            print(data)
