@@ -3,7 +3,7 @@ author: "J. Doe"
 date: "`r Sys.Date()`"
 knit: "bookdown::render_book"
 documentclass: book
-bibliography: [~/.tigernotes/reference.bib]
+bibliography: [~/.labnotes/reference.bib]
 biblio-style: apalike
 link-citations: yes
 site: bookdown::bookdown_site

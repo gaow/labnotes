@@ -18,12 +18,13 @@ b1.pdf: $(slides)
 		--title "Example documentation" --output b1
 
 md1.rmd: $(notes)
-	labnotes markdown $(notes) -o md1 --suffix rmd
+	labnotes markdown $(notes) -o md1 --suffix rmd --lite
 
 labnotes/index.html:
-	labnotes admin --md md1.rmd --pdf $(notes) -o labnotes \
+	labnotes bind --md md1.rmd --pdf $(notes) -o labnotes \
 		-a "Gao T. Wang" -t "My Text Processor" --description \
-		"This is a tool that I built and use to manage pieces of notes since 2011. It compiles formatted notes into various types publishable documents."
+		"This is a tool that I built and use to manage pieces of notes since 2011. It compiles formatted notes into various types publishable documents." \
+		--font_size 12 --lite --footnote
 
 clean:
 	rm -f $(objects)

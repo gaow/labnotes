@@ -1,26 +1,16 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import codecs, os, shutil
 from . import BOOKDOWN_CFG as cfg, BOOKDOWN_OUT as out, \
      BOOKDOWN_TEX as tex, BOOKDOWN_STYLE as style, \
      BOOKDOWN_TOC as toc, BOOKDOWN_IDX as idx
 from .utils import env, dict2str, cd
-from pysos.sos_script import SoS_Script
+from pysos import SoS_Script, check_R_library, check_command
 
-def get_sos(files, pdf, check_deps, workdir):
-    bookdown_header = '''
+def get_sos(files, pdf, workdir):
+    bookdown_section = '''
 [1]
 # Build bookdown in HTML
-'''
-    if check_deps:
-        check_section = '''
-check_R_library('rstudio/bookdown')
-check_R_library('rstudio/DT')
-check_command('pandoc')
-'''
-    else:
-        check_section = ''
-    bookdown_section = '''
 quiet = 'T'
 formats = ['bookdown::gitbook']
 input: %s
@@ -52,14 +42,21 @@ for (fmt in formats) {
 input: %s
 output: %s
 run:
-    tigernotes doc ${input!q} -o ${output!q} %s
+    labnotes doc ${input!q} -o ${output!q} %s
 ''' % (repr(pdf[0]), repr(os.path.join(workdir, pdf[1], '_main.pdf')), pdf[2])
     else:
         pdf_section = ''
-    return(bookdown_header + check_section + bookdown_section + pdf_section)
+    return(bookdown_section + pdf_section)
 
 def prepare_bookdown(files, title, author, date, description,
                      url, url_edit, repo, pdf, output, pdf_args):
+
+    if not os.path.exists(os.path.join(env.tmp_dir, env.time) + '.deps'):
+        check_R_library('rstudio/bookdown')
+        check_R_library('rstudio/DT')
+        check_command('pandoc')
+        os.system('touch %s' % os.path.join(env.tmp_dir, env.time) + '.deps')
+
     # write resources
     with codecs.open(os.path.join(env.tmp_dir, 'style.css'), 'w', encoding='UTF-8') as f:
             f.write(style)
@@ -97,6 +94,7 @@ def prepare_bookdown(files, title, author, date, description,
     out['bookdown::pdf_book']['includes']['in_header'] = os.path.join(env.tmp_dir, 'preamble.tex')
     workdir = os.getcwd()
     if output:
+        output = os.path.abspath(os.path.expanduser(output))
         os.makedirs(output, exist_ok = True)
         cfg['output_dir'] = os.path.basename(output)
         workdir = os.path.dirname(output)
@@ -113,11 +111,6 @@ def prepare_bookdown(files, title, author, date, description,
                       '-t {}'.format(repr(title)) if title else '',
                       '-d {}'.format(repr(date)) if date else '',
                       ' '.join(pdf_args)))
-    #
-    if os.path.exists(os.path.join(env.tmp_dir, env.time) + '.deps'):
-        check_deps = False
-    else:
-        check_deps = True
     # Move files around to resolve path problem for bookdown
     filenames = ['index.rmd' if idx == 0 else '{}_{}'.format(str(idx).zfill(4), os.path.basename(x))
                  for idx, x in enumerate(files)]
@@ -126,29 +119,30 @@ def prepare_bookdown(files, title, author, date, description,
     with open(files[0]) as f:
         tmp = f.read()
     for f in files:
-        os.rename(f, os.path.join(env.tmp_dir, os.path.basename(f)))
-    with cd(workdir):
-        with open(filenames[0], 'w') as f:
-            f.write('---\n{}\n---\n{}'.format(dict2str(idx), tmp))
-        cfg['rmd_files']['html'] = list(filenames)
-        cfg['rmd_files']['latex'] = list(filenames)
-        with open('_output.yml', 'w') as f:
-            f.write(dict2str(out))
-        with open('_bookdown.yml', 'w') as f:
-            f.write(dict2str(cfg))
+        shutil.move(f, os.path.join(env.tmp_dir, os.path.basename(f)))
     error_msg = None
     try:
-        SoS_Script(get_sos(filenames, pdf, check_deps, workdir)).workflow().run()
+        with cd(workdir):
+            with open(filenames[0], 'w') as f:
+                f.write('---\n{}\n---\n{}'.format(dict2str(idx), tmp))
+            cfg['rmd_files']['html'] = list(filenames)
+            cfg['rmd_files']['latex'] = list(filenames)
+            with open('_output.yml', 'w') as f:
+                f.write(dict2str(out))
+            with open('_bookdown.yml', 'w') as f:
+                f.write(dict2str(cfg))
+        SoS_Script(get_sos(filenames, pdf, workdir)).workflow().run()
     except Exception as e:
         error_msg = e
     for f in files:
-        os.rename(os.path.join(env.tmp_dir, os.path.basename(f)), f)
-    with cd(workdir):
-        os.remove('_output.yml')
-        os.remove('_bookdown.yml')
-        for f in filenames:
-            os.remove(f)
-    if error_msg is None:
-        os.system('touch %s' % os.path.join(env.tmp_dir, env.time) + '.deps')
-    else:
-        raise RuntimeError(e)
+        shutil.move(os.path.join(env.tmp_dir, os.path.basename(f)), f)
+    try:
+        with cd(workdir):
+            os.remove('_output.yml')
+            os.remove('_bookdown.yml')
+            for f in filenames:
+                os.remove(f)
+    except:
+        pass
+    if error_msg is not None:
+        raise RuntimeError(error_msg)

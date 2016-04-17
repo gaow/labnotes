@@ -6,6 +6,7 @@ from .parser import ParserCore
 from .encoder import LaTeX, Beamer, Html, Dokuwiki, Markdown
 from .markdown_toclify import markdown_toclify
 from .blog import BlogCFG, edit_blog, upload_blog
+from .bookdown import prepare_bookdown
 
 def doc(args, unknown_args):
     runner = ParserCore(args.filename, 'tex', 'long' if args.long_ref else 'short', args.lite)
@@ -97,6 +98,19 @@ def blog(args, unknown_args):
         edit_blog(config)
     return
 
+def bind(args, unknown_args):
+    if args.html:
+        fname = 'index.html'
+        if args.output:
+            fname = getfname([], args.output, suffix='.html') + '.html'
+        otext = indexhtml([x for x in args.html if x != fname])
+        with codecs.open(fname, 'w', encoding='UTF-8', errors='ignore') as f:
+            f.writelines(otext)
+    if args.md:
+        prepare_bookdown(args.md, args.title, args.author, args.date,
+                         args.description, args.url, args.url_edit,
+                         args.repo, args.pdf, args.output, unknown_args)
+
 class Main:
     def __init__(self, version):
         self.master_parser = argparse.ArgumentParser(
@@ -142,11 +156,11 @@ class Main:
                                        help='A simple HTML blog manager')
         self.getBlogArguments(parser)
         parser.set_defaults(func=blog)
-        # # admin
-        # parser = subparsers.add_parser('admin', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        #                                help='A collection of utility features')
-        # self.getAdminArguments(parser)
-        # parser.set_defaults(func=admin)
+        # bind
+        parser = subparsers.add_parser('bind', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                       help='Bind multiple documents')
+        self.getBindArguments(parser)
+        parser.set_defaults(func=bind)
 
     def __call__(self):
         args, unknown_args = self.master_parser.parse_known_args()
@@ -296,3 +310,51 @@ class Main:
         parser.add_argument('-c', dest = 'config', default = '~/.labnotes/blog.yml', help = 'blog configuration file')
         parser.add_argument('-u', '--user', help='''username to web host''')
         parser.add_argument('-m', '--make', action='store_true', help = 'generate and upload pages')
+
+    def getBindArguments(self, parser):
+        group = parser.add_argument_group('Index HTML')
+        parser.add_argument('-o', '--output',
+                        metavar='name',
+                        type=str,
+                        help='''name of output file prefix''')
+        group.add_argument('--html',
+                        metavar = 'FN',
+                        nargs = '+',
+                        help='''name of the input file(s)''')
+        group = parser.add_argument_group('Prepare bookdown')
+        group.add_argument('--md',
+                        metavar = 'FN',
+                        nargs = '+',
+                        help='''name of the input file(s)''')
+        group.add_argument('-a', '--author',
+                        action='store',
+                        default = '',
+                        help='''author's name''')
+        group.add_argument('-t', '--title',
+                        action='store',
+                        default = '',
+                        help='''title of document''')
+        group.add_argument('-d', '--date',
+                        action='store',
+                        default = '',
+                        help='''date, leave empty for current date''')
+        group.add_argument('--description',
+                        action='store',
+                        default = '',
+                        help='''description, a message string or a file name''')
+        group.add_argument('--url',
+                        action='store',
+                        default = '',
+                        help='''URL of the website to publish''')
+        group.add_argument('--url-edit', dest = 'url_edit',
+                        action='store',
+                        default = '',
+                        help='''URL of the source to edit''')
+        group.add_argument('--repo',
+                        action='store',
+                        default = '',
+                        help='''github repo, if available''')
+        group.add_argument('--pdf',
+                        action='store',
+                        nargs = '+',
+                        help='''source notes to generate PDF file from''')

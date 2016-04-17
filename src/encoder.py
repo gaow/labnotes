@@ -195,7 +195,7 @@ class FigureInserter:
             else:
                 lines[0] = '\\begin{figure}[H]\n\\centering\n' + lines[0]
                 lines[-1] += '\\end{figure}\n'
-        self.data = '\n'.join(lines)
+        self.data = '\n'.join(lines) + '\n'
 
     def Insert(self):
         return self.data
@@ -295,6 +295,9 @@ class LaTeX(BaseEncoder):
         return [m.group(1) for m in re.finditer(re.compile('\\cite{(.*?)}'), value)]
 
     def GetCodes(self, text, k, label = None):
+        if k.lower() not in SYNTAX:
+            env.logger.warning("Syntax highlight not available for ``{}``.".format(k))
+            k = 'text'
         return '\\begin{minted}[samepage=false, fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{%s}]{%s}\n%s\n\\end{minted}\n' % (k.upper() if not label else label, k, wraptxt(text, '\\' if k == 'bash' else '', 131, rmblank = False, prefix = COMMENT[k.lower()]))
 
     def GetVerbatim(self, text, label = None):
@@ -388,6 +391,9 @@ class Beamer(LaTeX):
         return value + '\\end{thebibliography}' + '\n\\end{frame}'
 
     def GetCodes(self, text, k, label = None):
+        if k.lower() not in SYNTAX:
+            env.logger.warning("Syntax highlight not available for ``{}``.".format(k))
+            k = 'text'
         return '\\begin{exampleblock}{\\texttt{%s}}\\scriptsize\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{exampleblock}\n' % (k.capitalize() if not label else label, wraptxt(text, '', int(78 * self.wrap_adjust), rmblank = False, prefix = COMMENT[k.lower()]))
 
     def GetVerbatim(self, text, label = None):
@@ -765,6 +771,9 @@ class Dokuwiki(BaseEncoder):
         # no wrap, totally rely on dokuwiki
         # text = wraptxt(text, '', 1000, rmblank = True)
         # require sxh3 plugin
+        if k.lower() not in SYNTAX:
+            env.logger.warning("Syntax highlight not available for ``{}``.".format(k))
+            k = 'text'
         if self.sxh3:
             text = '<sxh {0}{1};gutter: false;>\n\n'.format(
                 k.lower() if k.lower() not in ['s', 'r'] else 'plain',
@@ -872,13 +881,13 @@ class Markdown(BaseEncoder):
         return '<a name="#footnote-{0}">{1}</a>'.format(value3, value1)
 
     def FmtBibItem(self, k, v1, v2):
-        return '[{1}](#footnote-{0}): {2}\n'.format(k, v1, v2)
+        return '[{1}](#footnote-{0}): {2}\n\n'.format(k, v1, v2)
 
     def FindBibKey(self, value):
         return [m.group(1) for m in re.finditer(re.compile('"#footnote-(.*?)"'), value)]
 
     def FmtListItem(self, value, level):
-        return re.sub(r'^{0}'.format(M * level), ('\t' * (level - 1)) + '* ', value)
+        return ('\t' * (level - 1)) + '* ' + value.lstrip(M)
 
     def GetTable(self, table, label = None):
         ncols = list(set([len(x) for x in table]))
@@ -894,8 +903,7 @@ class Markdown(BaseEncoder):
         return text
 
     def GetVerbatim(self, text, label = None):
-        k = label if label is not None else ''
-        return self.GetCodes(text, k, label = None)
+        return self.GetCodes(text, '', label = None)
 
     def GetBox(self, text, k, label = None):
         return '**_{0}_**\n\n{1}\n'.format(label if label else k.lower().capitalize(), text)

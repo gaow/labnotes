@@ -27,10 +27,14 @@ class Environment:
         self.precise_time = strftime("%a %d %b %Y %H:%M:%S", localtime())
         self.nice_time = '{} {}, {}'.format(self.month_name, self.date, self.year)
         self.logger = pysos_env.logger
+        self.datadir = os.path.expanduser('~/.labnotes')
+        if not os.path.isdir(self.datadir):
+            os.makedirs(self.datadir)
+        os.system('touch {}/reference.bib'.format(self.datadir))
 
     def get_tmpdir(self):
         self.tmp_dir = None
-        pattern = re.compile(r'tigernotes_cache_*(.*)')
+        pattern = re.compile(r'labnotes_cache_*(.*)')
         for fn in os.listdir(tempfile.gettempdir()):
             if pattern.match(fn):
                 self.tmp_dir = os.path.join(tempfile.gettempdir(), fn)
@@ -42,14 +46,14 @@ class Environment:
         if self.tmp_dir:
             shutil.rmtree(self.tmp_dir)
             env.logger.info('cache folder ``{0}`` is removed\n'.format(self.tmp_dir))
-            self.tmp_dir = tempfile.mkdtemp(prefix='tigernotes_cache_')
+            self.tmp_dir = tempfile.mkdtemp(prefix='labnotes_cache_')
         else:
-            self.tmp_dir = tempfile.mkdtemp(prefix='tigernotes_cache_')
+            self.tmp_dir = tempfile.mkdtemp(prefix='labnotes_cache_')
         if (not os.access(self.tmp_dir, os.R_OK)) or \
           (not os.access(self.tmp_dir, os.W_OK)) or \
           (os.stat(self.tmp_dir).st_mode & stat.S_ISVTX == 512):
                 home_dir = os.getenv("HOME")
-                self.tmp_dir = os.path.join(home_dir, '.tigernotes/cache')
+                self.tmp_dir = os.path.join(home_dir, '.labnotes/cache')
                 if not os.path.exists(self.tmp_dir):
                         os.makedirs(self.tmp_dir)
 
@@ -57,10 +61,7 @@ env = Environment()
 
 def getPaper(doi, reference_format):
     doi = doi.rstrip('/')
-    datadir = os.path.expanduser('~/.tigernotes')
-    if not os.path.isdir(datadir):
-        os.makedirs(datadir)
-    database = os.path.join(datadir, 'references')
+    database = os.path.join(env.datadir, 'reference')
     finder = PaperList(database)
     sys.stderr.write('Searching for {0} ...\r'.format(doi))
     sys.stderr.flush()

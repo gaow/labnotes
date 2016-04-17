@@ -1,10 +1,10 @@
 ###
 #! About
 ###
-# @@labnotes@@ was first written in summer 2011 as a LaTeX wrapper to generate documentation from arbitrary pieces of @@bash@@, @@python@@, @@c++@@ or @@R@@ script, as a replacement for Doxygen, for book-keeping of stuff I wrote for research projects. Hashtag @@#@@ was therefore the default choice to lead a regular line of text, or ``comments'' in between codes, as it conforms to many programming languages. It was then polished to produce more formal documents as I started to use it to write homework, project reports, and organize notes. It made life better documented and research projects more reproducible. In 2012 a few others in the lab began to adopt it for documenting a collaborative data analysis project, and within roughly a year the program was expanded to generate beamer sides and HTML files for sharing at seminars and websites. Support for a couple of wiki platforms was later added to write documentation for projects such as [this|@http://bioinformatics.org/spower/start@], [this|@http://varianttools.sourceforge.net/@], [this|@http://bioinformatics.org/seqlink/@], and [this|@https://github.com/stephenslab/dsc2/wiki@]. In 2016, I put together a simple [bookdown|@https://bookdown.org/@] template and switched to it from dokuwiki for daily work. On the Tax day of 2016 I posted the source code to [github|@https://github.com/gaow/labnotes@].
+# My text processor, @@labnotes@@ was first written in summer 2011 as a LaTeX wrapper to generate documentation from arbitrary pieces of @@bash@@, @@python@@, @@c++@@ or @@R@@ script, as a replacement for Doxygen, for book-keeping of stuff I wrote for research projects. Hashtag @@#@@ was therefore the default choice to lead a regular line of text, or ``comments'' in between codes, as it conforms to many programming languages. It was then polished to produce more formal documents as I started to use it to write homework, project reports, and organize notes. It made life better documented and research projects more reproducible. In 2012 a few others in the lab began to adopt it for documenting a collaborative data analysis project, and within roughly a year the program was expanded to generate beamer sides and HTML files for sharing at seminars and websites. Support for a couple of wiki platforms was later added to write documentation for projects such as [this|@http://bioinformatics.org/spower/start@], [this|@http://varianttools.sourceforge.net/@], [this|@http://bioinformatics.org/seqlink/@], and [this|@https://github.com/stephenslab/dsc2/wiki@]. In 2016, I put together a simple [bookdown|@https://bookdown.org/@] template and switched to it from dokuwiki for daily work. On the Tax day of 2016 I posted the source code to [github|@https://github.com/gaow/labnotes@].
 # I never tried to advertise @@labnotes@@ because the syntax and features are entirely driven by personal taste ("hashtags", to start with!) and the implementation is continuous accumulation of monkey patches to get jobs done during a busy day. Nowadays @@knitr + rmarkdown@@ rules and most of us write Markdown text. Still, I hold on to it because it continues to serve me well as it has over the years, and I have the liberty to shape it as I see fit. If your day job shares a lot similarities with mine (do statistics and computational biology using multiple programming languages, mostly via non-interactive batch commands, on messy data), you might find @@labnotes@@ a fine choice to keep your project organized.
-# For installation please visit @github.com/gaow/labnotes@.
-# Documentation is still [being prepared|@https://github.com/gaow/labnotes/blob/master/vignette/example.notes@].
+# For installation please visit @http://github.com/gaow/labnotes@.
+# A complete demo is still [in preparation|@https://github.com/gaow/labnotes/blob/master/vignette/example.notes@].
 #{----
 ###
 # This part of document is commented out
@@ -38,15 +38,9 @@ output:///labnotes dokuwiki -h
   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-
  / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \
 `-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'
-labnotes pmwiki -h
-output:///labnotes pmwiki -h
-  .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-
- / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \
-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'
 labnotes markdown -h
 output:///labnotes markdown -h
 #}
-#}---
 # This documentation is very much out-dated. Quite a few features in the latest version of the program is not documented on this page, unfortunately ...
 #{out syntax
       ###   ###
@@ -78,38 +72,38 @@ output:///labnotes markdown -h
 ###
 #! DOC Example
 #{bash doc
-tigernotes doc -h
-tigernotes doc example.notes --author "John Doe" --title "Example log documentation" --footnote --lite --output d1.pdf
-tigernotes doc example.notes --author "John Doe" --title "Example log documentation" --toc --output d2.pdf
-tigernotes doc example.notes --no_page_number --no_section_number --font default --font_size 11 --output d3.pdf
+labnotes doc -h
+labnotes doc example.notes --author "John Doe" --title "Example log documentation" --footnote --lite --output d1.pdf
+labnotes doc example.notes --author "John Doe" --title "Example log documentation" --toc --output d2.pdf
+labnotes doc example.notes --no_page_number --no_section_number --font default --font_size 11 --output d3.pdf
 #}
 #! SLIDES Example
 #{bash slides
-tigernotes slides -h
-tigernotes slides example.slides -o d3
-tigernotes slides example.slides --theme plain -o d4
-tigernotes slides example.slides -a "John Doe" -t "Example log slides" -i "McDonald's" --toc -o d5
-tigernotes slides example.slides -a "John Doe" -t "Example log slides" -i "McDonald's" --toc --theme heavy -o d6
-tigernotes slides example.slides -a "John Doe" -t "Example log slides" --toc --mode handout -o d7
-tigernotes slides example.slides -a "John Doe" -t "Example log slides" --toc --mode notes -o d8
+labnotes slides -h
+labnotes slides example.slides -o d3
+labnotes slides example.slides --theme plain -o d4
+labnotes slides example.slides -a "John Doe" -t "Example log slides" -i "McDonald's" --toc -o d5
+labnotes slides example.slides -a "John Doe" -t "Example log slides" -i "McDonald's" --toc --theme heavy -o d6
+labnotes slides example.slides -a "John Doe" -t "Example log slides" --toc --mode handout -o d7
+labnotes slides example.slides -a "John Doe" -t "Example log slides" --toc --mode notes -o d8
 #}
 #! HTML Example
 #{bash html
-tigernotes html -h
-tigernotes html example.notes -o d1 --author "John Doe" --title "Example log documentation" --lite
-tigernotes html example.notes -o d2 --author "John Doe" --title "Example log documentation" --lite --columns 2
-tigernotes html example.notes -o d3 --author "John Doe" --title "Example log documentation" --toc --separate
-tigernotes admin *.html -o index -a index_html
+labnotes html -h
+labnotes html example.notes -o d1 --author "John Doe" --title "Example log documentation" --lite
+labnotes html example.notes -o d2 --author "John Doe" --title "Example log documentation" --lite --columns 2
+labnotes html example.notes -o d3 --author "John Doe" --title "Example log documentation" --toc --separate
+labnotes admin *.html -o index -a index_html
 #}
 #! DOKUWIKI Example
 #{bash dokuwiki
-tigernotes dokuwiki -h
-tigernotes dokuwiki example.notes -o ~/html/data/pages/example.txt --toc
+labnotes dokuwiki -h
+labnotes dokuwiki example.notes -o ~/html/data/pages/example.txt --toc
 #}
-#! PMWIKI Example
-#{bash pmwiki
-tigernotes pmwiki -h
-tigernotes pmwiki example.notes --toc
+#! Markdown Example
+#{bash markdown
+labnotes markdown -h
+labnotes markdown example.notes --toc
 #}
 ###
 # Known Issues
@@ -123,7 +117,6 @@ tigernotes pmwiki example.notes --toc
 ###
 #! usage
 ###
-
 
 ###
 # Syntax
@@ -153,9 +146,7 @@ p(\theta|y_1 \ldots y_6) & = \frac{p(y_1 \ldots y_6|\theta) p(\theta)}{p(y_1 \do
 #!! Blocks
 #{ list
 #this
-#
 #is
-
 #a list block
 ## and you can indent it further
 ### but not any further
@@ -394,3 +385,4 @@ print("HELLO WORLD")
 #<hidden>
 # these will be hidden via ``hidden'' plugin. Usually I use this for codes folding
 #</hidden>
+#}---

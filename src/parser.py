@@ -67,7 +67,7 @@ class ParserCore:
         self.ParseText(worker)
         if not worker.no_ref:
             self.ParseBib(worker)
-        return worker.Write([_f for _f in self.text if _f])
+        return worker.Write(self.text)
 
     def PurgeComment(self):
         comments = []
@@ -388,7 +388,7 @@ class ParserCore:
             return self.PrepareTable(text, worker, label)
         elif name in ['warning', 'tip', 'important', 'note']:
             return self.PrepareBox(text, worker, name, label)
-        elif name in list(SYNTAX.keys()):
+        else:
             return self.PrepareCodes(text, worker, name, label)
 
     def PrepareList(self, text, worker, label = None):
