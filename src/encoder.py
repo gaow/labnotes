@@ -727,8 +727,7 @@ class Dokuwiki(BaseEncoder):
         self.tt = r"''\1''"
         self.sq = r"'\1'"
         self.dq = r'"\1"'
-        self.bar = '\|'
-        self.box_kw = []
+        self.box_kw = [r'box 80']
         self.direct_url = True
         self.no_ref = True
         # parameters
@@ -843,4 +842,84 @@ class Dokuwiki(BaseEncoder):
             otext += '\n\\\\\n\\\\\n\\\\\n~~DISQUS~~'
         if self.permission:
             otext += '\n</ifauth>'
+        return otext
+
+class Markdown(BaseEncoder):
+    def __init__(self, title, author, date):
+        super().__init__()
+        self.swaps = [(r'^__', r'\\__', r'^__(.*?)__$')]
+        self.bl = r"**_\1_**" 
+        self.bd = r'**\1**'
+        self.it = r'*\1*'
+        self.tt = r'`\1`' 
+        self.sq = r"'\1'"
+        self.dq = r'"\1"'
+        self.direct_url = True
+        # parameters
+        self.title = title
+        self.author = author
+        self.date = date
+        self.wrap_width = -1
+
+    def GetURL(self, value, link_text = ''):
+        if link_text:
+            return '[{}]({})'.format(link_text, value)
+        else:
+            return value
+
+    def GetRef(self, value1, value2, value3):
+        return '<a name="#footnote-{0}">{1}</a>'.format(value3, value1)
+
+    def FmtBibItem(self, k, v1, v2):
+        return '[{1}](#footnote-{0}): {2}\n'.format(k, v1, v2)
+
+    def FindBibKey(self, value):
+        return [m.group(1) for m in re.finditer(re.compile('"#footnote-(.*?)"'), value)]
+
+    def FmtListItem(self, value, level):
+        return re.sub(r'^{0}'.format(M * level), ('\t' * level - 1) + '* ', value)
+
+    def GetTable(self, table, label = None):
+        ncols = list(set([len(x) for x in table]))
+        if len(ncols) > 1:
+            raise ValueError("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'.\n``{0} ...``".format('\t'.join(table[0])))
+        hline = '|' + '|'.join([':{}:'.format('-' * (len(x) + 2)) for x in table[0]]) + '  |\n'
+        body = '|  ' + '  |  '.join(table[0]) + '  |\n' + hline + '\n'.join(['|  ' + '  |  '.join(item) + '  |' for item in table[1:]]) + '\n'
+        return body
+
+    def GetCodes(self, text, k, label = None):
+        text = '\n'.join(['  ' + x for x in text.split('\n')])
+        text = '```{1}\n{0}\n```\n'.format(text, k.lower() if k.lower() != "text" else '')
+        return text
+
+    def GetVerbatim(self, text, label = None):
+        k = label if label is not None else ''
+        return self.GetCodes(text, k, label = None)
+
+    def GetBox(self, text, k, label = None):
+        return '**_{0}_**\n\n{1}\n'.format(k.lower().capitalize() if label is None else label, text)
+
+    def GetCMD(self, value, index = None):
+        cmd = '\n'.join([wraptxt(x, '\\', int(self.wrap_width)) for x in value])
+        head = '```\n'
+        tail = '\n```\n'
+        return head + cmd + tail
+
+    def GetChapter(self, value, add_head = None, index = None):
+        return '# ' + value
+
+    def GetSection(self, value, add_head = None, index = None):
+        return '## ' + value
+
+    def GetHighlight(self, value):
+        return '\n</wrap>\n' + value + '_**\n'
+
+    def GetSubsubsection(self, value, index = None):
+        return '#### ' + value
+
+    def GetSubsection(self, value, add_head = None, index = None):
+        return '### ' + value
+
+    def Write(self, value):
+        otext = '\n'.join(value)
         return otext

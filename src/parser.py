@@ -326,13 +326,13 @@ class ParserCore:
                 # conditional swap
                 pattern = re.compile(item[2])
                 for m in re.finditer(pattern, line):
-                    line = line.replace(m.group(0), m.group(0).replace(item[0], item[1]))
+                    line = line.replace(m.group(0), re.sub(item[0], item[1], m.group(0)))
         line = re.sub(r'"""(.*?)"""', worker.bl, line)
         line = re.sub(r'""(.*?)""', worker.bd, line)
         line = re.sub(r'"(.*?)"', worker.it, line)
-        line = re.sub(r'@@(.*?)@@', worker.tt, line)
         line = re.sub(r"``(.*?)''", worker.dq, line)
         line = re.sub(r"`(.*?)'", worker.sq, line)
+        line = re.sub(r'@@(.*?)@@', worker.tt, line)
         # citation
         # [note|reference] defines the pattern for citation.
         # Will have to use [note$|$reference] here since '|' was previously replaced by $|$
