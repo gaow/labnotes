@@ -53,19 +53,19 @@ class BaseEncoder:
         self.no_ref = False
 
     def GetURL(self, value, link_text = ''):
-        return ''
+        return value
 
     def GetRef(self, value1, value2, value3):
         return ''
 
     def FmtListItem(self, value, level):
-        return ''
+        return value
 
     def FmtListStart(self, value, level):
-        return ''
+        return value
 
     def FmtListEnd(self, value, level):
-        return ''
+        return value
 
     def GetTable(self, table, label = None):
         return ''
@@ -702,7 +702,7 @@ class Html(BaseEncoder):
 
         if self.text_only:
             # Export pure text for use with other templates
-            return '\n'.join(self.text), '', ''
+            return '\n'.join(value), '', ''
         otext = '<!DOCTYPE html><html><head><title>{0}</title>\n'.\
           format((self.title + ' | ' + self.author) if self.title or self.author else '')
         if self.separate_css:
@@ -715,3 +715,132 @@ class Html(BaseEncoder):
                        (format_toc(self.dtoc) if self.toc else ''),
                        self.frame, '\n'.join(value))
         return otext, HTML_STYLE if self.separate_css else ''
+
+class Dokuwiki(BaseEncoder):
+    def __init__(self, title, author, date, toc, show_all, permission, disqus):
+        super().__init__()
+        self.swaps = [('--', '%%--%%', r'@@(.*?)@@'),
+                      ('__', '%%__%%', r'@@(.*?)@@')]
+        self.bl = r"**//\1//**"
+        self.bd = r'**\1**'
+        self.it = r'//\1//'
+        self.tt = r"''\1''"
+        self.sq = r"'\1'"
+        self.dq = r'"\1"'
+        self.bar = '\|'
+        self.box_kw = []
+        self.direct_url = True
+        self.no_ref = True
+        # parameters
+        self.title = title
+        self.author = author
+        self.date = date
+        self.toc = toc
+        self.show_all = show_all
+        self.wrap_width = -1
+        self.sxh3 = False
+        self.box_colors = {'warning': 'red', 'important': 'orange', 'tip': 'blue', 'note': 'green'}
+        self.permission = permission
+        self.disqus = disqus
+
+    def GetURL(self, value, link_text = ''):
+        if link_text:
+            return '[[{}|{}]]'.format(value, link_text)
+        else:
+            return value
+
+    def GetRef(self, value1, value2, value3):
+        return value1 + '(({0}))'.format(value2)
+
+    def FmtListItem(self, value, level):
+        return re.sub(r'^{0}'.format(M * level), '\t' * level + '* ', value)
+
+    def GetTable(self, table, label = None):
+        ncols = list(set([len(x) for x in table]))
+        if len(ncols) > 1:
+            raise ValueError("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'.\n``{0} ...``".format('\t'.join(table[0])))
+        body = '<WRAP center 105%>\n' + '^  ' + '  ^  '.join(table[0]) + '  ^\n' + '\n'.join(['|  ' + '  |  '.join(item) + '  |' for item in table[1:]]) + '\n</WRAP>\n'
+        return body
+
+    def GetCodes(self, text, k, label = None):
+        # no wrap, totally rely on dokuwiki
+        # text = wraptxt(text, '', 1000, rmblank = True)
+        # require sxh3 plugin
+        if self.sxh3:
+            text = '<sxh {0}{1};gutter: false;>\n\n'.format(
+                k.lower() if k.lower() not in ['s', 'r'] else 'plain',
+                ';title: {0}'.format(label) if label else ''
+                ) +  text + '\n\n</sxh>'
+        # non-sxh3 version
+        else:
+            text = '<code {0} {1}>\n'.format(
+                k.lower() if k.lower() not in ['s', 'r'] else 'rsplus',
+                '{0}{1}'.format('_'.join(re.sub(r'[^a-zA-Z0-9]',' ', os.path.splitext(label)[0]).split())
+                                if label else 'download-source',
+                                ('.' + SYNTAX[k.lower()]) if k.lower() != 'text'
+                                else (os.path.splitext(label)[1] if label else '.txt'))
+                ) +  text + '\n</code>'
+        if self.show_all:
+            text = '<hidden initialState="visible" -noprint>\n{0}\n</hidden>\\\\'.format(text)
+        else:
+            text = '<hidden -noprint>\n{0}\n</hidden>\\\\'.format(text)
+        return text
+
+    def GetVerbatim(self, text, label = None):
+        text = '\n'.join(['  ' + x for x in text.split('\n')])
+        if self.show_all:
+            text = '<hidden initialState="visible" -noprint>\n{0}\n</hidden>\\\\'.format(text)
+        else:
+            text = '<hidden -noprint>\n{0}\n</hidden>\\\\'.format(text)
+        return text
+
+    def GetBox(self, text, k, label = None):
+        text = '<box 80% round {0}|**__{1}__**>\n{2}\n</box>'.\
+          format(self.box_colors[k.lower()] if k.lower() in self.box_colors else 'black',
+                 k.lower().capitalize() if not label else label, text)
+        return text
+
+    def GetCMD(self, value, index = None):
+        cmd = '\n'.join([wraptxt(x, '\\', int(self.wrap_width)) for x in value])
+        head = '<code bash>\n'
+        tail = '\n</code>\\\\'
+        return head + cmd + tail
+
+    def GetChapter(self, value, add_head = None, index = None):
+        return '===== ' + value + ' ====='
+
+    def GetSection(self, value, add_head = None, index = None):
+        return '==== ' + value + ' ===='
+
+    def GetHighlight(self, value):
+        return '<wrap em hi>\n' + value + '\n</wrap>\n'
+
+    def GetSubsubsection(self, value, index = None):
+        return '== ' + value + ' =='
+
+    def GetSubsection(self, value, add_head = None, index = None):
+        return '=== ' + value + ' ==='
+
+    def Write(self, value):
+        otext = '\n'.join(value)
+        # mathjax support
+        # otext = '<HTML><script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><link href="style.css" rel="stylesheet" type="text/css"><script LANGUAGE="JavaScript" src="style.js"></script></HTML>\n' + otext
+        if self.toc == 0:
+            otext = '~~NOTOC~~\n' + otext
+        if self.toc == 2:
+            otext = otext.split('\n')
+            insert_point = [idx for idx, item in enumerate(otext)
+                            if item.startswith('=====') and item.endswith("=====")]
+            if len(insert_point) != 1:
+                otext = '{{INLINETOC}}\n\\\\\n' + '\n'.join(otext)
+            else:
+                otext.insert(insert_point[0] + 1,  '{{INLINETOC}}\n\\\\')
+                otext = '\n'.join(otext)
+        if self.permission:
+            user = re.sub(r'^\\', '', re.sub(r'^"|^\'|"$|\'$', '', self.permission))
+            otext = '<ifauth !{0}>\nThis post is only visible to authorized members. Please login if you are one of them.\n</ifauth>\n<ifauth {0}>\n' + otext
+        if self.disqus:
+            otext += '\n\\\\\n\\\\\n\\\\\n~~DISQUS~~'
+        if self.permission:
+            otext += '\n</ifauth>'
+        return otext

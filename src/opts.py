@@ -3,7 +3,7 @@
 import sys, shutil, os, re, argparse
 import codecs
 from .utils import env, regulate_output, pdflatex, indexhtml
-from .encoder import LaTeX, Beamer, Html
+from .encoder import LaTeX, Beamer, Html, Dokuwiki
 from .parser import ParserCore
 
 def doc(args, unknown_args):
@@ -41,6 +41,23 @@ def html(args, unknown_args):
     env.logger.info('http://www.google.com/webfonts/specimen/PT+Sans')
     return
 
+def dokuwiki(args, unknown_args):
+    toc = 0
+    if args.toc:
+        toc = 2
+    if args.compact_toc:
+        toc = 1
+    runner = ParserCore(args.filename, 'dokuwiki', 'long' if args.long_ref else 'short', args.lite,
+                        figure_path = args.figure_path)
+    worker = Dokuwiki(args.title, args.author, args.date, toc, args.showall, args.permission,
+                      args.disqus)
+    fname = regulate_output(args.filename, args.output, suffix='.txt')
+    if args.filename == fname + '.txt':
+        raise ValueError('Cannot write output to ``{0}`` due to name conflict with input!')
+    with codecs.open(fname + '.txt', 'w', encoding='UTF-8', errors='ignore') as f:
+        f.writelines(runner(worker))
+    return
+
 
 class Main:
     def __init__(self, version):
@@ -70,12 +87,12 @@ class Main:
         self.getCommonArguments(parser)
         self.getHtmlArguments(parser)
         parser.set_defaults(func=html)
-        # # dokuwiki
-        # parser = subparsers.add_parser('dokuwiki', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        #                                help='Generate dokuwiki text from notes file(s)')
-        # self.getCommonArguments(parser)
-        # self.getDokuwikiArguments(parser)
-        # parser.set_defaults(func=dokuwiki)
+        # dokuwiki
+        parser = subparsers.add_parser('dokuwiki', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                       help='Generate dokuwiki text from notes file(s)')
+        self.getCommonArguments(parser)
+        self.getDokuwikiArguments(parser)
+        parser.set_defaults(func=dokuwiki)
         # # markdown
         # parser = subparsers.add_parser('markdown', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         #                                help='Generate markdown text from notes file(s)')
@@ -200,4 +217,23 @@ class Main:
                         help='''plain html code for text body (no style, no title / author, etc.)''')
         parser.add_argument('--figure_path',
                         metavar = 'PATH',
+                        default = '',
+                        help='''path to where figures are saved''')
+
+    def getDokuwikiArguments(self, parser):
+        parser.add_argument('--showall',
+                        action='store_true',
+                        help='''unfold source code / output fields in page by default''')
+        parser.add_argument('--compact_toc',
+                        action='store_true',
+                        help='''generate compact table of contents (will override --toc)''')
+        # group = parser.add_mutually_exclusive_group()
+        parser.add_argument('--permission',
+                        metavar='user',
+                        type= str,
+                        help='''authorized user name or group name of this page''')
+        parser.add_argument('--disqus', action = 'store_true', help = 'Add "disqus" comment section to page')
+        parser.add_argument('--figure_path',
+                        metavar = 'PATH',
+                        default = '',
                         help='''path to where figures are saved''')

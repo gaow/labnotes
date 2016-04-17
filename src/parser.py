@@ -100,7 +100,7 @@ class ParserCore:
                     if idx in range(item[0], item[1]):
                         self.text[idx] = None
                         break
-        self.text = [_f for _f in self.text if _f is not None]
+        self.text = [_f for _f in self.text if _f]
 
     def ParseBlock(self, text, worker):
         idx = 0
@@ -219,7 +219,7 @@ class ParserCore:
                     end_subsection += 1
                 self.text[idx] = ''
                 self.text[idx + 1] = worker.GetChapter(
-                    self.Capitalize(self.Recode(self.text[idx + 1][len(M)+1:], worker)),
+                    self.Capitalize(self.Recode(self.text[idx + 1][len(M)+1:], worker)).strip(),
                     add_head = previous_ended, index = count_chapter)
                 self.text[idx + 2] = ''
                 idx += 3
@@ -234,7 +234,7 @@ class ParserCore:
                     end_subsection += 1
                 self.text[idx] = ''
                 self.text[idx + 1] = worker.GetSection(
-                    self.Capitalize(self.Recode(self.text[idx + 1][len(M):], worker)),
+                    self.Capitalize(self.Recode(self.text[idx + 1][len(M):], worker)).strip(),
                     add_head = previous_ended, index = count_section)
                 self.text[idx + 2] = ''
                 idx += 3
@@ -244,7 +244,7 @@ class ParserCore:
                 env.logger.warning("If you are sure of two ``{0}{0}`` at the beginning of this line please enter a space between them to get rid of this warning:\n\t``{1}``".format(M, self.text[idx]))
             if self.text[idx].startswith(M + '!!!'):
                 # highlight
-                self.text[idx] = worker.GetHighlight(self.Recode(self.text[idx][len(M)+3:], worker))
+                self.text[idx] = worker.GetHighlight(self.Recode(self.text[idx][len(M)+3:], worker).strip())
                 idx += 1
                 continue
             if self.text[idx].startswith(M + '!!'):
@@ -252,7 +252,7 @@ class ParserCore:
                     # for beamer
                     worker.RaiseSubsubsection(self.text[idx - 1])
                 # subsubsection
-                self.text[idx] = worker.GetSubsubsection(self.Recode(self.text[idx][len(M)+2:], worker))
+                self.text[idx] = worker.GetSubsubsection(self.Recode(self.text[idx][len(M)+2:], worker).strip())
                 idx += 1
                 continue
             if self.text[idx].startswith(M + '!'):
@@ -263,7 +263,7 @@ class ParserCore:
                     previous_ended  = True
                     end_subsection += 1
                 start_subsection += 1
-                self.text[idx] = worker.GetSubsection(self.Recode(self.text[idx][len(M)+1:], worker),
+                self.text[idx] = worker.GetSubsection(self.Recode(self.text[idx][len(M)+1:], worker).strip(),
                                                       add_head = previous_ended, index = count_subsection)
                 idx += 1
                 continue
@@ -275,7 +275,7 @@ class ParserCore:
                 continue
             if self.text[idx].startswith(M):
                 # a plain line here
-                self.text[idx] = worker.GetLine(self.Recode(self.text[idx][len(M):], worker))
+                self.text[idx] = worker.GetLine(self.Recode(self.text[idx][len(M):], worker).strip())
                 idx += 1
                 continue
         if start_subsection > end_subsection:
@@ -319,7 +319,14 @@ class ParserCore:
             line = line.replace(m.group(0), getPaper(m.group(1), self.reference_format))
         # in-line replacement of keywords
         for item in worker.swaps:
-            line = line.replace(item[0], item[1])
+            if len(item) == 2:
+                # plain swap
+                line = line.replace(item[0], item[1])
+            elif len(item) == 3:
+                # conditional swap
+                pattern = re.compile(item[2])
+                for m in re.finditer(pattern, line):
+                    line = line.replace(m.group(0), m.group(0).replace(item[0], item[1]))
         line = re.sub(r'"""(.*?)"""', worker.bl, line)
         line = re.sub(r'""(.*?)""', worker.bd, line)
         line = re.sub(r'"(.*?)"', worker.it, line)
