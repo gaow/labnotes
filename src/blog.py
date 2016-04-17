@@ -48,17 +48,17 @@ class BlogCFG:
         print(self.time, self.year, self.month, self.date, self.month_name)
 
 def write_blog(config):
-    html = '{}.html'.format(config.month_name)
+    html = '../{}.html'.format(config.month_name)
     contents = []
     for fn in sorted(glob.glob(os.path.join(config.path, "*.notes")), reverse = True):
         runner = ParserCore([fn], 'html', 'short', 0)
         worker = Html('', '', '', False, 1, text_only = True)
-        text = runner(worker)[0].strip()
+        text = runner(worker)[0].strip().split('\n')
         # summary, date, text
         name = os.path.splitext(os.path.basename(fn))[0]
-        contents.append((text[0][4:-5], '{}-{}-{}'.\
+        contents.append((text[0][3:-4], '{}-{}-{}'.\
                               format(name[:4], name[4:6], name[6:]),
-                              ''.join(text[1:])))
+                              '\n'.join(text[1:])))
     links = []
     for item in config.monthlist:
         links.append((os.path.join('../', config.year, item + '.html'), item))
@@ -74,11 +74,14 @@ def upload_blog(config, user):
     if not user:
         user = input("Username: ")
         passwd = getpass.getpass("Password: ")
-        os.system("sshpass -p {} rsync -auzP {}/* {}@{} --include '*/' --include '*.html' --exclude '*' --delete".\
+        cmd = ("sshpass -p {} rsync -auzP {}/* {}@{} --include '*/' --include '*.html' --exclude '*' --delete".\
                   format(passwd, config.blog_dir, user, config.ssh_path))
+        env.logger.debug(cmd)
     else:
-        os.system("rsync -auzP {}/* {}@{} --include '*/' --include '*.html' --exclude '*' --delete".\
+        cmd = ("rsync -auzP {}/* {}@{} --include '*/' --include '*.html' --exclude '*' --delete".\
                   format(config.blog_dir, user, config.ssh_path))
+        env.logger.debug(cmd)
+    os.system(cmd)
 
 def edit_blog(config):
     mkpath(config.path)
