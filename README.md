@@ -11,7 +11,9 @@ sudo apt-get install texlive texlive-xetex texlive-latex-extra texlive-fonts-ext
 For MacOS, you can install [MacTex](http://tug.org/mactex/).
 
 In order to use `bookdown` with `labnotes bind`, you have to install `pandoc`. On Debian:
+```
 sudo apt-get install libcurl4-openssl-dev libssl-dev pandoc pandoc pandoc-citeproc
+```
 
 `labnotes` requires Python 3.4 or newer. If you have it, then you are ready to download and install `labnotes`:
 
