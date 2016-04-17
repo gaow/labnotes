@@ -3,7 +3,7 @@
 import sys, shutil, os, re, argparse
 import codecs
 from .utils import env, regulate_output, pdflatex, indexhtml
-from .encoder import LaTeX, Beamer
+from .encoder import LaTeX, Beamer, Html
 from .parser import ParserCore
 
 def doc(args, unknown_args):
@@ -22,6 +22,25 @@ def slides(args, unknown_args):
                       mode = args.mode, theme = args.theme, thank = args.thank)
     pdflatex(regulate_output(args.filename, args.output), runner(worker), vanilla = args.vanilla,
              beamer_institute = args.color)
+
+def html(args, unknown_args):
+    runner = ParserCore(args.filename, 'html', 'long' if args.long_ref else 'short', args.lite,
+                        figure_path = args.figure_path)
+    worker = Html(args.title, args.author, args.date, args.toc, args.columns, separate_css = args.separate,
+                  text_only = args.plain)
+    fname = regulate_output(args.filename, args.output, suffix='.html')
+    #
+    body, css = runner(worker)
+    if body:
+        with codecs.open(fname + '.html', 'w', encoding='UTF-8', errors='ignore') as f:
+            f.writelines(body)
+    if css:
+        with open('style.css', 'w') as f:
+            f.writelines(css)
+    env.logger.info('Done! ``{}.html`` should display in PTSans font if available.'.format(fname))
+    env.logger.info('http://www.google.com/webfonts/specimen/PT+Sans')
+    return
+
 
 class Main:
     def __init__(self, version):
@@ -45,24 +64,18 @@ class Main:
         self.getCommonArguments(parser)
         self.getSlidesArguments(parser)
         parser.set_defaults(func=slides)
-        # # html
-        # parser = subparsers.add_parser('html', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        #                                help='Generate HTML page from notes file(s)')
-        # self.getCommonArguments(parser)
-        # self.getHtmlArguments(parser)
-        # parser.set_defaults(func=html)
+        # html
+        parser = subparsers.add_parser('html', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                       help='Generate HTML page from notes file(s)')
+        self.getCommonArguments(parser)
+        self.getHtmlArguments(parser)
+        parser.set_defaults(func=html)
         # # dokuwiki
         # parser = subparsers.add_parser('dokuwiki', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         #                                help='Generate dokuwiki text from notes file(s)')
         # self.getCommonArguments(parser)
         # self.getDokuwikiArguments(parser)
         # parser.set_defaults(func=dokuwiki)
-        # # pmwiki
-        # parser = subparsers.add_parser('pmwiki', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        #                                help='Generate pmwiki text from notes file(s)')
-        # self.getCommonArguments(parser)
-        # self.getPmwikiArguments(parser)
-        # parser.set_defaults(func=pmwiki)
         # # markdown
         # parser = subparsers.add_parser('markdown', formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         #                                help='Generate markdown text from notes file(s)')
@@ -172,3 +185,19 @@ class Main:
         parser.add_argument('-f', '--vanilla',
                         action='store_true',
                         help='''force build document from scratch without using cached data''')
+
+    def getHtmlArguments(self, parser):
+        parser.add_argument('--columns',
+                        type = int,
+                        choices = [1,2,3],
+                        default = 1,
+                        help='''number of columns in html page (1 ~ 3)''')
+        parser.add_argument('-s', '--separate',
+                        action='store_true',
+                        help='''use separate files for css and js scripts''')
+        parser.add_argument('--plain',
+                        action='store_true',
+                        help='''plain html code for text body (no style, no title / author, etc.)''')
+        parser.add_argument('--figure_path',
+                        metavar = 'PATH',
+                        help='''path to where figures are saved''')

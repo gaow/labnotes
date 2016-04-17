@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import os, re
+from collections import OrderedDict
 from .utils import wraptxt
 from .style import DOC_PACKAGES, DOC_CONFIG, BM_MODE, BM_CONFIG, \
-     BM_TITLE, BM_THANK, BM_THEME
+     BM_TITLE, BM_THANK, BM_THEME, HTML_STYLE, HTML_SYN
 
 M = '#' # Lines of regular labnotes text start with hashtag
 FONT = {'bch':'bch',
@@ -44,9 +45,14 @@ class BaseEncoder:
         self.bd = None
         self.it = None
         self.tt = None
+        self.sq = None
+        self.dq = None
+        self.bar = '\|'
         self.box_kw = []
+        self.direct_url = False
+        self.no_ref = False
 
-    def GetURL(self, value):
+    def GetURL(self, value, link_text = ''):
         return ''
 
     def GetRef(self, value1, value2, value3):
@@ -55,20 +61,20 @@ class BaseEncoder:
     def FmtListItem(self, value, level):
         return ''
 
-    def FmtListStart(self, value):
+    def FmtListStart(self, value, level):
         return ''
 
-    def FmtListEnd(self, value):
+    def FmtListEnd(self, value, level):
         return ''
 
     def GetTable(self, table, label = None):
         return ''
 
     def FmtBibStart(self, value):
-        return ''
+        return value
 
     def FmtBibEnd(self, value):
-        return ''
+        return value
 
     def FmtBibItem(self, k, v1, v2):
         return ''
@@ -77,31 +83,34 @@ class BaseEncoder:
         return []
 
     def GetCodes(self, text, k, label = None):
-        return ''
+        return text
 
     def GetVerbatim(self, text, label = None):
-        return ''
+        return text
 
     def GetBox(self, text, k, label = None):
-        return ''
+        return text
 
     def GetCMD(self, value, index = None):
-        return ''
+        return value
 
-    def GetChapter(self, value, add_head = None):
-        return ''
+    def GetChapter(self, value, add_head = None, index = None):
+        return value
 
-    def GetSection(self, value, add_head = None):
-        return ''
+    def GetSection(self, value, add_head = None, index = None):
+        return value
 
     def GetHighlight(self, value):
-        return ''
+        return value
 
-    def GetSubsubsection(self, value):
-        return ''
+    def GetSubsubsection(self, value, index = None):
+        return value
 
-    def GetSubsection(self, value, add_head = None):
-        return ''
+    def GetSubsection(self, value, add_head = None, index = None):
+        return value
+
+    def GetLine(self, value):
+        return '\n{}\n'.format(value)
 
     def RaiseSubsubsection(self, value):
         pass
@@ -110,6 +119,9 @@ class BaseEncoder:
         return ''
 
     def GetDocumentTail(self):
+        return ''
+
+    def GetDocumentHead(self):
         return ''
 
     def Write(self, value):
@@ -192,6 +204,7 @@ class LaTeX(BaseEncoder):
     def __init__(self, title, author, date, toc, is_footnote, font,
                  font_size, table_font_size = 'footnotesize', no_num = False, no_page = False,
                  no_ref = False, twocols = False, landscape = False, pause = False):
+        super().__init__()
         # configurations
         self.swaps = [('\\', '!!\\backslash!!'),('$', '\$'),
                       ('!!\\backslash!!', '$\\backslash$'),
@@ -203,6 +216,9 @@ class LaTeX(BaseEncoder):
         self.bd = r'\\textbf{\1}'
         self.it = r'\\textit{\1}'
         self.tt = r'\\texttt{\1}'
+        self.dq = r"``\1''"
+        self.sq = r"`\1'"
+        self.bar = '\$\|\$'
         self.box_kw = [r'\\\\begin{bclogo}', r'\\\\end{bclogo}']
         # parameters
         self.title = title
@@ -227,7 +243,7 @@ class LaTeX(BaseEncoder):
         self.twocols = twocols
         self.landscape = landscape
 
-    def GetURL(self, value):
+    def GetURL(self, value, link_text = ''):
         return '\\url{%s}' % value.replace('\-\_', '\_').replace('$\sim$', '~')
 
     def GetRef(self, value1, value2, value3):
@@ -243,10 +259,10 @@ class LaTeX(BaseEncoder):
             value = value.replace('\\item -', '\\pause \\item ')
         return value
 
-    def FmtListStart(self, value):
+    def FmtListStart(self, value, level):
         return '\\begin{itemize}\n' + value
 
-    def FmtListEnd(self, value):
+    def FmtListEnd(self, value, level):
         return value + '\n\\end{itemize}'
 
     def GetTable(self, table, label = None):
@@ -256,7 +272,7 @@ class LaTeX(BaseEncoder):
         ncols = list(set([len(x) for x in table]))
         nseqsplit = max([len([iitem for iitem in item if iitem.startswith('\\seqsplit')]) for item in table])
         if len(ncols) > 1:
-            raise ValueError("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'.\n ``{0}``".format(text))
+            raise ValueError("Number of columns not consistent in table. Please replace empty columns with placeholder symbol, e.g. '-'.\n``{0} ...``".format('\t'.join(table[0])))
         try:
             cols = ''.join(['c' if len([item[i] for item in table if item[i].startswith('\\seqsplit')]) == 0 else 'p{{{}pt}}'.format((480-(ncols[0]-nseqsplit)*10)/nseqsplit) for i in range(ncols[0])])
             head = '\\begin{center}\n{\\%s\\begin{longtable}{%s}\n\\hline\n' % (self.tablefont, cols)
@@ -310,21 +326,21 @@ class LaTeX(BaseEncoder):
             cmd = lminted + '\n'.join(cmd) + '\n\\end{minted}'
         return cmd
 
-    def GetChapter(self, value, add_head):
+    def GetChapter(self, value, add_head, index = None):
         self.doctype = 'report'
         return '\\chapter{' + value + '}'
 
-    def GetSection(self, value, add_head):
+    def GetSection(self, value, add_head, index = None):
         return ('\\section*{' if self.no_num else '\\section{') + value + '}'
 
     def GetHighlight(self, value):
         # return '\\shabox{' + value + '}'
         return '\\colorbox{yellow}{\\begin{varwidth}{\\dimexpr\\linewidth-2\\fboxsep}{\\color{red}\\textbf{' + value + '}}\\end{varwidth}}'
 
-    def GetSubsubsection(self, value):
+    def GetSubsubsection(self, value, index = None):
         return ('\\subsubsection*{' if self.no_num else '\\subsubsection{') + value + '}'
 
-    def GetSubsection(self, value, add_head):
+    def GetSubsection(self, value, add_head, index = None):
         return ('\\subsection*{' if self.no_num else '\\subsection{') + value + '}'
 
     def Write(self, value):
@@ -362,6 +378,7 @@ class Beamer(LaTeX):
             if self.theme == 'heavy':
                 self.wrap_adjust = 0.92
         self.thank = thank
+        self.tablefont = table_font_size
 
     def FmtBibStart(self, value):
         return '\\appendix\n\\begin{frame}[allowframebreaks]\n\\tiny\n' + \
@@ -399,21 +416,21 @@ class Beamer(LaTeX):
             cmd = lminted + '\n'.join(cmd) + '\n\\end{Verbatim}'
         return cmd
 
-    def GetChapter(self, value, add_head):
+    def GetChapter(self, value, add_head, index = None):
         prefix = ('\\end{frame}\n\n' if add_head else '') + '\\section{'
         return prefix + value + '}'
 
-    def GetSection(self, value, add_head):
+    def GetSection(self, value, add_head, index = None):
         prefix = ('\\end{frame}\n\n' if add_head else '') + '\\subsection{'
         return prefix + value + '}'
 
     def GetHighlight(self, value):
         return '\\colorbox{yellow}{\\textcolor{red}{\\textbf{' + value + '}}}'
 
-    def GetSubsubsection(self, value):
+    def GetSubsubsection(self, value, index = None):
         return '\\framesubtitle{' + value + '}'
 
-    def GetSubsection(self, value, add_head):
+    def GetSubsection(self, value, add_head, index = None):
         prefix = '\\begin{frame}[fragile, shrink]\n'
         if value.lower() == 'acknowledgment':
             prefix = '\\section*{Acknowledgment}\n' + prefix
@@ -478,3 +495,223 @@ class Beamer(LaTeX):
                 )
         otext += '\n'.join(value) + '\n\\end{document}'
         return otext
+
+class Html(BaseEncoder):
+    def __init__(self, title, author, date, toc, num_columns,
+                 table_font_size = 'small', separate_css = True,
+                 text_only = False):
+        super().__init__()
+        self.swaps = [
+               # ('\\', '&#92;'),('$', '&#36;'),
+               # ('{', '&#123;'),('}', '&#125;'),
+               # ('%', '&#37;'),('--', '&mdash;'),
+               # ('-', '&ndash;'),('&', '&amp;'),
+               # ('~', '&tilde;'),('^', '&circ;'),
+               # ('``', '&ldquo;'),('`', '&lsquo;'),
+               # ('#', '&#35;'),
+                ('<', '&lt;'),('>', '&gt;')
+            ]
+        self.bl = r'<strong><em>\1</em></strong>'
+        self.bd = r'<strong>\1</strong>'
+        self.it = r'<em>\1</em>'
+        self.tt = r'<kbd>\1</kbd>'
+        self.dq = r'"\1"'
+        self.sq = r"'\1'"
+        self.box_kw = [r'id="wrapper"']
+        self.direct_url = True
+        self.no_ref = False
+        # parameters
+        self.toc = toc
+        self.toc = toc
+        if num_columns == 2:
+            self.frame = 'two-col'
+        elif num_columns == 3:
+            self.frame = 'three-col'
+        else:
+            self.frame = 'frame'
+        self.dtoc = OrderedDict()
+        self.title = title
+        self.author = author
+        self.date = date
+        self.wrap_width = 90
+        self.tablefont = table_font_size
+        self.separate_css = separate_css
+        self.text_only = text_only
+
+    def GetURL(self, value, link_text = ''):
+        m = re.search(r'^(.+?)://', value)
+        if m:
+            prefix, address = m.group(0), value.replace(m.group(0), '')
+        else:
+            prefix = 'http://'
+            address = value
+        if link_text:
+            return '<a style="text-shadow: 1px 1px 1px #999;" href="{0}{1}">{2}</a>'.\
+              format(prefix, address, link_text)
+        else:
+            return '<a href="{0}{1}">{1}</a>'.format(prefix, address, address)
+
+    def GetRef(self, value1, value2, value3):
+        return '<a href="#footnote-{0}">{1}</a>'.format(value3, value1)
+
+    def FmtListItem(self, value, level):
+        return re.sub(r'^{0}'.format(M * level), '<li>', value) + '</li>'
+
+    def FmtListStart(self, value, level):
+        return ('<ol>\n' if level == 2 else '<ul>\n') + value
+
+    def FmtListEnd(self, value, level):
+        return value + ('\n</ol>' if level == 2 else '\n</ul>')
+
+    def GetTable(self, table, label = None):
+        ncols = list(set([len(x) for x in table]))
+        if len(ncols) > 1:
+            raise ValueError("Number of columns not consistent for table. Please replace empty columns with placeholder symbol, e.g. '-'.\n``{0} ...``".format('\t'.join(table[0])))
+        start = '<td style="vertical-align: top;"><{0}>'.format(self.tablefont)
+        end = '<br /></{0}></td>'.format(self.tablefont)
+        head = '<center><table><tbody>'
+        body = []
+        line = ''
+        try:
+            for cell in table[0]:
+                line += start + '<b>' + cell + '</b>' + end + '\n'
+            body.append(line)
+            for item in table[1:]:
+                line = ''
+                for cell in item:
+                    line += start + cell + end + '\n'
+                body.append(line)
+        except IndexError:
+            # emtpy table
+            pass
+        #
+        for idx, item in enumerate(body):
+            if idx % 2:
+                body[idx] = '<tr>' + item + '</tr>'
+            else:
+                body[idx] = '<tr class="dark">' + item + '</tr>'
+        tail = '</tbody></table></center>\n'
+        text = head + '\n'.join(body) + tail
+        return text
+
+    def FmtBibStart(self, value):
+        return '<hr style="border: 3px double #555;margin-top:2em;margin-bottom:1em;">\n' + value
+
+    def FmtBibItem(self, k, v1, v2):
+        return '<p id="footnote-{0}">[{1}]: {2}</p>\n'.format(k, v1, v2)
+
+    def FindBibKey(self, value):
+        return [m.group(1) for m in re.finditer(re.compile('"#footnote-(.*?)"'), value)]
+
+    def GetCodes(self, text, k, label = None):
+        text = wraptxt(text, '', int(self.wrap_width), rmblank = True,
+                       prefix = COMMENT[k.lower()])
+        text = '<pre><code class = "{0}">{3}{3}\n{3}{3} LANGUAGE: {0}, ID: {2}\n{3}{3}\n{1}</code></pre>'.\
+          format(k.lower(), text, label if label else k.lower(), COMMENT[k.lower()])
+        return text
+
+    def GetVerbatim(self, text, label = None):
+        nrow = len(text.split('\n'))
+        text = '<center><textarea rows="%s", wrap="off">%s</textarea></center>' % \
+          (max(min(nrow, 30), 1), text)
+        return text
+
+    def GetBox(self, text, k, label = None):
+        text = '<center><div id="wrapper"><div class="{0}"><div style="font-family:\'PT Sans\', comic sans ms;text-align:center;text-decoration:underline{3}; margin-bottom:3px">{1}</div>{2}</div></div></center>'.\
+                        format(k.lower(), k.capitalize() if not label else label, text,
+                               ';color:red' if k.lower() == 'warning' else '')
+        return text
+
+    def GetCMD(self, value, index = None):
+        line = '\n'.join(value)
+        return '<pre><code class = "nohighlight">{}</code></pre>\n'.\
+          format(wraptxt(line, '\\', int(self.wrap_width)))
+
+    def GetChapter(self, value, add_head = None, index = None):
+        self.dtoc['chapter_{0}'.format(index)] = value
+        return '''
+        <h1 class="superheading" id="chapter_{0}">{1}</h1><hr size="5" noshade>
+        '''.format(index, value)
+
+    def GetSection(self, value, add_head = None, index = None):
+        self.dtoc['section_{0}'.format(index)] = value
+        return '''
+        <h2 class="heading" id="section_{0}">{1}</h2>
+        '''.format(index, value)
+
+    def GetHighlight(self, value):
+        return '<span style="color:red;background:yellow;font-weight:bold">' + value + '</span>'
+
+    def GetSubsubsection(self, value, index = None):
+        return '''
+        <h3 class="subsubheading">&#9642; {0}</h3>
+        '''.format(value)
+
+    def GetSubsection(self, value, add_head = None, index = None):
+        self.dtoc['subsection_{0}'.format(index)] = value
+        return '''
+        <h3 class="subheading" id="subsection_{0}">{1}</h3>
+        '''.format(index, value)
+
+    def GetLine(self, value):
+        return '\n<p>{}</p>\n'.format(value)
+
+    # def GetDocumentHead(self):
+    #     res = ''
+    #     if title:
+    #         res = '\n'.join([M * 3, '{0}!{1}'.format(M, self.title), M * 3])
+    #     if author:
+    #         res += '\n' + '{1}{0}, {2}'.format(self.author, M, env.precise_time)
+    #     return res
+
+    def Write(self, value):
+        def format_title(title, author, date):
+            return '''
+            <div class="top">
+            {0}{1}
+            </div>
+            '''.format('<h1 class="title">{0}</h1>'.format(title)
+                       if title else '', '<div class="author" >Edited by {0}, on {1}</div>'.\
+                       format(author, date if date else env.precise_time) if author else '')
+
+        def _csize(v, k):
+            if k.startswith('chapter'):
+                return '<big>{0}</big>'.format(v)
+            elif k.startswith('section'):
+                return '{0}'.format(v)
+            else:
+                return '<small>{0}</small>'.format(v)
+
+        def _isize(k):
+            if k.startswith('chapter'):
+                return 'text-decoration:underline'
+            elif k.startswith('section'):
+                return 'padding-left:2em'
+            else:
+                return 'padding-left:4em'
+
+        def format_toc(dtoc):
+            if not dtoc:
+                return ''
+            head = '<b>Contents:</b><ul id="toc">\n'
+            tail = '\n</ul>'
+            body = '\n'.join(['<li><span style="{0}">{1}</span><a href="#{2}">{3}</a></li>'.\
+                              format(_isize(k), _csize(v,k),k,'&clubs;') \
+                              for k, v in list(dtoc.items())])
+            return '<div class="frame">' + head + body + tail + '</div>'
+
+        if self.text_only:
+            # Export pure text for use with other templates
+            return '\n'.join(self.text), '', ''
+        otext = '<!DOCTYPE html><html><head><title>{0}</title>\n'.\
+          format((self.title + ' | ' + self.author) if self.title or self.author else '')
+        if self.separate_css:
+            otext += '<link href="style.css" rel="stylesheet" type="text/css">'
+        else:
+            otext += '<style type="text/css">\n{0}</style>'.format(HTML_STYLE)
+        # syntax highlight and mathjax support
+        otext += HTML_SYN
+        otext += '</head><body><a name="top"></a>%s%s<div class="%s"><div class="content">%s</div></div></body></html>' % (format_title(self.title, self.author, self.date),
+                       (format_toc(self.dtoc) if self.toc else ''),
+                       self.frame, '\n'.join(value))
+        return otext, HTML_STYLE if self.separate_css else ''

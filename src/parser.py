@@ -35,7 +35,8 @@ class Raw(Element):
 
 class ParserCore:
     '''Main parser framework'''
-    def __init__(self, filename, file_format, reference_format, purge_comment):
+    def __init__(self, filename, file_format, reference_format, purge_comment,
+                 figure_path = ''):
         self.format = file_format
         self.reference_format = reference_format
         self.PH = 'LAB{}NOTES'.format(hashlib.md5(env.precise_time.encode()).hexdigest()[:10])
@@ -57,15 +58,14 @@ class ParserCore:
                     del lines[0]
             self.text.extend(lines)
         self.purge_comment = purge_comment
+        self.figure_path = figure_path
 
     def __call__(self, worker):
         env.logger.info("Evaluating input document ...")
         self.PurgeComment()
         self.text = self.ParseBlock(self.text, worker)
         self.ParseText(worker)
-        if worker.no_ref:
-            pass
-        else:
+        if not worker.no_ref:
             self.ParseBib(worker)
         return worker.Write(self.text)
 
@@ -181,11 +181,13 @@ class ParserCore:
             if self.PH in item:
                 self.text[idx] = self.__ReserveBlock(item, mode = 'remove')[0]
                 skip.append(idx)
+        head = worker.GetDocumentHead()
+        if head:
+            self.text.insert(0, head)
         idx = 0
         # Keep track of section positions to add some section spec info
         # such as version, date, potentially
-        subsection_start = 0
-        subsection_end = 0
+        start_subsection = end_subsection = count_chapter = count_section = count_subsection = 0
         while idx < len(self.text):
             if idx in skip or self.text[idx] == '':
                 # no need to process
@@ -202,7 +204,7 @@ class ParserCore:
                             pass
                 else:
                     i = idx + 1
-                self.text[idx] = worker.GetCMD(self.text[idx:i])
+                self.text[idx] = worker.GetCMD(self.text[idx:i], index = idx)
                 for j in range(idx + 1, i):
                     self.text[j] = ''
                 idx = i
@@ -210,28 +212,30 @@ class ParserCore:
             if self.text[idx].startswith(M * 3) and self.text[idx+1].startswith(M + '!') \
               and self.text[idx+2].startswith(M * 3):
                 # chapter
+                count_chapter += 1
                 previous_ended = False
-                if subsection_start > subsection_end:
+                if start_subsection > end_subsection:
                     previous_ended  = True
-                    subsection_end += 1
+                    end_subsection += 1
                 self.text[idx] = ''
                 self.text[idx + 1] = worker.GetChapter(
                     self.Capitalize(self.Recode(self.text[idx + 1][len(M)+1:], worker)),
-                    add_head = previous_ended)
+                    add_head = previous_ended, index = count_chapter)
                 self.text[idx + 2] = ''
                 idx += 3
                 continue
             if self.text[idx].startswith(M * 3) and self.text[idx+1].startswith(M) \
               and (not self.text[idx+1].startswith(M * 2)) and self.text[idx+2].startswith(M * 3):
                 # section
+                count_section += 1
                 previous_ended = False
-                if subsection_start > subsection_end:
+                if start_subsection > end_subsection:
                     previous_ended  = True
-                    subsection_end += 1
+                    end_subsection += 1
                 self.text[idx] = ''
                 self.text[idx + 1] = worker.GetSection(
                     self.Capitalize(self.Recode(self.text[idx + 1][len(M):], worker)),
-                    add_head = previous_ended)
+                    add_head = previous_ended, index = count_section)
                 self.text[idx + 2] = ''
                 idx += 3
                 continue
@@ -245,6 +249,7 @@ class ParserCore:
                 continue
             if self.text[idx].startswith(M + '!!'):
                 if idx > 0:
+                    # for beamer
                     worker.RaiseSubsubsection(self.text[idx - 1])
                 # subsubsection
                 self.text[idx] = worker.GetSubsubsection(self.Recode(self.text[idx][len(M)+2:], worker))
@@ -252,27 +257,28 @@ class ParserCore:
                 continue
             if self.text[idx].startswith(M + '!'):
                 # subsection
+                count_subsection += 1
                 previous_ended = False
-                if subsection_start > subsection_end:
+                if start_subsection > end_subsection:
                     previous_ended  = True
-                    subsection_end += 1
-                subsection_start += 1
+                    end_subsection += 1
+                start_subsection += 1
                 self.text[idx] = worker.GetSubsection(self.Recode(self.text[idx][len(M)+1:], worker),
-                                                      add_head = previous_ended)
+                                                      add_head = previous_ended, index = count_subsection)
                 idx += 1
                 continue
             if self.text[idx].startswith(M + '*'):
                 # fig: figure.pdf 0.9
                 self.text[idx] = FigureInserter(self.text[idx], support = FIGTYPES,
-                                                tag = self.format).Insert()
+                                                tag = self.format, remote_path = self.figure_path).Insert()
                 idx += 1
                 continue
             if self.text[idx].startswith(M):
                 # a plain line here
-                self.text[idx] = '\n' + self.Recode(self.text[idx][len(M):], worker) + '\n'
+                self.text[idx] = worker.GetLine(self.Recode(self.text[idx][len(M):], worker))
                 idx += 1
                 continue
-        if subsection_start > subsection_end:
+        if start_subsection > end_subsection:
             self.text.append(worker.GetSubsectionTail())
         self.text.append(worker.GetDocumentTail())
         return
@@ -318,25 +324,37 @@ class ParserCore:
         line = re.sub(r'""(.*?)""', worker.bd, line)
         line = re.sub(r'"(.*?)"', worker.it, line)
         line = re.sub(r'@@(.*?)@@', worker.tt, line)
-        # url
-        pattern = re.compile('@(\S*?)@')
-        for m in re.finditer(pattern, line):
-            line = line.replace(m.group(0), worker.GetURL(m.group(1)))
+        line = re.sub(r"``(.*?)''", worker.dq, line)
+        line = re.sub(r"`(.*?)'", worker.sq, line)
         # citation
         # [note|reference] defines the pattern for citation.
         # Will have to use [note$|$reference] here since '|' was previously replaced by $|$
-        pattern = re.compile('\[(\s*)(?P<a>.+?)(\s*)\$\|\$(\s*)(?P<b>.+?)(\s*)\]')
+        pattern = re.compile('\[(\s*)(?P<a>.+?)(\s*)%s(\s*)(?P<b>.+?)(\s*)\]' % worker.bar)
         # re.compile('\[(.+?)\|(.+?)\]')
         for m in re.finditer(pattern, line):
+            # [text|@link@] defines the pattern for direct URL, in non pdf documents
+            mm = re.match(r'(\s*)@(\S*?)@(\s*)', m.group('b'))
+            if mm:
+                content = worker.GetURL(mm.group(2), link_text = m.group('a'))
+                if worker.direct_url:
+                    # Directly embed URL, do not record reference
+                    line = line.replace(m.group(0), content)
+                    continue
+            else:
+                content = m.group('b')
             k = re.sub('\W', '', m.group('a'))
             if not k:
                 raise ValueError("Invalid citation keyword for reference item ``{0}``.".\
-                                 format(m.group('b')))
+                                 format(m.group('a')))
             if k in list(self.bib.keys()):
-                if self.bib[k] != [m.group('a'), m.group('b')]:
+                if self.bib[k] != [m.group('a'), content]:
                     k += str(len(list(self.bib.keys())))
-            self.bib[k] = [m.group('a'), m.group('b')]
-            line = line.replace(m.group(0), worker.GetRef(m.group('a'), m.group('b'), k))
+            self.bib[k] = [m.group('a'), content]
+            line = line.replace(m.group(0), worker.GetRef(m.group('a'), content, k))
+        # standalone url
+        pattern = re.compile('@(\S*?)@')
+        for m in re.finditer(pattern, line):
+            line = line.replace(m.group(0), worker.GetURL(m.group(1)))
         # recover raw latex syntax
         for i in range(len(raw)):
             line = line.replace("{0}N{1}".format(self.PH, i), raw[i])
@@ -356,7 +374,6 @@ class ParserCore:
         return out
 
     def PrepareBlock(self, text, worker, name, label):
-        label = self.Recode(label, worker)
         if name == 'list':
             return self.PrepareList(text, worker, label)
         elif name == 'out':
@@ -396,8 +413,8 @@ class ParserCore:
                         except IndexError:
                             pass
                 #
-                text[start] = worker.FmtListStart(text[start])
-                text[end] = worker.FmtListEnd(text[end])
+                text[start] = worker.FmtListStart(text[start], 2)
+                text[end] = worker.FmtListEnd(text[end], 2)
                 idx = end + 1
             elif text[idx].startswith(M):
                 text[idx] = M + self.Recode(text[idx][1:], worker)
@@ -408,15 +425,15 @@ class ParserCore:
         # handle 1st level indentation
         text = '\n'.join([x if x.startswith(self.PH) else worker.FmtListItem(x, 1) for x in text])
         text = self.__ReserveBlock(text, mode = 'release', cache = reserved)[0]
-        text = worker.FmtListStart(text)
-        text = worker.FmtListEnd(text)
+        text = worker.FmtListStart(text, 1)
+        text = worker.FmtListEnd(text, 1)
         return text
 
     def PrepareTable(self, text, worker, label = None):
         self.__RaiseNested(text)
         table = [[self.Recode(iitem, worker) for iitem in multispace2tab(item).split('\t')] \
                  for item in text.split('\n') if item]
-        return worker.GetTable(table, label)
+        return worker.GetTable(table, self.Recode(label, worker))
 
     def PrepareCodes(self, text, worker, k, label = None):
         text = text.split('\n')
@@ -499,7 +516,8 @@ class ParserCore:
         pattern = re.compile('#\*(.*?)(\n|$)')
         for m in re.finditer(pattern, text):
             fig = 'BEGIN' + self.PH + FigureInserter(m.group(1), support = FIGTYPES,
-                                             tag = self.format).Insert() + 'END' + self.PH + '\n'
+                                             tag = self.format, remote_path = self.figure_path).Insert() \
+                                             + 'END' + self.PH + '\n'
             text = text.replace(m.group(0), fig, 1)
         return text
 

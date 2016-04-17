@@ -4,19 +4,7 @@
 # @@labnotes@@ was first written in summer 2011 as a LaTeX wrapper to generate documentation from arbitrary pieces of @@bash@@, @@python@@, @@c++@@ or @@R@@ script, as a replacement for Doxygen, for book-keeping of stuff I wrote for research projects. Hashtag @@#@@ was therefore the default choice to lead a regular line of text, or ``comments'' in between codes, as it conforms to many programming languages. It was then polished to produce more formal documents as I started to use it to write homework, project reports, and organize notes. It made life better documented and research projects more reproducible. In 2012 a few others in the lab began to adopt it for documenting a collaborative data analysis project, and within roughly a year the program was expanded to generate beamer sides and HTML files for sharing at seminars and websites. Support for a couple of wiki platforms was later added to write documentation for projects such as [this|@http://bioinformatics.org/spower/start@], [this|@http://varianttools.sourceforge.net/@], [this|@http://bioinformatics.org/seqlink/@], and [this|@https://github.com/stephenslab/dsc2/wiki@]. In 2016, I put together a simple [bookdown|@https://bookdown.org/@] template and switched to it from dokuwiki for daily work. On the Tax day of 2016 I posted the source code to [github|@https://github.com/gaow/labnotes@].
 # I never tried to advertise @@labnotes@@ because the syntax and features are entirely driven by personal taste ("hashtags", to start with!) and the implementation is continuous accumulation of monkey patches to get jobs done during a busy day. Nowadays @@knitr + rmarkdown@@ rules and most of us write Markdown text. Still, I hold on to it because it continues to serve me well as it has over the years, and I have the liberty to shape it as I see fit. If your day job shares a lot similarities with mine (do statistics and computational biology using multiple programming languages, mostly via non-interactive batch commands, on messy data), you might find @@labnotes@@ a fine choice to keep your project organized.
 # For installation please visit @github.com/gaow/labnotes@.
-###
-# Dependencies
-###
-# On Debian GNU/Linux based computer:
-sudo apt-get install texlive texlive-xetex texlive-latex-extra texlive-fonts-extra texlive-extra-utils texlive-font-utils latex-beamer pgf latexmk latex-xcolor texlive-pstricks python-pygments
-###
-# Installation
-###
-# compile & install the program:
-git clone http://github.com/gaow/labnotes
-cd labnotes
-python3 setup.py install
-
+# Documentation is still [being prepared|@https://github.com/gaow/labnotes/blob/master/vignette/example.notes@].
 #{----
 ###
 # This part of document is commented out
