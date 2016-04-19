@@ -899,7 +899,10 @@ class Markdown(BaseEncoder):
         return [m.group(1) for m in re.finditer(re.compile('"#footnote-(.*?)"'), value)]
 
     def FmtListItem(self, value, level):
-        return ('\t' * (level - 1)) + '* ' + value.lstrip(M)
+        if not value.startswith('\t'):
+            return ('\t' * (level - 1)) + '* ' + value.strip().lstrip(M)
+        else:
+            return value
 
     def GetTable(self, table, label = None):
         ncols = list(set([len(x) for x in table]))
