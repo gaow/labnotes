@@ -195,7 +195,7 @@ class FigureInserter:
                         lines[idx] = '%center% Attach:%s' % (fname)
             elif tag == 'markdown':
                 # The width option here only works with Pandoc 1.16+
-                lines[idx] = '![]({}){{ width={}% }}'.format(fig, int(width * 95))
+                lines[idx] = '![]({0}){{ width={1}% }}[&#9755;]({0})'.format(fig, int(width * 90))
             else:
                 raise ValueError('Unknown tag ``{0}`` for figures!'.format(tag))
         if tag == 'tex':
@@ -714,7 +714,7 @@ class Html(BaseEncoder):
             head = '<b>Contents:</b><ul id="toc">\n'
             tail = '\n</ul>'
             body = '\n'.join(['<li><span style="{0}">{1}</span><a href="#{2}">{3}</a></li>'.\
-                              format(_isize(k), _csize(v,k),k,'&clubs;') \
+                              format(_isize(k), _csize(v,k),k,'&#9758;') \
                               for k, v in list(dtoc.items())])
             return '<div class="frame">' + head + body + tail + '</div>'
 
