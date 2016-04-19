@@ -128,7 +128,7 @@ class BaseEncoder:
         return ''
 
 class FigureInserter:
-    def __init__(self, text, support, tag, remote_path = ''):
+    def __init__(self, text, support, tag, path_adj = ''):
         if text.startswith(M + '*'):
             text = text[len(M)+1:].strip()
         else:
@@ -155,10 +155,21 @@ class FigureInserter:
                           format(extension, ' '.join(support)))
             if not os.path.exists(fig):
                 raise ValueError("Cannot find file ``%s``" % fig)
-            if not remote_path:
-                fig = os.path.abspath(fig)
-            else:
+            # path adjustment rule
+            fig = os.path.abspath(fig)
+            path_swap = path_adj.split()
+            if len(path_swap) == 1:
+                remote_path = path_swap[0]
                 fig = os.path.join(remote_path, fname)
+            if len(path_swap) > 1:
+                fig = fig.split('/')
+                for i in range(1, len(path_swap)):
+                    if path_swap[i] in fig:
+                        fig = fig[fig.index(path_swap[i]):]
+                        fig[0] = path_swap[0]
+                        break
+                fig = '/'.join(fig)
+                remote_path = os.path.dirname(fig)
             # syntax images
             if tag == 'tex':
                 lines[idx] = '\\includegraphics[width=%s\\textwidth]{%s}\n' % (width, fig)
@@ -183,7 +194,8 @@ class FigureInserter:
                     else:
                         lines[idx] = '%center% Attach:%s' % (fname)
             elif tag == 'markdown':
-                    lines[idx] = '![]({})'.format(fig)
+                # The width option here only works with Pandoc 1.16+
+                lines[idx] = '![]({}){{ width={}% }}'.format(fig, int(width * 95))
             else:
                 raise ValueError('Unknown tag ``{0}`` for figures!'.format(tag))
         if tag == 'tex':
@@ -858,10 +870,10 @@ class Markdown(BaseEncoder):
         super().__init__()
         self.swaps = [(r'(\b|^)__', r'\\__', r'(\b|^)__(.*?)__(\b|$)'),
                       (r'(\b|^|@@)__', r'\\__', r'(\b|^)@@__(.*?)__@@($|\b)')]
-        self.bl = r"**_\1_**" 
+        self.bl = r"**_\1_**"
         self.bd = r'**\1**'
         self.it = r'*\1*'
-        self.tt = r'`\1`' 
+        self.tt = r'`\1`'
         self.sq = r"'\1'"
         self.dq = r'"\1"'
         self.direct_url = True

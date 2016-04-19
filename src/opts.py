@@ -27,7 +27,7 @@ def slides(args, unknown_args):
 
 def html(args, unknown_args):
     runner = ParserCore(args.filename, 'html', 'long' if args.long_ref else 'short', args.lite,
-                        figure_path = args.figure_path)
+                        fig_path_adj = args.fig_path_adj)
     worker = Html(args.title, args.author, args.date, args.toc, args.columns, separate_css = args.separate,
                   text_only = args.plain)
     fname = regulate_output(args.filename, args.output, suffix='.html')
@@ -50,7 +50,7 @@ def dokuwiki(args, unknown_args):
     if args.compact_toc:
         toc = 1
     runner = ParserCore(args.filename, 'dokuwiki', 'long' if args.long_ref else 'short', args.lite,
-                        figure_path = args.figure_path)
+                        fig_path_adj = args.fig_path_adj)
     worker = Dokuwiki(args.title, args.author, args.date, toc, args.showall, args.permission,
                       args.disqus)
     fname = regulate_output(args.filename, args.output, suffix='.txt')
@@ -63,7 +63,7 @@ def dokuwiki(args, unknown_args):
 def markdown(args, unknown_args):
     args.suffix = '.' + args.suffix
     runner = ParserCore(args.filename, 'markdown', 'long' if args.long_ref else 'short', args.lite,
-                        figure_path = args.figure_path)
+                        fig_path_adj = args.fig_path_adj)
     # Currently none of these 3 input variables is used
     worker = Markdown(args.title, args.author, args.date)
     text = runner(worker).split('\n')
@@ -272,10 +272,10 @@ class Main:
         parser.add_argument('--plain',
                         action='store_true',
                         help='''plain html code for text body (no style, no title / author, etc.)''')
-        parser.add_argument('--figure_path',
-                        metavar = 'dir',
+        parser.add_argument('--fig_path_adj',
+                        metavar = 'dirs',
                         default = '',
-                        help='''path to where figures are saved''')
+                        help='''rule to swap paths to figures for online publishing''')
 
     def getDokuwikiArguments(self, parser):
         parser.add_argument('--showall',
@@ -290,20 +290,20 @@ class Main:
                         type= str,
                         help='''authorized user name or group name of this page''')
         parser.add_argument('--disqus', action = 'store_true', help = 'Add "disqus" comment section to page')
-        parser.add_argument('--figure_path',
-                        metavar = 'dir',
+        parser.add_argument('--fig_path_adj',
+                        metavar = 'dirs',
                         default = '',
-                        help='''path to where figures are saved''')
+                        help='''rule to swap paths to figures for online publishing''')
 
     def getMarkDownArguments(self, parser):
         parser.add_argument('--suffix',
                         metavar='EXT',
                         default='md',
                         help='''output file suffix''')
-        parser.add_argument('--figure_path',
-                        metavar = 'dir',
+        parser.add_argument('--fig_path_adj',
+                        metavar = 'dirs',
                         default = '',
-                        help='''path to where figures are saved''')
+                        help='''rule to swap paths to figures for online publishing''')
 
     def getBlogArguments(self, parser):
         parser.add_argument('-d', '--date', help='''Date to edit''')

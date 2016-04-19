@@ -36,7 +36,7 @@ class Raw(Element):
 class ParserCore:
     '''Main parser framework'''
     def __init__(self, filename, file_format, reference_format, purge_comment,
-                 figure_path = ''):
+                 fig_path_adj = ''):
         self.format = file_format
         self.reference_format = reference_format
         self.PH = 'LAB{}NOTES'.format(hashlib.md5(env.precise_time.encode()).hexdigest()[:10])
@@ -58,7 +58,7 @@ class ParserCore:
                     del lines[0]
             self.text.extend(lines)
         self.purge_comment = purge_comment
-        self.figure_path = figure_path
+        self.fig_path_adj = fig_path_adj
 
     def __call__(self, worker):
         env.logger.info("Evaluating input document ...")
@@ -269,7 +269,7 @@ class ParserCore:
             if self.text[idx].startswith(M + '*'):
                 # fig: figure.pdf 0.9
                 self.text[idx] = FigureInserter(self.text[idx], support = FIGTYPES,
-                                                tag = self.format, remote_path = self.figure_path).Insert()
+                                                tag = self.format, path_adj = self.fig_path_adj).Insert()
                 idx += 1
                 continue
             if self.text[idx].startswith(M):
@@ -522,7 +522,7 @@ class ParserCore:
         pattern = re.compile('#\*(.*?)(\n|$)')
         for m in re.finditer(pattern, text):
             fig = 'BEGIN' + self.PH + FigureInserter(m.group(1), support = FIGTYPES,
-                                             tag = self.format, remote_path = self.figure_path).Insert() \
+                                             tag = self.format, path_adj = self.fig_path_adj).Insert() \
                                              + 'END' + self.PH + '\n'
             text = text.replace(m.group(0), fig, 1)
         return text
