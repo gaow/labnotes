@@ -904,6 +904,9 @@ class Markdown(BaseEncoder):
         else:
             return value
 
+    def FmtListEnd(self, value, level):
+        return value + '\n'
+
     def GetTable(self, table, label = None):
         ncols = list(set([len(x) for x in table]))
         if len(ncols) > 1:
@@ -936,7 +939,11 @@ class Markdown(BaseEncoder):
         return '## ' + value
 
     def GetHighlight(self, value):
-        return '**_' + value + '_**\n'
+        # FIXME: have to distinguish output platform
+        if True:
+            return '<span style="color:red;background:yellow;font-weight:bold">' + value + '</span>'
+        else:
+            return '**_' + value + '_**\n'
 
     def GetSubsubsection(self, value, index = None):
         return '#### ' + value
