@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import sys, shutil, os, re, argparse, codecs
+import sys, os, re, argparse, codecs
 from .utils import env, regulate_output, pdflatex, indexhtml
 from .parser import ParserCore
 from .encoder import LaTeX, Beamer, Html, Dokuwiki, Markdown
@@ -102,7 +102,7 @@ def bind(args, unknown_args):
     if args.html:
         fname = 'index.html'
         if args.output:
-            fname = getfname([], args.output, suffix='.html') + '.html'
+            fname = regulate_output([], args.output, suffix='.html') + '.html'
         otext = indexhtml([x for x in args.html if x != fname])
         with codecs.open(fname, 'w', encoding='UTF-8', errors='ignore') as f:
             f.writelines(otext)

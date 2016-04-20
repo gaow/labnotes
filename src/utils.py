@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import os, sys, re, datetime
 from time import strftime, localtime
-import glob, shutil, shlex
+import shutil, shlex
 import yaml
 from io import StringIO
 from subprocess import PIPE, Popen

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import os, re
 from collections import OrderedDict
-from .utils import wraptxt
+from .utils import env, wraptxt
 from .style import DOC_PACKAGES, DOC_CONFIG, BM_MODE, BM_CONFIG, \
      BM_TITLE, BM_THANK, BM_THEME, HTML_STYLE, HTML_SYN
 
@@ -200,7 +200,7 @@ class FigureInserter:
                 raise ValueError('Unknown tag ``{0}`` for figures!'.format(tag))
         if tag == 'tex':
             if len(lines) > 1:
-                w_minipage = int(1.0 / (1.0 * len(lines)) * 90) / 100.0
+                # w_minipage = int(1.0 / (1.0 * len(lines)) * 90) / 100.0
                 lines = ['\\subfigure{' + x + '}\n' for x in lines]
                 lines[0] = '\\begin{figure}[H]\n\\centering\n\\mbox{\n' + lines[0]
                 lines[-1] += '\n}\n\\end{figure}\n'
@@ -857,7 +857,7 @@ class Dokuwiki(BaseEncoder):
                 otext.insert(insert_point[0] + 1,  '{{INLINETOC}}\n\\\\')
                 otext = '\n'.join(otext)
         if self.permission:
-            user = re.sub(r'^\\', '', re.sub(r'^"|^\'|"$|\'$', '', self.permission))
+            # user = re.sub(r'^\\', '', re.sub(r'^"|^\'|"$|\'$', '', self.permission))
             otext = '<ifauth !{0}>\nThis post is only visible to authorized members. Please login if you are one of them.\n</ifauth>\n<ifauth {0}>\n' + otext
         if self.disqus:
             otext += '\n\\\\\n\\\\\n\\\\\n~~DISQUS~~'

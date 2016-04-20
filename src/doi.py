@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import os, yaml, json
+import sys, yaml, json
 from urllib.request import urlopen
 from collections import OrderedDict
 from time import sleep
@@ -119,7 +119,7 @@ class PaperList:
         try:
             paper = self.db[doi]
         except KeyError:
-            env.logger.warning('``{}`` is not found in database!\n'.format(doi))
+            sys.stderr.write('``{}`` is not found in database!\n'.format(doi))
             info["authors"] = ''
             return info
         info["authors"] = self.getInfo(paper, "authors")
