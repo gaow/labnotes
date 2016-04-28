@@ -99,7 +99,7 @@ def prepare_bookdown(files, title, author, date, description,
         cfg['output_dir'] = os.path.basename(output)
         workdir = os.path.dirname(output)
     else:
-        os.mkdirs(cfg['output_dir'], exist_ok = True)
+        os.makedirs(cfg['output_dir'], exist_ok = True)
     out['bookdown::gitbook']['config']['toc']['before'] = '{}'.format(
         out['bookdown::gitbook']['config']['toc']['before'].replace('VALUE', idx['title']))
     out['bookdown::gitbook']['config']['toc']['after'] = '{}'.format(
