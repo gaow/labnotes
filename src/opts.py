@@ -103,7 +103,8 @@ def bind(args, unknown_args):
         fname = 'index.html'
         if args.output:
             fname = regulate_output([], args.output, suffix='.html') + '.html'
-        otext = indexhtml([x for x in args.html if x != fname])
+        otext = indexhtml([x for x in args.html if x != fname],
+                          title = args.title, author = args.author, date = args.date)
         with codecs.open(fname, 'w', encoding='UTF-8', errors='ignore') as f:
             f.writelines(otext)
     if args.md:
@@ -181,9 +182,11 @@ class Main:
                         help='''name of the input notes file(s)''')
         parser.add_argument('-a', '--author',
                         metavar='name',
+                        default='',
                         help='''author's name''')
         parser.add_argument('-t', '--title',
                         metavar='text',
+                        default='',
                         help='''title of document''')
         parser.add_argument('-d', '--date',
                         metavar='date',
@@ -312,6 +315,18 @@ class Main:
         parser.add_argument('-m', '--make', action='store_true', help = 'generate and upload pages')
 
     def getBindArguments(self, parser):
+        parser.add_argument('-a', '--author',
+                        action='store',
+                        default = '',
+                        help='''author's name''')
+        parser.add_argument('-t', '--title',
+                        action='store',
+                        default = '',
+                        help='''title of document''')
+        parser.add_argument('-d', '--date',
+                        action='store',
+                        default = '',
+                        help='''date, leave empty for current date''')
         group = parser.add_argument_group('Index HTML')
         parser.add_argument('-o', '--output',
                         metavar='name',
@@ -326,18 +341,6 @@ class Main:
                         metavar = 'FN',
                         nargs = '+',
                         help='''name of the input file(s)''')
-        group.add_argument('-a', '--author',
-                        action='store',
-                        default = '',
-                        help='''author's name''')
-        group.add_argument('-t', '--title',
-                        action='store',
-                        default = '',
-                        help='''title of document''')
-        group.add_argument('-d', '--date',
-                        action='store',
-                        default = '',
-                        help='''date, leave empty for current date''')
         group.add_argument('--description',
                         action='store',
                         default = '',

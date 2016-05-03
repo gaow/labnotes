@@ -1479,7 +1479,7 @@ HTML_INDEX = {
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Documentation Files Navigation</title>
+	<title>DOCTITLE_PH</title>
 	<style type="text/css"/>
 * {
 	/* Lazy reset */
@@ -1561,7 +1561,7 @@ hr {
 </head>
 <body>
 <div id="wrapper">
-	<h1>Documentation Files Navigation</h1>
+	<h1>DOCTITLE_PH</h1>
 	<ul id="toc">
 ''',
 'tail':'</ul><h4>Last updated: %s</h4></div></body></html>' % strftime("%a %d %b %Y %H:%M:%S", localtime())

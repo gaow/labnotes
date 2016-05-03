@@ -271,7 +271,7 @@ def pdflatex(fname, text, vanilla=False, beamer_institute = None):
     env.logger.info('Done!')
     return
 
-def indexhtml(fnames):
+def indexhtml(fnames, title = 'Documentation Files Navigation', author = None, date = None):
     d = OrderedDict()
     try:
         nbars = 0
@@ -290,7 +290,8 @@ def indexhtml(fnames):
                     m = re.search(r'<!DOCTYPE html><html><head><title>(.+?)\|(.+?)</title>', line)
                     if m:
                         if m.group(1).strip():
-                            d[fn] = (m.group(1).strip(), m.group(2).strip())
+                            d[fn] = (m.group(1).strip(),
+                                     m.group(2).strip() if not author else author.strip())
                             flag = False
             if flag:
                 env.logger.warning('Cannot find valid title for ``{}``. Please make sure the html files are generated with "--title" option'.format(fn))
@@ -303,7 +304,7 @@ def indexhtml(fnames):
     otext = ''
     for k, v in list(d.items()):
         if not k.startswith(','):
-            otext += '<li><span>{0}{1}</span>{4}<a href="{2}">{3}</a></li>'.format(re.sub(r'(\s*)-(\s*)', ' - ', v[0].replace('_', ' ')), '&nbsp;&nbsp;<em><sub>Last edited: {}</sub></em>'.format(v[1]) if v[1] else '', k, '[view]', '<a href="{}">{}</a>'.format(k.replace('.html', '.pdf'), '&nbsp;&nbsp;[download]') if os.path.exists(k.replace('.html', '.pdf')) else '') + '\n'
+            otext += '<li><span>{0}{1}</span>{4}<a href="{2}">{3}</a></li>'.format(re.sub(r'(\s*)-(\s*)', ' - ', v[0].replace('_', ' ')), '&nbsp;&nbsp;<em><sub>Last edited: {}</sub></em>'.format(v[1]) if v[1] else '', k, '&#9832view', '<a href="{}">{}</a>'.format(k.replace('.html', '.pdf'), '&nbsp;&nbsp;&#9832download') if os.path.exists(k.replace('.html', '.pdf')) else '') + '\n'
         else:
             otext += v + '\n'
-    return HTML_INDEX['head'] + otext + HTML_INDEX['tail']
+    return HTML_INDEX['head'].replace('DOCTITLE_PH', title) + otext + HTML_INDEX['tail']
