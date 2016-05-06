@@ -5,10 +5,10 @@ from distutils.dir_util import mkpath
 from .parser import ParserCore
 from .encoder import Html
 from .style import BlogCSS
-from .utils import env, cd
+from .utils import env, cd, dict2str
 
 class BlogCFG:
-    def __init__(self, config_file, date):
+    def __init__(self, config_file, date, post):
         d = yaml.load(open(os.path.expanduser(config_file)))
         for key in ['editor', 'blog_dir', 'url', 'ssh_path',
                     'title', 'logo_img_name', 'background_img_name', 'media_url']:
@@ -17,6 +17,18 @@ class BlogCFG:
         for key, value in list(d.items()):
             setattr(self, key, value)
         self.blog_dir = os.path.expanduser(self.blog_dir)
+        self.blog_index = self.blog_dir + '/posts.yml'
+        if not os.path.isfile(self.blog_index):
+            with open(self.blog_index, 'w') as f:
+                f.write(dict2str({}))
+        posts = yaml.load(open(self.blog_index))
+        self.post = post
+        self.post_args = ''
+        for key in posts:
+            if post in key:
+                date = posts[key]['date']
+                self.post_args = posts[key]['args']
+                self.post = key[0]
         if date is None:
             # Figure out the date
             self.year = env.year
@@ -47,10 +59,20 @@ class BlogCFG:
     def show(self):
         print(self.time, self.year, self.month, self.date, self.month_name)
 
-def write_blog(config):
+def edit_blog(config):
+    mkpath(config.path)
+    fn = os.path.join(config.path, config.time if config.post is None else config.post)
+    if config.editor == 'gw-emacs':
+        os.system('''emacsclient -c -F '((font . "Ubuntu Mono-14"))' -a 'emacs' {}.notes > /dev/null&'''.\
+                  format(fn))
+    else:
+        os.system('{} {}.notes &'.format(config.editor, fn))
+
+def write_journal(config):
     html = '../{}.html'.format(config.month_name)
     contents = []
-    for fn in sorted(glob.glob(os.path.join(config.path, "*.notes")), reverse = True):
+    for fn in sorted(glob.glob(os.path.join(config.path, "{}{}*.notes".format(config.year, config.month))),
+                     reverse = True):
         runner = ParserCore([fn], 'html', 'short', 0)
         worker = Html('', '', '', False, 1, text_only = True)
         text = runner(worker)[0].strip().split('\n')
@@ -62,15 +84,16 @@ def write_blog(config):
     links = []
     for item in config.monthlist:
         links.append((os.path.join('../', config.year, item + '.html'), item))
-    page = BlogCSS(config.url, config.title, config.media_url, config.logo_img_name, config.background_img_name)
+    page = BlogCSS(config.url, config.title, config.media_url, config.logo_img_name,
+                   config.background_img_name)
     with open(html, 'w') as f:
         f.write(page.GetMeta('Entries of {}, {}'.format(config.month_name, config.year)) + \
                 page.GetLeftColumn('Entries of {}'.format(config.year), links) + \
                 page.GetRightColumn(contents))
-        
-def upload_blog(config, user):
+
+def upload_journal(config, user):
     with cd(config.path):
-        write_blog(config)
+        write_journal(config)
     if not user:
         user = input("Username: ")
         passwd = getpass.getpass("Password: ")
@@ -83,10 +106,5 @@ def upload_blog(config, user):
         env.logger.debug(cmd)
     os.system(cmd)
 
-def edit_blog(config):
-    mkpath(config.path)
-    if config.editor == 'gw-emacs':
-        os.system('''emacsclient -c -F '((font . "Ubuntu Mono-14"))' -a 'emacs' {}.notes > /dev/null&'''.\
-                  format(os.path.join(config.path, config.time)))
-    else:
-        os.system('{} {}.notes &'.format(config.editor, os.path.join(config.path, config.time)))
+def upload_blog():
+    pass

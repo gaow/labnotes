@@ -5,7 +5,7 @@ from .utils import env, regulate_output, pdflatex, indexhtml
 from .parser import ParserCore
 from .encoder import LaTeX, Beamer, Html, Dokuwiki, Markdown
 from .markdown_toclify import markdown_toclify
-from .blog import BlogCFG, edit_blog, upload_blog
+from .blog import BlogCFG, edit_blog, upload_blog, upload_journal
 from .bookdown import prepare_bookdown
 
 def doc(args, unknown_args):
@@ -91,8 +91,10 @@ def markdown(args, unknown_args):
     return
 
 def blog(args, unknown_args):
-    config = BlogCFG(args.config, args.date)
-    if args.make:
+    config = BlogCFG(args.config, args.date, args.post)
+    if args.make == 1:
+        upload_journal(config, args.user)
+    elif args.make == 2:
         upload_blog(config, args.user)
     else:
         edit_blog(config)
@@ -309,10 +311,12 @@ class Main:
                         help='''rule to swap paths to figures for online publishing''')
 
     def getBlogArguments(self, parser):
-        parser.add_argument('-d', '--date', help='''Date to edit''')
+        group_ex = parser.add_mutually_exclusive_group()
+        group_ex.add_argument('-d', '--date', help='''Date to edit''')
+        group_ex.add_argument('-p', '--post', help='''Post to edit''')
         parser.add_argument('-c', dest = 'config', default = '~/.labnotes/blog.yml', help = 'blog configuration file')
         parser.add_argument('-u', '--user', help='''username to web host''')
-        parser.add_argument('-m', '--make', action='store_true', help = 'generate and upload pages')
+        parser.add_argument('-m', '--make', choices = [1,2], help = 'generate and upload pages')
 
     def getBindArguments(self, parser):
         parser.add_argument('-a', '--author',
