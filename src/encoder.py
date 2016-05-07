@@ -857,8 +857,9 @@ class Dokuwiki(BaseEncoder):
                 otext.insert(insert_point[0] + 1,  '{{INLINETOC}}\n\\\\')
                 otext = '\n'.join(otext)
         if self.permission:
-            # user = re.sub(r'^\\', '', re.sub(r'^"|^\'|"$|\'$', '', self.permission))
-            otext = '<ifauth !{0}>\nThis post is only visible to authorized members. Please login if you are one of them.\n</ifauth>\n<ifauth {0}>\n' + otext
+            user = re.sub(r'^\\', '', re.sub(r'^"|^\'|"$|\'$', '', self.permission))
+            otext = '<ifauth !{0}>\nThis post is only visible to authorized members. Please login if you are one of them.\n</ifauth>\n<ifauth {0}>\n'.\
+                    format(user) + otext
         if self.disqus:
             otext += '\n\\\\\n\\\\\n\\\\\n~~DISQUS~~'
         if self.permission:
