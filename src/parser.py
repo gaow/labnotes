@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import re, hashlib, codecs
+import os, re, hashlib, codecs
 from .utils import env, getPaper, multispace2tab, \
      gettxtfromfile, gettxtfromcmd
 from .encoder import FigureInserter, M, SYNTAX
@@ -47,9 +47,11 @@ class ParserCore:
         self.table = []
         self.figure = []
         #
+        self.dirnames = []
         self.text = []
         self.bib = {}
         for fn in filename:
+            self.dirnames.append(os.path.dirname(fn))
             with codecs.open(fn, 'r', encoding='UTF-8', errors='ignore') as f:
                 lines = [l.rstrip() for l in f.readlines()]
                 # in case I need to parse source code
@@ -444,8 +446,8 @@ class ParserCore:
     def PrepareCodes(self, text, worker, k, label = None):
         text = text.split('\n')
         for idx, item in enumerate(text):
-            if item.startswith("file:///"): text[idx] = gettxtfromfile(item)
-            elif item.startswith("output:///"): text[idx] = gettxtfromcmd(item)
+            if item.startswith("file:///"): text[idx] = gettxtfromfile(item, self.dirnames)
+            elif item.startswith("output:///"): text[idx] = gettxtfromcmd(item, self.dirnames)
             else: continue
         text = '\n'.join(text)
         if k.lower() == 'raw' or k.lower() == '$': return text
@@ -455,8 +457,8 @@ class ParserCore:
     def PrepareVerbatim(self, text, worker, label = None):
         text = text.split('\n')
         for idx, item in enumerate(text):
-            if item.startswith("file:///"): text[idx] = gettxtfromfile(item)
-            elif item.startswith("output:///"): text[idx] = gettxtfromcmd(item)
+            if item.startswith("file:///"): text[idx] = gettxtfromfile(item, self.dirnames)
+            elif item.startswith("output:///"): text[idx] = gettxtfromcmd(item, self.dirnames)
             else: continue
         text = '\n'.join(text)
         self.__RaiseNested(text)

@@ -39,5 +39,5 @@ setup(name = 'labnotes',
     scripts = ['src/labnotes'],
     package_dir = {'labnotes': 'src'},
     packages = ['labnotes'],
-    install_requires = ['sos>=0.5.9', 'pygments']
+    install_requires = ['sos>=0.6.2', 'pygments']
     )

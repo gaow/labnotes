@@ -168,9 +168,12 @@ def multispace2tab(line):
     p = re.compile(r' \s+|\t\s+')
     return p.sub('\t', line)
 
-def readfromfile(fname, start = None, end = None):
+def readfromfile(fname, dirnames, start = None, end = None):
+    for item in dirnames:
+        if os.path.isfile(os.path.expanduser(os.path.join(item, fname))):
+            fname = os.path.expanduser(os.path.join(item, fname))
+            break
     try:
-
         with codecs.open(os.path.expanduser(fname), 'r', encoding='UTF-8', errors='ignore') as f:
             text = [x.rstrip() for x in f.readlines()]
         if start is not None and end is None:
@@ -180,9 +183,9 @@ def readfromfile(fname, start = None, end = None):
         else:
             return '\n'.join(text)
     except Exception as e:
-        raise ValueError('Cannot load ``{0}``: {1}'.format(fname, e))
+        raise ValueError('Cannot load ``{0}`` from ``{1}``: {2}'.format(fname, repr(dirnames), e))
 
-def gettxtfromfile(text):
+def gettxtfromfile(text, dirnames):
     flist = text.split('\n')
     for idx, item in enumerate(flist):
         if item.startswith('file:///'):
@@ -196,16 +199,21 @@ def gettxtfromfile(text):
                 except:
                     raise ValueError("Invalid input argument ``{0} {1}`` for ``{2}``".\
                                      format(item[1], item[2], item[0]))
-                flist[idx] = readfromfile(item[0], item[1], item[2])
+                flist[idx] = readfromfile(item[0], dirnames, item[1], item[2])
             else:
-                flist[idx] = readfromfile(item[0])
+                flist[idx] = readfromfile(item[0], dirnames)
     return '\n'.join(flist)
 
-def gettxtfromcmd(text):
+def gettxtfromcmd(text, dirnames):
     flist = text.split('\n')
     for idx, item in enumerate(flist):
         if item.startswith('output:///'):
-            flist[idx] = Popen(shlex.split(item[10:]), stdout=PIPE).communicate()[0].decode('utf-8')
+            exe = shlex.split(item[10:])
+            for item in dirnames:
+                if os.path.isfile(os.path.expanduser(os.path.join(item, exe[0]))):
+                    exe[0] = os.path.expanduser(os.path.join(item, exe[0]))
+                    break
+            flist[idx] = Popen(exe, stdout=PIPE).communicate()[0].decode('utf-8')
     return '\n'.join(flist)
 
 def uniq(seq):

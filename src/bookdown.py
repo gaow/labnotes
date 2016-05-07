@@ -6,6 +6,7 @@ from . import BOOKDOWN_CFG as cfg, BOOKDOWN_OUT as out, \
      BOOKDOWN_TOC as toc, BOOKDOWN_IDX as idx
 from .utils import env, dict2str, cd
 from pysos import SoS_Script, check_R_library, check_command
+from pysos.sos_executor import Sequential_Executor as SE
 
 def get_sos(files, pdf, workdir):
     bookdown_section = '''
@@ -131,7 +132,7 @@ def prepare_bookdown(files, title, author, date, description,
                 f.write(dict2str(out))
             with open('_bookdown.yml', 'w') as f:
                 f.write(dict2str(cfg))
-        SoS_Script(get_sos(filenames, pdf, workdir)).workflow().run()
+        SE(SoS_Script(get_sos(filenames, pdf, workdir)).workflow()).run()
     except Exception as e:
         error_msg = e
     for f in files:

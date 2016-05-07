@@ -95,7 +95,7 @@ def blog(args, unknown_args):
     if args.make == 1:
         upload_journal(config, args.user)
     elif args.make == 2:
-        upload_blog(config, args.user)
+        upload_blog(config, args.user, unknown_args)
     else:
         edit_blog(config)
     return
@@ -316,7 +316,8 @@ class Main:
         group_ex.add_argument('-p', '--post', help='''Post to edit''')
         parser.add_argument('-c', dest = 'config', default = '~/.labnotes/blog.yml', help = 'blog configuration file')
         parser.add_argument('-u', '--user', help='''username to web host''')
-        parser.add_argument('-m', '--make', choices = [1,2], help = 'generate and upload pages')
+        parser.add_argument('-m', '--make', type = int, choices = [1,2],
+                            help = 'generate and upload pages')
 
     def getBindArguments(self, parser):
         parser.add_argument('-a', '--author',

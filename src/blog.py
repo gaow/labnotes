@@ -6,11 +6,13 @@ from .parser import ParserCore
 from .encoder import Html
 from .style import BlogCSS
 from .utils import env, cd, dict2str
+from pysos import SoS_Script
+from pysos.sos_executor import Sequential_Executor as SE
 
 class BlogCFG:
     def __init__(self, config_file, date, post):
         d = yaml.load(open(os.path.expanduser(config_file)))
-        for key in ['editor', 'blog_dir', 'url', 'ssh_path',
+        for key in ['editor', 'blog_dir', 'url', 'journal_path', 'blog_path',
                     'title', 'logo_img_name', 'background_img_name', 'media_url']:
             if key not in d:
                 raise ValueError('Cannot find required key ``{}`` in ``{}``!'.format(key, config_file))
@@ -21,14 +23,12 @@ class BlogCFG:
         if not os.path.isfile(self.blog_index):
             with open(self.blog_index, 'w') as f:
                 f.write(dict2str({}))
-        posts = yaml.load(open(self.blog_index))
-        self.post = post
-        self.post_args = ''
-        for key in posts:
+        self.posts = yaml.load(open(self.blog_index))
+        self.post = (post, post)
+        for key in self.posts:
             if post in key:
-                date = posts[key]['date']
-                self.post_args = posts[key]['args']
-                self.post = key[0]
+                date = self.posts[key]['date']
+                self.post = key
         if date is None:
             # Figure out the date
             self.year = env.year
@@ -61,10 +61,9 @@ class BlogCFG:
 
 def edit_blog(config):
     mkpath(config.path)
-    fn = os.path.join(config.path, config.time if config.post is None else config.post)
+    fn = os.path.join(config.path, config.time if config.post == (None, None) else config.post[0])
     if config.editor == 'gw-emacs':
-        os.system('''emacsclient -c -F '((font . "Ubuntu Mono-14"))' -a 'emacs' {}.notes > /dev/null&'''.\
-                  format(fn))
+        os.system('''emacsclient -c -a 'emacs' {}.notes > /dev/null&'''.format(fn))
     else:
         os.system('{} {}.notes &'.format(config.editor, fn))
 
@@ -98,13 +97,56 @@ def upload_journal(config, user):
         user = input("Username: ")
         passwd = getpass.getpass("Password: ")
         cmd = ("sshpass -p {} rsync -auzP {}/* {}@{} --include '*/' --include '*.html' --exclude '*' --delete".\
-                  format(passwd, config.blog_dir, user, config.ssh_path))
-        env.logger.debug(cmd)
+                  format(passwd, config.blog_dir, user, config.journal_path))
     else:
         cmd = ("rsync -auzP {}/* {}@{} --include '*/' --include '*.html' --exclude '*' --delete".\
-                  format(config.blog_dir, user, config.ssh_path))
-        env.logger.debug(cmd)
+                  format(config.blog_dir, user, config.journal_path))
+    env.logger.debug(cmd)
     os.system(cmd)
 
-def upload_blog():
-    pass
+
+def upload_blog(config, user, args):
+    if config.post == (None, None):
+        return
+    if len(args) == 0 or '-o' not in args:
+        output = config.post[1]
+    else:
+        output = args.pop(args.index('-o') + 1)
+        args.pop(args.index('-o'))
+    # update post index
+    if output != config.post[1]:
+        config.posts[config.post[0], output] = {}
+        config.posts[config.post[0], output]['date'] = config.time
+    if len(args) > 1:
+        config.posts[config.post[0], output]['args'] = args[1:]
+    elif 'args' in config.posts[config.post]:
+        config.posts[config.post[0], output]['args'] = config.posts[config.post]['args']
+    # compile doc
+    with cd(config.blog_dir):
+        script = "[1]\ninput: '{}.notes'\noutput: '{}.txt'\nrun:\n{}".\
+                 format(os.path.join(config.year, config.month_name, config.post[0]),
+                        os.path.join(config.year, config.month_name, output),
+                        'labnotes dokuwiki ${{input}} -o ${{output}} {}'.\
+                        format((config.posts[config.post[0], output]['args']
+                               if 'args' in config.posts[config.post[0], output]
+                                else '').replace('@', "\\@")))
+        SE(SoS_Script(script).workflow()).run()
+    # upload doc
+    if not user:
+        user = input("Username: ")
+        passwd = getpass.getpass("Password: ")
+        cmd = ("sshpass -p {0} rsync -auzP --rsync-path='mkdir -p {6}/{5} && rsync' {1}/{2}.txt "\
+               "{3}@{4}/{5}/{7}.txt ".\
+               format(passwd, config.blog_dir, os.path.join(config.year, config.month_name, output),
+                      user, config.blog_path, config.time[:6], config.blog_path.split(':')[1], output))
+    else:
+        cmd = ("rsync -auzP --rsync-path='mkdir -p {5}/{4} && rsync' {0}/{1}.txt {2}@{3}/{4}/{6}.txt ".\
+                  format(config.blog_dir, os.path.join(config.year, config.month_name, output),
+                         user, config.blog_path, config.time[:6], config.blog_path.split(':')[1], output))
+    env.logger.debug(cmd)
+    os.system(cmd)
+    # All good, update posts.yml
+    if output != config.post[1]:
+        del config.posts[config.post]
+    with open(config.blog_index, 'w') as f:
+        f.write(dict2str(config.posts))
