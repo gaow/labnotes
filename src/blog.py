@@ -218,16 +218,16 @@ def upload_blog(config, user, args):
         output = args.pop(args.index('-o') + 1)
         args.pop(args.index('-o'))
     # update post index
-    flag = config.post in config.posts
+    flag = config.post not in config.posts
     if output != config.post[1]:
         config.posts[config.post[0], output] = {}
     config.posts[config.post[0], output]['date'] = config.time
     if len(args) > 1:
         # overwrite args
-        config.posts[config.post[0], output]['args'] = args[1:]
+        config.posts[config.post[0], output]['args'] = ' '.join(args)
     elif 'args' in config.posts[config.post]:
         config.posts[config.post[0], output]['args'] = config.posts[config.post]['args']
-    if output != config.post[1]:
+    if output != config.post[1] and config.post in config.posts:
         # same post, new output
         env.logger.info('Post ``{}/{}`` is obsolete. Please manually delete it from ``{}``!'.\
                         format(config.posts[config.post]['date'], config.post[1], config.blog_dir))
