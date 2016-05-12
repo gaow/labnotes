@@ -35,8 +35,8 @@ class Raw(Element):
 
 class ParserCore:
     '''Main parser framework'''
-    def __init__(self, filename, file_format, reference_format, purge_comment,
-                 fig_path_adj = ''):
+    def __init__(self, filename, file_format, reference_format, purge_comment, stamp,
+                 asset_path = None, fig_path_adj = ''):
         self.format = file_format
         self.reference_format = reference_format
         self.PH = 'LAB{}NOTES'.format(hashlib.md5(env.precise_time.encode()).hexdigest()[:10])
@@ -47,7 +47,7 @@ class ParserCore:
         self.table = []
         self.figure = []
         #
-        self.dirnames = []
+        self.dirnames = ['./']
         self.text = []
         self.bib = {}
         for fn in filename:
@@ -59,8 +59,11 @@ class ParserCore:
                   and fn.split('.')[-1].lower() in lines[0].lower():
                     del lines[0]
             self.text.extend(lines)
+        if asset_path is not None:
+            self.dirnames += asset_path
         self.purge_comment = purge_comment
         self.fig_path_adj = fig_path_adj
+        self.stamp = stamp
 
     def __call__(self, worker):
         env.logger.info("Evaluating input document ...")
@@ -237,7 +240,7 @@ class ParserCore:
                 self.text[idx + 1] = worker.GetSection(
                     self.Capitalize(self.Recode(self.text[idx + 1][len(M):], worker)).strip(),
                     add_head = previous_ended, index = count_section)
-                self.text[idx + 2] = ''
+                self.text[idx + 2] = ''  if not self.stamp else self.Recode(' '.join(self.stamp), worker)
                 idx += 3
                 continue
             if self.text[idx].startswith(M * 2):
@@ -270,8 +273,11 @@ class ParserCore:
                 continue
             if self.text[idx].startswith(M + '*'):
                 # fig: figure.pdf 0.9
+                for m in re.finditer(re.compile(r'@{(.*?)}@'), self.text[idx]):
+                    self.text[idx] = self.text[idx].replace(m.group(0), get_output(m.group(1)))
                 self.text[idx] = FigureInserter(self.text[idx], support = FIGTYPES,
-                                                tag = self.format, path_adj = self.fig_path_adj).Insert()
+                                                tag = self.format, paths = self.dirnames,
+                                                path_adj = self.fig_path_adj).Insert()
                 idx += 1
                 continue
             if self.text[idx].startswith(M):
@@ -525,10 +531,13 @@ class ParserCore:
         return text, reserved
 
     def __ReserveFigure(self, text):
-        pattern = re.compile('#\*(.*?)(\n|$)')
-        for m in re.finditer(pattern, text):
-            fig = 'BEGIN' + self.PH + FigureInserter(m.group(1), support = FIGTYPES,
-                                             tag = self.format, path_adj = self.fig_path_adj).Insert() \
+        for m in re.finditer(re.compile('#\*(.*?)(\n|$)'), text):
+            line = m.group(1)
+            for mm in re.finditer(re.compile(r'@{(.*?)}@'), line):
+                line = line.replace(mm.group(0), get_output(mm.group(1)))
+            fig = 'BEGIN' + self.PH + FigureInserter(line, support = FIGTYPES,
+                                                     tag = self.format, paths = self.dirnames,
+                                                     path_adj = self.fig_path_adj).Insert() \
                                              + 'END' + self.PH + '\n'
             text = text.replace(m.group(0), fig, 1)
         return text

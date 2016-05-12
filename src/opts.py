@@ -9,7 +9,8 @@ from .blog import BlogCFG, edit_blog, upload_blog, upload_journal
 from .bookdown import prepare_bookdown
 
 def doc(args, unknown_args):
-    runner = ParserCore(args.filename, 'tex', 'long' if args.long_ref else 'short', args.lite)
+    runner = ParserCore(args.filename, 'tex', 'long' if args.long_ref else 'short', args.lite, args.stamp,
+                        asset_path = args.asset_path)
     worker = LaTeX(args.title, args.author, args.date, args.toc, args.footnote, args.font, args.font_size,
                    table_font_size = 'footnotesize', no_num = args.no_section_number,
                    no_page = args.no_page_number, no_ref = False, twocols = args.twocols,
@@ -18,7 +19,8 @@ def doc(args, unknown_args):
     return
 
 def slides(args, unknown_args):
-    runner = ParserCore(args.filename, 'tex', 'long' if args.long_ref else 'short', args.lite)
+    runner = ParserCore(args.filename, 'tex', 'long' if args.long_ref else 'short', args.lite, args.stamp,
+                        asset_path = args.asset_path)
     worker = Beamer(args.title, args.author, args.date, args.institute,
                       args.toc, args.stoc, False, table_font_size = 'tiny',
                       mode = args.mode, theme = args.theme, thank = args.thank)
@@ -26,8 +28,8 @@ def slides(args, unknown_args):
              beamer_institute = args.color)
 
 def html(args, unknown_args):
-    runner = ParserCore(args.filename, 'html', 'long' if args.long_ref else 'short', args.lite,
-                        fig_path_adj = args.fig_path_adj)
+    runner = ParserCore(args.filename, 'html', 'long' if args.long_ref else 'short', args.lite, args.stamp,
+                        asset_path = args.asset_path, fig_path_adj = args.fig_path_adj)
     worker = Html(args.title, args.author, args.date, args.toc, args.columns, separate_css = args.separate,
                   text_only = args.plain)
     fname = regulate_output(args.filename, args.output, suffix='.html')
@@ -50,7 +52,7 @@ def dokuwiki(args, unknown_args):
     if args.compact_toc:
         toc = 1
     runner = ParserCore(args.filename, 'dokuwiki', 'long' if args.long_ref else 'short', args.lite,
-                        fig_path_adj = args.fig_path_adj)
+                        args.stamp, asset_path = args.asset_path, fig_path_adj = args.fig_path_adj)
     worker = Dokuwiki(args.title, args.author, args.date, toc, args.showall, args.permission,
                       args.disqus)
     fname = regulate_output(args.filename, args.output, suffix='.txt')
@@ -63,7 +65,7 @@ def dokuwiki(args, unknown_args):
 def markdown(args, unknown_args):
     args.suffix = '.' + args.suffix
     runner = ParserCore(args.filename, 'markdown', 'long' if args.long_ref else 'short', args.lite,
-                        fig_path_adj = args.fig_path_adj)
+                        args.stamp, asset_path = args.asset_path, fig_path_adj = args.fig_path_adj)
     # Currently none of these 3 input variables is used
     worker = Markdown(args.title, args.author, args.date)
     text = runner(worker).split('\n')
@@ -207,6 +209,9 @@ class Main:
         parser.add_argument('-r', '--long_ref',
                         action='store_true',
                         help='''additionally include DOI and HTTP links in reference paper''')
+        parser.add_argument('-s', '--stamp', nargs = '+', help = '''add information under section names''')
+        parser.add_argument('--asset_path', nargs = '+',
+                            help = '''folders containing files referred to in input''')
 #        parser.add_argument('--no_reference',
 #                        action='store_true',
 #                        help='''do not include reference in the document''')
@@ -271,7 +276,7 @@ class Main:
                         choices = [1,2,3],
                         default = 1,
                         help='''number of columns in html page (1 ~ 3)''')
-        parser.add_argument('-s', '--separate',
+        parser.add_argument('--separate',
                         action='store_true',
                         help='''use separate files for css and js scripts''')
         parser.add_argument('--plain',
