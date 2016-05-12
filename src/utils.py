@@ -5,7 +5,7 @@ from time import strftime, localtime
 import shutil, shlex
 import yaml
 from io import StringIO
-from subprocess import PIPE, Popen
+from subprocess import PIPE, Popen, check_output
 import tempfile
 from pysos.utils import env as pysos_env
 from .minted import minted
@@ -215,6 +215,9 @@ def gettxtfromcmd(text, dirnames):
                     break
             flist[idx] = Popen(exe, stdout=PIPE).communicate()[0].decode('utf-8')
     return '\n'.join(flist)
+
+def get_output(cmd):
+    return check_output(cmd, shell = True).decode().strip()
 
 def uniq(seq):
     seen = set()

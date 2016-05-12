@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import os, re, hashlib, codecs
 from .utils import env, getPaper, multispace2tab, \
-     gettxtfromfile, gettxtfromcmd
+     gettxtfromfile, gettxtfromcmd, get_output
 from .encoder import FigureInserter, M, SYNTAX
 
 BLOCKS = ['list', 'table', 'out', 'warning', 'tip',
@@ -314,6 +314,10 @@ class ParserCore:
         for m in re.finditer(pattern, line):
             line = line.replace(m.group(0), "{0}N{1}".format(self.PH, len(raw)))
             raw.append(m.group(1))
+        # support for inline command
+        pattern = re.compile(r'@{(.*?)}@')
+        for m in re.finditer(pattern, line):
+            line = line.replace(m.group(0), get_output(m.group(1)))
         # DOI online lookup
         pattern = re.compile('@DOI://(.*?)@')
         for m in re.finditer(pattern, line):
