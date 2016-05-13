@@ -316,9 +316,8 @@ class Main:
                         help='''rule to swap paths to figures for online publishing''')
 
     def getBlogArguments(self, parser):
-        group_ex = parser.add_mutually_exclusive_group()
-        group_ex.add_argument('-d', '--date', help='''Date to edit''')
-        group_ex.add_argument('-p', '--post', help='''Post to edit''')
+        parser.add_argument('-d', '--date', help='''Date to edit''')
+        parser.add_argument('-p', '--post', help='''Post to edit''')
         parser.add_argument('-c', dest = 'config', default = '~/.labnotes/blog.yml', help = 'blog configuration file')
         parser.add_argument('-u', '--user', help='''username to web host''')
         parser.add_argument('-m', '--make', type = int, choices = [1,2],
