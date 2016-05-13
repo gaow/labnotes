@@ -240,7 +240,10 @@ class ParserCore:
                 self.text[idx + 1] = worker.GetSection(
                     self.Capitalize(self.Recode(self.text[idx + 1][len(M):], worker)).strip(),
                     add_head = previous_ended, index = count_section)
-                self.text[idx + 2] = ''  if not self.stamp else self.Recode(' '.join(self.stamp), worker)
+                if self.stamp:
+                    self.text[idx + 2] = worker.GetHighlight(self.Recode(' '.join(self.stamp), worker).strip())
+                else:
+                    self.text[idx + 2] = ''
                 idx += 3
                 continue
             if self.text[idx].startswith(M * 2):
@@ -461,7 +464,7 @@ class ParserCore:
             else: continue
         text = '\n'.join(text)
         if k.lower() == 'raw' or k.lower() == '$': return text
-        self.__RaiseNested(text)
+        #self.__RaiseNested(text)
         return worker.GetCodes(text, k, self.Recode(label, worker))
 
     def PrepareVerbatim(self, text, worker, label = None):
@@ -471,7 +474,7 @@ class ParserCore:
             elif item.startswith("output:///"): text[idx] = gettxtfromcmd(item, self.dirnames)
             else: continue
         text = '\n'.join(text)
-        self.__RaiseNested(text)
+        #self.__RaiseNested(text)
         return worker.GetVerbatim(text, self.Recode(label, worker))
 
     def PrepareBox(self, text, worker, k, label = None):

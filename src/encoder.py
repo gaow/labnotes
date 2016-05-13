@@ -946,9 +946,9 @@ class Markdown(BaseEncoder):
     def GetHighlight(self, value):
         # FIXME: have to distinguish output platform
         if True:
-            return '<span style="color:red;background:yellow;font-weight:bold">' + value + '</span>'
+            return '<span style="color:red;background:yellow;font-weight:bold">' + value + '</span>\n'
         else:
-            return '**_' + value + '_**\n'
+            return '**_' + value + '_**\n\n'
 
     def GetSubsubsection(self, value, index = None):
         return '#### ' + value
