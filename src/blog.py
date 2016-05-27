@@ -226,9 +226,10 @@ def upload_blog(config, user, args):
         config.posts[config.post[0], output] = {}
     config.posts[config.post[0], output]['date'] = config.time if config.post not in config.posts else \
                                                    config.posts[config.post]['date']
-    if len(args) > 1:
+    if len(args) > 1 and args != config.posts[config.post[0], output]['args'].split():
         # overwrite args
         config.posts[config.post[0], output]['args'] = ' '.join(args)
+        flag = True
     elif config.post in config.posts and 'args' in config.posts[config.post]:
         config.posts[config.post[0], output]['args'] = config.posts[config.post]['args']
     if output != config.post[1] and config.post in config.posts:
