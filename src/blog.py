@@ -63,6 +63,7 @@ class BlogCFG:
 def edit_blog(config):
     mkpath(config.path)
     fn = os.path.join(config.path, config.time if config.post == (None, None) else config.post[0])
+    env.logger.info("Editing ``{}.notes``".format(fn.replace(os.path.expanduser('~'), '~')))
     if config.editor == 'gw-emacs':
         os.system('''emacsclient -c -a 'emacs' {}.notes > /dev/null&'''.format(fn))
     else:
