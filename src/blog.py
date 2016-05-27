@@ -63,6 +63,8 @@ class BlogCFG:
 def edit_blog(config):
     mkpath(config.path)
     fn = os.path.join(config.path, config.time if config.post == (None, None) else config.post[0])
+    if fn.endswith('.notes'):
+        fn = fn[:-6]
     env.logger.info("Editing ``{}.notes``".format(fn.replace(os.path.expanduser('~'), '~')))
     if config.editor == 'gw-emacs':
         os.system('''emacsclient -c -a 'emacs' {}.notes > /dev/null&'''.format(fn))
@@ -188,12 +190,12 @@ class TitleParser:
 
     def WriteTitles(self, outfile):
         with open(outfile, 'w') as f:
-            f.write('###\n#!Public Posts\n###\n')
-            self.ndict2notes(f, self.titles_public, level = 2)
-            f.write('###\n#!Private Posts\n###\n')
             f.write('#{raw\n')
             f.write('<ifauth !gw>\nEntries are only visible to authorized members. Please login if you are one of them.\n</ifauth>\n<ifauth gw>\n')
             f.write('#}\n')
+            f.write('###\n#!Public Posts\n###\n')
+            self.ndict2notes(f, self.titles_public, level = 2)
+            f.write('###\n#!Private Posts\n###\n')
             self.ndict2notes(f, self.titles_private, level = 2)
             f.write('#{$</ifauth>$}\n')
 
@@ -219,14 +221,15 @@ def upload_blog(config, user, args):
         output = args.pop(args.index('-o') + 1)
         args.pop(args.index('-o'))
     # update post index
-    flag = config.post not in config.posts
+    flag = (config.post[0], output) not in config.posts
     if output != config.post[1]:
         config.posts[config.post[0], output] = {}
-    config.posts[config.post[0], output]['date'] = config.time
+    config.posts[config.post[0], output]['date'] = config.time if config.post not in config.posts else \
+                                                   config.posts[config.post]['date']
     if len(args) > 1:
         # overwrite args
         config.posts[config.post[0], output]['args'] = ' '.join(args)
-    elif 'args' in config.posts[config.post]:
+    elif config.post in config.posts and 'args' in config.posts[config.post]:
         config.posts[config.post[0], output]['args'] = config.posts[config.post]['args']
     if output != config.post[1] and config.post in config.posts:
         # same post, new output
