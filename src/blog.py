@@ -78,7 +78,7 @@ def write_journal(config):
     contents = []
     for fn in sorted(glob.glob(os.path.join(config.path, "{}{}*.notes".format(config.year, config.month))),
                      reverse = True):
-        runner = ParserCore([fn], 'html', 'short', 0)
+        runner = ParserCore([fn], 'html', 'short', 0, 0)
         worker = Html('', '', '', False, 1, text_only = True)
         text = runner(worker)[0].strip().split('\n')
         # summary, date, text

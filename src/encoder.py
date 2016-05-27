@@ -128,7 +128,7 @@ class BaseEncoder:
         return ''
 
 class FigureInserter:
-    def __init__(self, text, support, tag, path_adj = ''):
+    def __init__(self, text, support, tag, paths = ['./'], path_adj = ''):
         if text.startswith(M + '*'):
             text = text[len(M)+1:].strip()
         else:
@@ -153,6 +153,10 @@ class FigureInserter:
             if extension.lower() not in support:
                 raise ValueError("Input file format ``{0}`` not supported. Valid extensions are ``{1}``".\
                           format(extension, ' '.join(support)))
+            for item in paths:
+                if os.path.isfile(os.path.expanduser(os.path.join(item, fig))):
+                    fig = os.path.expanduser(os.path.join(item, fig))
+                    break
             if not os.path.exists(fig):
                 raise ValueError("Cannot find file ``%s``" % fig)
             # path adjustment rule
@@ -942,9 +946,9 @@ class Markdown(BaseEncoder):
     def GetHighlight(self, value):
         # FIXME: have to distinguish output platform
         if True:
-            return '<span style="color:red;background:yellow;font-weight:bold">' + value + '</span>'
+            return '<span style="color:red;background:yellow;font-weight:bold">' + value + '</span>\n'
         else:
-            return '**_' + value + '_**\n'
+            return '**_' + value + '_**\n\n'
 
     def GetSubsubsection(self, value, index = None):
         return '#### ' + value

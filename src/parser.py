@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import os, re, hashlib, codecs
 from .utils import env, getPaper, multispace2tab, \
-     gettxtfromfile, gettxtfromcmd
+     gettxtfromfile, gettxtfromcmd, get_output
 from .encoder import FigureInserter, M, SYNTAX
 
 BLOCKS = ['list', 'table', 'out', 'warning', 'tip',
@@ -35,8 +35,8 @@ class Raw(Element):
 
 class ParserCore:
     '''Main parser framework'''
-    def __init__(self, filename, file_format, reference_format, purge_comment,
-                 fig_path_adj = ''):
+    def __init__(self, filename, file_format, reference_format, purge_comment, stamp,
+                 asset_path = None, fig_path_adj = ''):
         self.format = file_format
         self.reference_format = reference_format
         self.PH = 'LAB{}NOTES'.format(hashlib.md5(env.precise_time.encode()).hexdigest()[:10])
@@ -47,7 +47,7 @@ class ParserCore:
         self.table = []
         self.figure = []
         #
-        self.dirnames = []
+        self.dirnames = ['./']
         self.text = []
         self.bib = {}
         for fn in filename:
@@ -59,8 +59,11 @@ class ParserCore:
                   and fn.split('.')[-1].lower() in lines[0].lower():
                     del lines[0]
             self.text.extend(lines)
+        if asset_path is not None:
+            self.dirnames += asset_path
         self.purge_comment = purge_comment
         self.fig_path_adj = fig_path_adj
+        self.stamp = stamp
 
     def __call__(self, worker):
         env.logger.info("Evaluating input document ...")
@@ -237,7 +240,10 @@ class ParserCore:
                 self.text[idx + 1] = worker.GetSection(
                     self.Capitalize(self.Recode(self.text[idx + 1][len(M):], worker)).strip(),
                     add_head = previous_ended, index = count_section)
-                self.text[idx + 2] = ''
+                if self.stamp:
+                    self.text[idx + 2] = worker.GetHighlight(self.Recode(' '.join(self.stamp), worker).strip())
+                else:
+                    self.text[idx + 2] = ''
                 idx += 3
                 continue
             if self.text[idx].startswith(M * 2):
@@ -270,8 +276,11 @@ class ParserCore:
                 continue
             if self.text[idx].startswith(M + '*'):
                 # fig: figure.pdf 0.9
+                for m in re.finditer(re.compile(r'@{(.*?)}@'), self.text[idx]):
+                    self.text[idx] = self.text[idx].replace(m.group(0), get_output(m.group(1)))
                 self.text[idx] = FigureInserter(self.text[idx], support = FIGTYPES,
-                                                tag = self.format, path_adj = self.fig_path_adj).Insert()
+                                                tag = self.format, paths = self.dirnames,
+                                                path_adj = self.fig_path_adj).Insert()
                 idx += 1
                 continue
             if self.text[idx].startswith(M):
@@ -314,6 +323,10 @@ class ParserCore:
         for m in re.finditer(pattern, line):
             line = line.replace(m.group(0), "{0}N{1}".format(self.PH, len(raw)))
             raw.append(m.group(1))
+        # support for inline command
+        pattern = re.compile(r'@{(.*?)}@')
+        for m in re.finditer(pattern, line):
+            line = line.replace(m.group(0), get_output(m.group(1)))
         # DOI online lookup
         pattern = re.compile('@DOI://(.*?)@')
         for m in re.finditer(pattern, line):
@@ -451,7 +464,7 @@ class ParserCore:
             else: continue
         text = '\n'.join(text)
         if k.lower() == 'raw' or k.lower() == '$': return text
-        self.__RaiseNested(text)
+        #self.__RaiseNested(text)
         return worker.GetCodes(text, k, self.Recode(label, worker))
 
     def PrepareVerbatim(self, text, worker, label = None):
@@ -461,7 +474,7 @@ class ParserCore:
             elif item.startswith("output:///"): text[idx] = gettxtfromcmd(item, self.dirnames)
             else: continue
         text = '\n'.join(text)
-        self.__RaiseNested(text)
+        #self.__RaiseNested(text)
         return worker.GetVerbatim(text, self.Recode(label, worker))
 
     def PrepareBox(self, text, worker, k, label = None):
@@ -521,10 +534,13 @@ class ParserCore:
         return text, reserved
 
     def __ReserveFigure(self, text):
-        pattern = re.compile('#\*(.*?)(\n|$)')
-        for m in re.finditer(pattern, text):
-            fig = 'BEGIN' + self.PH + FigureInserter(m.group(1), support = FIGTYPES,
-                                             tag = self.format, path_adj = self.fig_path_adj).Insert() \
+        for m in re.finditer(re.compile('#\*(.*?)(\n|$)'), text):
+            line = m.group(1)
+            for mm in re.finditer(re.compile(r'@{(.*?)}@'), line):
+                line = line.replace(mm.group(0), get_output(mm.group(1)))
+            fig = 'BEGIN' + self.PH + FigureInserter(line, support = FIGTYPES,
+                                                     tag = self.format, paths = self.dirnames,
+                                                     path_adj = self.fig_path_adj).Insert() \
                                              + 'END' + self.PH + '\n'
             text = text.replace(m.group(0), fig, 1)
         return text

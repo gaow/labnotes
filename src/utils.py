@@ -5,9 +5,9 @@ from time import strftime, localtime
 import shutil, shlex
 import yaml
 from io import StringIO
-from subprocess import PIPE, Popen
+from subprocess import PIPE, Popen, check_output
 import tempfile
-from pysos.utils import env as pysos_env
+from pysos.utils import logger
 from .minted import minted
 from .style import btheme, HTML_INDEX
 from .doi import PaperList
@@ -26,7 +26,7 @@ class Environment:
         self.time = self.year + self.month + self.date
         self.precise_time = strftime("%a %d %b %Y %H:%M:%S", localtime())
         self.nice_time = '{} {}, {}'.format(self.month_name, self.date, self.year)
-        self.logger = pysos_env.logger
+        self.logger = logger
         self.datadir = os.path.expanduser('~/.labnotes')
         if not os.path.isdir(self.datadir):
             os.makedirs(self.datadir)
@@ -215,6 +215,9 @@ def gettxtfromcmd(text, dirnames):
                     break
             flist[idx] = Popen(exe, stdout=PIPE).communicate()[0].decode('utf-8')
     return '\n'.join(flist)
+
+def get_output(cmd):
+    return check_output(cmd, shell = True).decode().strip()
 
 def uniq(seq):
     seen = set()
