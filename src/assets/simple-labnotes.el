@@ -231,19 +231,19 @@ subexpression.")
 
   (defface simple-labnotes-heading-1-face
     '((((type tty pc) (class color)) (:foreground "yellow" :weight bold))
-      (t (:height 1.2 :inherit simple-labnotes-heading-2-face)))
+      (t (:height 1.05 :inherit simple-labnotes-heading-2-face)))
     "Face for Labnotes headings at level 1."
     :group 'simple-labnotes-faces)
 
   (defface simple-labnotes-heading-2-face
     '((((type tty pc) (class color)) (:foreground "lightblue" :weight bold))
-      (t (:height 1.2 :inherit simple-labnotes-heading-3-face)))
+      (t (:height 1.05 :inherit simple-labnotes-heading-3-face)))
     "Face for Labnotes headings at level 2."
     :group 'simple-labnotes-faces)
 
   (defface simple-labnotes-heading-3-face
     '((((type tty pc) (class color)) (:weight bold))
-      (t (:height 1.2 :inherit simple-labnotes-heading-4-face)))
+      (t (:height 1.05 :inherit simple-labnotes-heading-4-face)))
     "Face for Labnotes headings at level 3."
     :group 'simple-labnotes-faces)
 
