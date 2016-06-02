@@ -58,14 +58,6 @@ def prepare_bookdown(files, title, author, date, description, no_section_number,
         check_R_library('rstudio/DT')
         check_command('pandoc')
         os.system('touch %s' % os.path.join(env.tmp_dir, env.time) + '.deps')
-
-    # write resources
-    with codecs.open(os.path.join(env.tmp_dir, 'style.css'), 'w', encoding='UTF-8') as f:
-            f.write(style)
-    with codecs.open(os.path.join(env.tmp_dir, 'toc.css'), 'w', encoding='UTF-8') as f:
-            f.write(toc)
-    with codecs.open(os.path.join(env.tmp_dir, 'preamble.tex'), 'w', encoding='UTF-8') as f:
-            f.write(tex)
     #
     if title:
         idx['title'] = title
@@ -89,10 +81,9 @@ def prepare_bookdown(files, title, author, date, description, no_section_number,
         del idx['github-repo']
         del cfg['repo']
     idx['author'] = '&copy; ' + idx['author']
-    out['bookdown::gitbook']['css'] = os.path.join(env.tmp_dir, 'style.css')
-    out['bookdown::html_chapters']['css'] = [os.path.join(env.tmp_dir, 'style.css'),
-                                             os.path.join(env.tmp_dir, 'toc.css')]
-    out['bookdown::epub_book']['stylesheet'] = os.path.join(env.tmp_dir, 'style.css')
+    out['bookdown::gitbook']['css'] =  'style.css'
+    out['bookdown::html_chapters']['css'] = ['style.css', 'toc.css']
+    out['bookdown::epub_book']['stylesheet'] = 'style.css'
     if pdf:
         out['bookdown::pdf_book']['includes']['in_header'] = os.path.join(env.tmp_dir, 'preamble.tex')
     else:
@@ -129,6 +120,13 @@ def prepare_bookdown(files, title, author, date, description, no_section_number,
         tmp = f.read()
     for f in files:
         shutil.move(f, os.path.join(env.tmp_dir, os.path.basename(f)))
+    # write resources
+    with codecs.open(os.path.join(workdir, cfg['output_dir'], 'style.css'), 'w', encoding='UTF-8') as f:
+            f.write(style)
+    with codecs.open(os.path.join(workdir, cfg['output_dir'], 'toc.css'), 'w', encoding='UTF-8') as f:
+            f.write(toc)
+    with codecs.open(os.path.join(env.tmp_dir, 'preamble.tex'), 'w', encoding='UTF-8') as f:
+            f.write(tex)
     error_msg = None
     try:
         with cd(workdir):
