@@ -113,7 +113,8 @@ def bind(args, unknown_args):
             f.writelines(otext)
     if args.md:
         prepare_bookdown(args.md, args.title, args.author, args.date,
-                         args.description, args.url, args.url_edit,
+                         args.description, args.no_section_number, args.split_by,
+                         args.url, args.url_edit,
                          args.repo, args.pdf, args.output, unknown_args)
 
 class Main:
@@ -354,6 +355,13 @@ class Main:
                         action='store',
                         default = '',
                         help='''description, a message string or a file name''')
+        group.add_argument('--no_section_number',
+                        action='store_true',
+                        help='''generate un-numbered sections''')
+        group.add_argument('--split_by',
+                        metavar = 'args',
+                        nargs = '+',
+                        help='''Options to split HTML file, see bookdown::gitbook''')
         group.add_argument('--url',
                         action='store',
                         default = '',

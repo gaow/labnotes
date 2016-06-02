@@ -15,7 +15,8 @@ def get_sos(files, pdf, workdir):
 quiet = 'T'
 formats = ['bookdown::gitbook']
 input: %s
-R: workdir = %s
+task: workdir = %s
+R:
 ###
 # Code below are copied from
 # https://github.com/rstudio/bookdown/blob/master/inst/examples/_render.R
@@ -49,8 +50,8 @@ run:
         pdf_section = ''
     return(bookdown_section + pdf_section)
 
-def prepare_bookdown(files, title, author, date, description,
-                     url, url_edit, repo, pdf, output, pdf_args):
+def prepare_bookdown(files, title, author, date, description, no_section_number,
+                     split_by, url, url_edit, repo, pdf, output, pdf_args):
 
     if not os.path.exists(os.path.join(env.tmp_dir, env.time) + '.deps'):
         check_R_library('rstudio/bookdown')
@@ -92,7 +93,10 @@ def prepare_bookdown(files, title, author, date, description,
     out['bookdown::html_chapters']['css'] = [os.path.join(env.tmp_dir, 'style.css'),
                                              os.path.join(env.tmp_dir, 'toc.css')]
     out['bookdown::epub_book']['stylesheet'] = os.path.join(env.tmp_dir, 'style.css')
-    out['bookdown::pdf_book']['includes']['in_header'] = os.path.join(env.tmp_dir, 'preamble.tex')
+    if pdf:
+        out['bookdown::pdf_book']['includes']['in_header'] = os.path.join(env.tmp_dir, 'preamble.tex')
+    else:
+        del out['bookdown::pdf_book']
     workdir = os.getcwd()
     if output:
         output = os.path.abspath(os.path.expanduser(output))
@@ -106,6 +110,10 @@ def prepare_bookdown(files, title, author, date, description,
     out['bookdown::gitbook']['config']['toc']['after'] = '{}'.format(
         out['bookdown::gitbook']['config']['toc']['after'].replace('VALUE',
                                                                    '{} {}'.format(env.year, idx['author'])))
+    if split_by:
+        out['bookdown::gitbook']['split_by'] = split_by
+    if no_section_number:
+        out['bookdown::gitbook']['number_sections'] = 0
     if pdf:
         pdf = (pdf, cfg['output_dir'], '{} {} {} --toc --long_ref --font_size 12 {}'.\
                format('-a {}'.format(repr(author)) if author else '',
