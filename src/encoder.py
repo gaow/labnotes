@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import os, re
+import os, re, glob
 from collections import OrderedDict
 from .utils import env, wraptxt
 from .style import DOC_PACKAGES, DOC_CONFIG, BM_MODE, BM_CONFIG, \
@@ -135,16 +135,29 @@ class FigureInserter:
             text = text.strip()
         if not text:
             return ''
-        lines = [x.strip() for x in text.split(';') if x.strip()]
-        for idx, line in enumerate(lines):
+        # collect figures
+        lines = []
+        for x in text.split(';'):
+            if not x.strip():
+                continue
             try:
-                fig, width = line.split()
+                fig, width = x.strip().split()
                 width = float(width)
             except ValueError:
                 fig = line.split()[0]
                 width = 0.9
             # if (not tag.endswith('wiki')) and width > 1:
             #     width = 0.9
+            x = []
+            for item in paths:
+                figs = glob.glob(os.path.join(os.path.expanduser(item), fig))
+                x.extend([(xx, width) for xx in figs])
+            if len(x) == 0:
+                raise ValueError("Cannot find file ``%s`` under ``%s``" % (fig, repr(paths)))
+            lines.extend(x)
+        # Insert figures
+        for idx, line in enumerate(lines):
+            fig, width = line
             fname = os.path.basename(fig)
             if not '.' in fname:
                 raise ValueError("Cannot determine file format for ``{0}``. Valid extensions are ``{1}``".\
@@ -153,12 +166,6 @@ class FigureInserter:
             if extension.lower() not in support:
                 raise ValueError("Input file format ``{0}`` not supported. Valid extensions are ``{1}``".\
                           format(extension, ' '.join(support)))
-            for item in paths:
-                if os.path.isfile(os.path.expanduser(os.path.join(item, fig))):
-                    fig = os.path.expanduser(os.path.join(item, fig))
-                    break
-            if not os.path.exists(fig):
-                raise ValueError("Cannot find file ``%s``" % fig)
             # path adjustment rule
             fig = os.path.abspath(fig)
             path_swap = path_adj.split()
