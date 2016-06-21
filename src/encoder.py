@@ -144,7 +144,7 @@ class FigureInserter:
                 fig, width = x.strip().split()
                 width = float(width)
             except ValueError:
-                fig = line.split()[0]
+                fig = x.split()[0]
                 width = 0.9
             # if (not tag.endswith('wiki')) and width > 1:
             #     width = 0.9
