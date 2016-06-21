@@ -222,10 +222,9 @@ def upload_blog(config, user, args):
         args.pop(args.index('-o'))
     # update post index
     flag = (config.post[0], output) not in config.posts
-    if output != config.post[1]:
+    if flag or output != config.post[1]:
         config.posts[config.post[0], output] = {}
-    config.posts[config.post[0], output]['date'] = config.time if config.post not in config.posts else \
-                                                   config.posts[config.post]['date']
+    config.posts[config.post[0], output]['date'] = config.time if flag else config.posts[config.post]['date']
     if len(args) > 1:
         if 'args' in config.posts[config.post[0], output] and args != config.posts[config.post[0], output]['args'].split():
             flag = True
