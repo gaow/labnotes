@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import os, re, glob
 from collections import OrderedDict
+from pysos.utils import logger
 from .utils import env, wraptxt
 from .style import DOC_PACKAGES, DOC_CONFIG, BM_MODE, BM_CONFIG, \
      BM_TITLE, BM_THANK, BM_THEME, HTML_STYLE, HTML_SYN
@@ -319,7 +320,7 @@ class LaTeX(BaseEncoder):
 
     def GetCodes(self, text, k, label = None):
         if k.lower() not in SYNTAX:
-            env.logger.warning("Syntax highlight not available for ``{}``.".format(k))
+            logger.warning("Syntax highlight not available for ``{}``.".format(k))
             k = 'text'
         return '\\begin{minted}[samepage=false, fontfamily=tt,\nfontsize=\\scriptsize, xleftmargin=1pt,\nframe=lines, framerule=1pt, framesep=2mm,\nlabel=\\fbox{%s}]{%s}\n%s\n\\end{minted}\n' % (k.upper() if not label else label, k, wraptxt(text, '\\' if k == 'bash' else '', 131, rmblank = False, prefix = COMMENT[k.lower()]))
 
@@ -415,7 +416,7 @@ class Beamer(LaTeX):
 
     def GetCodes(self, text, k, label = None):
         if k.lower() not in SYNTAX:
-            env.logger.warning("Syntax highlight not available for ``{}``.".format(k))
+            logger.warning("Syntax highlight not available for ``{}``.".format(k))
             k = 'text'
         return '\\begin{exampleblock}{\\texttt{%s}}\\scriptsize\n\\begin{Verbatim}\n%s\n\\end{Verbatim}\n\\end{exampleblock}\n' % (k.capitalize() if not label else label, wraptxt(text, '', int(78 * self.wrap_adjust), rmblank = False, prefix = COMMENT[k.lower()]))
 
@@ -795,7 +796,7 @@ class Dokuwiki(BaseEncoder):
         # text = wraptxt(text, '', 1000, rmblank = True)
         # require sxh3 plugin
         if k.lower() not in SYNTAX:
-            env.logger.warning("Syntax highlight not available for ``{}``.".format(k))
+            logger.warning("Syntax highlight not available for ``{}``.".format(k))
             k = 'text'
         if self.sxh3:
             text = '<sxh {0}{1};gutter: false;>\n\n'.format(

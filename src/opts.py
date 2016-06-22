@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import sys, os, re, argparse, codecs
+from pysos import logger
 from .utils import env, regulate_output, pdflatex, indexhtml
 from .parser import ParserCore
 from .encoder import LaTeX, Beamer, Html, Dokuwiki, Markdown
@@ -41,8 +42,8 @@ def html(args, unknown_args):
     if css:
         with open('style.css', 'w') as f:
             f.writelines(css)
-    env.logger.info('Done! ``{}.html`` should display in PTSans font if available.'.format(fname))
-    env.logger.info('http://www.google.com/webfonts/specimen/PT+Sans')
+    logger.info('Done! ``{}.html`` should display in PTSans font if available.'.format(fname))
+    logger.info('http://www.google.com/webfonts/specimen/PT+Sans')
     return
 
 def dokuwiki(args, unknown_args):
@@ -177,7 +178,7 @@ class Main:
             if '--debug' in unknown_args:
                 raise
             else:
-                env.logger.error(e)
+                logger.error(e)
                 sys.exit(1)
 
     def getCommonArguments(self, parser):

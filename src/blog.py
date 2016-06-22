@@ -9,6 +9,7 @@ from .style import BlogCSS
 from .utils import env, cd, dict2str
 from pysos import SoS_Script
 from pysos.sos_executor import Sequential_Executor as SE
+from pysos.utils import logger
 
 class BlogCFG:
     def __init__(self, config_file, date, post):
@@ -65,7 +66,7 @@ def edit_blog(config):
     fn = os.path.join(config.path, config.time if config.post == (None, None) else config.post[0])
     if fn.endswith('.notes'):
         fn = fn[:-6]
-    env.logger.info("Editing ``{}.notes``".format(fn.replace(os.path.expanduser('~'), '~')))
+    logger.info("Editing ``{}.notes``".format(fn.replace(os.path.expanduser('~'), '~')))
     if config.editor == 'gw-emacs':
         os.system('''emacsclient -c -a 'emacs' {}.notes > /dev/null&'''.format(fn))
     else:
@@ -109,7 +110,7 @@ def upload_journal(config, user):
     else:
         cmd = ("rsync -auzP {}/* {}@{} --include '*/' --include '*.html' --exclude '*' --delete".\
                   format(config.blog_dir, user, config.journal_path))
-    env.logger.debug(cmd)
+    logger.debug(cmd)
     os.system(cmd)
 
 #
@@ -234,7 +235,7 @@ def upload_blog(config, user, args):
         config.posts[config.post[0], output]['args'] = config.posts[config.post]['args']
     if output != config.post[1] and config.post in config.posts:
         # same post, new output
-        env.logger.info('Post ``{}/{}`` is obsolete. Please manually delete it from ``{}``!'.\
+        logger.info('Post ``{}/{}`` is obsolete. Please manually delete it from ``{}``!'.\
                         format(config.posts[config.post]['date'], config.post[1], config.blog_dir))
         exclude = "{}:{}".format(config.posts[config.post]['date'], config.post[1])
         del config.posts[config.post]
@@ -271,7 +272,7 @@ def upload_blog(config, user, args):
                          user, config.blog_path, config.time[:6], config.blog_path.split(':')[1], output))
         if flag:
             cmd += ("scp {}/blog.txt {}@{}.txt".format(config.blog_dir, user, config.blog_path))
-    env.logger.debug(cmd)
+    logger.debug(cmd)
     os.system(cmd)
     if os.path.isfile(os.path.join(config.blog_dir, 'blog.txt')):
         os.remove(os.path.join(config.blog_dir, 'blog.txt'))

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import os, re, hashlib, codecs
+from pysos.utils import logger
 from .utils import env, getPaper, multispace2tab, \
      gettxtfromfile, gettxtfromcmd, get_output
 from .encoder import FigureInserter, M, SYNTAX
@@ -47,11 +48,12 @@ class ParserCore:
         self.table = []
         self.figure = []
         #
-        self.dirnames = ['./']
+        self.dirnames = ['']
         self.text = []
         self.bib = {}
         for fn in filename:
-            self.dirnames.append(os.path.dirname(fn))
+            if os.path.dirname(fn):
+                self.dirnames.append(os.path.dirname(fn))
             with codecs.open(fn, 'r', encoding='UTF-8', errors='ignore') as f:
                 lines = [l.rstrip() for l in f.readlines()]
                 # in case I need to parse source code
@@ -61,12 +63,13 @@ class ParserCore:
             self.text.extend(lines)
         if asset_path is not None:
             self.dirnames += asset_path
+        self.dirnames = list(set(self.dirnames))
         self.purge_comment = purge_comment
         self.fig_path_adj = fig_path_adj
         self.stamp = stamp
 
     def __call__(self, worker):
-        env.logger.info("Evaluating input document ...")
+        logger.info("Evaluating input document ...")
         self.PurgeComment()
         self.text = self.ParseBlock(self.text, worker)
         self.ParseText(worker)
@@ -248,7 +251,7 @@ class ParserCore:
                 continue
             if self.text[idx].startswith(M * 2):
                 # too many ugly #'s
-                env.logger.warning("If you are sure of two ``{0}{0}`` at the beginning of this line please enter a space between them to get rid of this warning:\n\t``{1}``".format(M, self.text[idx]))
+                logger.warning("If you are sure of two ``{0}{0}`` at the beginning of this line please enter a space between them to get rid of this warning:\n\t``{1}``".format(M, self.text[idx]))
             if self.text[idx].startswith(M + '!!!'):
                 # highlight
                 self.text[idx] = worker.GetHighlight(self.Recode(self.text[idx][len(M)+3:], worker).strip())

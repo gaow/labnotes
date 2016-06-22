@@ -26,7 +26,6 @@ class Environment:
         self.time = self.year + self.month + self.date
         self.precise_time = strftime("%a %d %b %Y %H:%M:%S", localtime())
         self.nice_time = '{} {}, {}'.format(self.month_name, self.date, self.year)
-        self.logger = logger
         self.datadir = os.path.expanduser('~/.labnotes')
         if not os.path.isdir(self.datadir):
             os.makedirs(self.datadir)
@@ -45,7 +44,7 @@ class Environment:
     def reset_tmpdir(self):
         if self.tmp_dir:
             shutil.rmtree(self.tmp_dir)
-            env.logger.info('cache folder ``{0}`` is removed\n'.format(self.tmp_dir))
+            logger.info('cache folder ``{0}`` is removed\n'.format(self.tmp_dir))
             self.tmp_dir = tempfile.mkdtemp(prefix='labnotes_cache_')
         else:
             self.tmp_dir = tempfile.mkdtemp(prefix='labnotes_cache_')
@@ -67,8 +66,8 @@ def getPaper(doi, reference_format):
     sys.stderr.flush()
     # update database
     status = finder.addPaper(doi)
-    env.logger.info('``{0}`` {1} {3}, {2} in database'.format(doi,
-		status[0].upper(), status[1].upper(), 'online'))
+    logger.info('``{0}`` {1} online, {2} in database'.format(doi,
+		status[0].upper(), status[1].upper()))
     finder.dump()
     # format citation
     info = finder.extract(doi)
@@ -245,7 +244,7 @@ def pdflatex(fname, text, vanilla=False, beamer_institute = None):
         m = btheme(env.tmp_dir)
         m.put(beamer_institute)
     # compile
-    env.logger.info('Building {0} ``{1}`` ...'.\
+    logger.info('Building {0} ``{1}`` ...'.\
                     format('document' if beamer_institute is None else 'slides', fname + '.pdf'))
     cmd = ["pdflatex", "-shell-escape", "-halt-on-error", "-file-line-error", fname + '.tex']
     for visit in [1,2]:
@@ -272,14 +271,14 @@ def pdflatex(fname, text, vanilla=False, beamer_institute = None):
                     *   -> Report file "{0}-ERROR.txt" to Gao Wang
                     * * *\n\n'''.format(fname))
         if visit == 1:
-            env.logger.info('Still working ...')
+            logger.info('Still working ...')
         else:
             shutil.move(os.path.join(env.tmp_dir, (fname + '.pdf')),
                         os.path.join(dest_dir, fname + '.pdf'))
             empty(env.tmp_dir, fname)
             ferr = os.path.join(cwd, '{0}-ERROR.txt'.format(fname))
             if os.path.exists(ferr): os.remove(ferr)
-    env.logger.info('Done!')
+    logger.info('Done!')
     return
 
 def indexhtml(fnames, title = 'Documentation Files Navigation', author = None, date = None):
@@ -305,9 +304,9 @@ def indexhtml(fnames, title = 'Documentation Files Navigation', author = None, d
                                      m.group(2).strip() if not author else author.strip())
                             flag = False
             if flag:
-                env.logger.warning('Cannot find valid title for ``{}``. Please make sure the html files are generated with "--title" option'.format(fn))
+                logger.warning('Cannot find valid title for ``{}``. Please make sure the html files are generated with "--title" option'.format(fn))
         if len(d) == 0:
-            env.logger.warning('No output generated')
+            logger.warning('No output generated')
     except Exception as e:
         raise ValueError("ERROR processing input html: ``{}``".format(e))
     #
