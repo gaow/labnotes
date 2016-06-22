@@ -78,7 +78,7 @@ def markdown(args, unknown_args):
         if os.path.isdir(args.output):
             for idx, item in enumerate(text):
                 if item:
-                    fname = os.path.join(args.out, re.sub(r'#|:', '', item).strip().replace(' ', '-'))
+                    fname = os.path.join(args.output, re.sub(r'#|:', '', item).strip().replace(' ', '-'))
                     text = text[(idx + 1):]
                     break
     if not fname:
@@ -89,8 +89,8 @@ def markdown(args, unknown_args):
     with codecs.open(fname, 'w', encoding='UTF-8', errors='ignore') as f:
         f.writelines('\n'.join(text))
     if args.toc:
-        markdown_toclify(input_file = fname,
-                         output_file = fname, github = True, back_to_top = True)
+        markdown_toclify(input_file = fname, output_file = fname,
+                         github = True, back_to_top = True)
     return
 
 def blog(args, unknown_args):
