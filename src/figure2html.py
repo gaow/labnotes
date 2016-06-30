@@ -46,15 +46,18 @@ def md2dict(md_file):
     def load_data(tmp):
         if curr2 is None:
             return
-        tmp = tmp.replace(',\n,\n', '-').replace('\n', '').split('-')
-        res[curr1][curr2]['Linear edge'] = tmp[0].strip(',').split(',')
-        res[curr1][curr2]['Simple branch'] = tmp[1].strip(',').split(',')
-        res[curr1][curr2]['Tree'] = tmp[2].strip(',').split(',')
-        return ''
+        curr3 = ''
+        for ii in tmp:
+            if not ii.startswith('dsc'):
+                curr3 = ii
+                res[curr1][curr2][curr3] = []
+            else:
+                res[curr1][curr2][curr3].append(ii)
+        return []
     #
     res = OrderedDict()
     curr1 = curr2 = None
-    tmp = ''
+    tmp = []
     with open(md_file) as f:
         lines = [x.strip() for x in f.readlines()]
     for idx, line in enumerate(lines):
@@ -62,10 +65,11 @@ def md2dict(md_file):
             res[line[4:]] = OrderedDict()
             curr1 = line[4:]
         elif line.startswith('#### '):
-            res[curr1][line[5:]] = OrderedDict([('Linear edge', []), ('Simple branch', []), ('Tree', [])])
+            res[curr1][line[5:]] = OrderedDict()
             curr2 = line[5:]
         else:
-            tmp += (line if line else '\n') + ','
+            if line:
+                tmp.append(line)
             if idx + 1 < len(lines) and lines[idx + 1].startswith('#'):
                 tmp = load_data(tmp)
     load_data(tmp)
@@ -83,5 +87,5 @@ def pdf2png(data):
 
 if __name__ == '__main__':
     data = md2dict(sys.argv[1])
-    # pdf2png(data)
+    pdf2png(data)
     figs2html(data, sys.argv[1], 'dr-tree benchmark')
