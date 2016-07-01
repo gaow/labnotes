@@ -226,8 +226,8 @@ def upload_blog(config, user, args):
     if flag or output != config.post[1]:
         config.posts[config.post[0], output] = {}
     config.posts[config.post[0], output]['date'] = config.time if flag else config.posts[config.post]['date']
-    if len(args) > 1:
-        if 'args' in config.posts[config.post[0], output] and args != config.posts[config.post[0], output]['args'].split():
+    if len(args) >= 1:
+        if ('args' in config.posts[config.post[0], output] and args != config.posts[config.post[0], output]['args'].split()) or 'args' not in config.posts[config.post[0], output]:
             flag = True
         # overwrite args
         config.posts[config.post[0], output]['args'] = ' '.join(args)
