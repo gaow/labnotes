@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import codecs, os, shutil
+import codecs, os, shutil, re
 from . import BOOKDOWN_CFG as cfg, BOOKDOWN_OUT as out, \
      BOOKDOWN_TEX as tex, BOOKDOWN_STYLE as style, \
      BOOKDOWN_TOC as toc, BOOKDOWN_IDX as idx
 from .utils import env, dict2str, cd
 from pysos import SoS_Script, check_R_library, check_command
-from pysos.sos_executor import Sequential_Executor as SE
 
 def get_sos(files, pdf, workdir):
     bookdown_section = '''
@@ -114,12 +113,28 @@ def prepare_bookdown(files, title, author, date, description, no_section_number,
     # Move files around to resolve path problem for bookdown
     filenames = ['index.rmd' if idx == 0 else '{}_{}'.format(str(idx).zfill(4), os.path.basename(x))
                  for idx, x in enumerate(files)]
+    filenames = [x if x.endswith('.rmd') else os.path.splitext(x)[0] + '.rmd' for x in filenames]
     for x, y in zip(files[1:], filenames[1:]):
         shutil.copy(x, os.path.join(workdir, y))
     with open(files[0]) as f:
-        tmp = f.read()
-    for f in files:
-        shutil.move(f, os.path.join(env.tmp_dir, os.path.basename(f)))
+        tmp = f.readlines()
+        if not (tmp[0].startswith('# ')):
+            name = os.path.splitext(os.path.basename(files[0]))[0].lstrip('0123456789.- ')
+            tmp = ['# ' + re.sub(r'\-|_', ' ', name) + '\n'] \
+                    + tmp
+        tmp = ''.join(tmp)
+    for i, fn in enumerate(files):
+        if i == 0:
+            continue
+        with cd(workdir):
+            with open(filenames[i]) as f:
+                lines = f.readlines()
+            if not (lines[0].startswith('# ')):
+                name = os.path.splitext(os.path.basename(fn))[0].lstrip('0123456789.- ')
+                lines = ['# ' + re.sub(r'\-|_', ' ', name) + '\n'] \
+                        + lines
+                with open(filenames[i], 'w') as f:
+                    f.write(''.join(lines))
     # write resources
     with codecs.open(os.path.join(workdir, cfg['output_dir'], 'style.css'), 'w', encoding='UTF-8') as f:
             f.write(style)
@@ -138,11 +153,13 @@ def prepare_bookdown(files, title, author, date, description, no_section_number,
                 f.write(dict2str(out))
             with open('_bookdown.yml', 'w') as f:
                 f.write(dict2str(cfg))
-        SE(SoS_Script(get_sos(filenames, pdf, workdir)).workflow()).run()
+            sos_file = os.path.join(env.tmp_dir, 'bookdown.sos')
+            with open(sos_file, 'w') as f:
+                f.write(get_sos(filenames, pdf, workdir))
+            os.system('sos run {}'.format(sos_file))
     except Exception as e:
         error_msg = e
-    for f in files:
-        shutil.move(os.path.join(env.tmp_dir, os.path.basename(f)), f)
+    os.remove(sos_file)
     try:
         with cd(workdir):
             os.remove('_output.yml')
