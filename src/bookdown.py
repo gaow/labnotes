@@ -118,6 +118,8 @@ def prepare_bookdown(files, title, author, date, description, no_section_number,
         shutil.copy(x, os.path.join(workdir, y))
     with open(files[0]) as f:
         tmp = f.readlines()
+        if len(tmp) == 0:
+            tmp.append(' ')
         if not (tmp[0].startswith('# ')):
             name = os.path.splitext(os.path.basename(files[0]))[0].lstrip('0123456789.- ')
             tmp = ['# ' + re.sub(r'\-|_', ' ', name) + '\n'] \
@@ -129,6 +131,8 @@ def prepare_bookdown(files, title, author, date, description, no_section_number,
         with cd(workdir):
             with open(filenames[i]) as f:
                 lines = f.readlines()
+            if len(lines) == 0:
+                lines.append(' ')
             if not (lines[0].startswith('# ')):
                 name = os.path.splitext(os.path.basename(fn))[0].lstrip('0123456789.- ')
                 lines = ['# ' + re.sub(r'\-|_', ' ', name) + '\n'] \
