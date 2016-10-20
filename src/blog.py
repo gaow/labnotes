@@ -8,7 +8,7 @@ from .encoder import Html
 from .style import BlogCSS
 from .utils import env, cd, dict2str
 from pysos.sos_script import SoS_Script
-from pysos.sos_executor import SP_Step_Executor as SE
+from pysos.sos_executor import Base_Executor as SE
 from pysos.utils import logger
 
 class BlogCFG:
