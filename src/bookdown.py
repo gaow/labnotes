@@ -5,7 +5,8 @@ from . import BOOKDOWN_CFG as cfg, BOOKDOWN_OUT as out, \
      BOOKDOWN_TEX as tex, BOOKDOWN_STYLE as style, \
      BOOKDOWN_TOC as toc, BOOKDOWN_IDX as idx
 from .utils import env, dict2str, cd
-from pysos import SoS_Script, check_R_library, check_command
+from pysos.sos_script import SoS_Script
+from pysos.actions import check_R_library, check_command
 
 def get_sos(files, pdf, workdir):
     bookdown_section = '''

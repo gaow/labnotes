@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import sys, os, re, argparse, codecs
-from pysos import logger
+from pysos.utils import logger
 from .utils import env, regulate_output, pdflatex, indexhtml
 from .parser import ParserCore
 from .encoder import LaTeX, Beamer, Html, Dokuwiki, Markdown
