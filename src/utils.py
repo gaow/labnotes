@@ -7,7 +7,7 @@ import yaml
 from io import StringIO
 from subprocess import PIPE, Popen, check_output
 import tempfile
-from pysos.utils import logger
+from sos.utils import logger
 from .minted import minted
 from .style import btheme, HTML_INDEX
 from .doi import PaperList

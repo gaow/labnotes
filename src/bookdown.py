@@ -5,8 +5,9 @@ from . import BOOKDOWN_CFG as cfg, BOOKDOWN_OUT as out, \
      BOOKDOWN_TEX as tex, BOOKDOWN_STYLE as style, \
      BOOKDOWN_TOC as toc, BOOKDOWN_IDX as idx
 from .utils import env, dict2str, cd
-from pysos.sos_script import SoS_Script
-from pysos.actions import check_R_library, check_command
+from sos.sos_script import SoS_Script
+from sos.target import executable
+from sos.R.target import R_library
 
 def get_sos(files, pdf, workdir):
     bookdown_section = '''
@@ -54,9 +55,9 @@ def prepare_bookdown(files, title, author, date, description, no_section_number,
                      split_by, url, url_edit, repo, pdf, output, pdf_args):
 
     if not os.path.exists(os.path.join(env.tmp_dir, env.time) + '.deps'):
-        check_R_library('rstudio/bookdown')
-        check_R_library('rstudio/DT')
-        check_command('pandoc')
+        R_library('rstudio/bookdown')
+        R_library('rstudio/DT')
+        executable('pandoc')
         os.system('touch %s' % os.path.join(env.tmp_dir, env.time) + '.deps')
     #
     if title:
