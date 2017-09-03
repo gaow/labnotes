@@ -955,7 +955,7 @@ DOC_PACKAGES = '''
 \\usepackage{upquote}
 %%\\usepackage[utf8]{inputenc}
 %%\\usepackage{ucs}
-\\usepackage{titlesec}
+\\usepackage[explicit]{titlesec}
 \\usepackage{longtable}
 \\usepackage{seqsplit}
 \\usepackage{subfigure}
@@ -997,14 +997,32 @@ DOC_CONFIG = '''
 \\makeatother
 \\renewcommand{\\thesubfigure}{\\thefigure.\\arabic{subfigure}}
 \\definecolor{bg}{rgb}{0.95,0.95,0.95}
-\\definecolor{rblue}{rgb}{0,.14,.41}
+\\definecolor{rblue}{RGB}{16,183,179}
 \\definecolor{rgray}{RGB}{94,96,98}
 \\definecolor{wwwcolor}{rgb}{0,0.2,0.6}
+\\newcommand*\\chapterlabel{}
+\\titleformat{\\chapter}
+  {\\gdef\\chapterlabel{}
+   \\normalfont\\sffamily\\Huge\\bfseries\\scshape}
+  {\\gdef\\chapterlabel{\\thechapter\\ }}{0pt}
+  {\\begin{tikzpicture}[remember picture,overlay]
+    \\node[yshift=-3cm] at (current page.north west)
+      {\\begin{tikzpicture}[remember picture, overlay]
+        \\draw[fill=rgray] (0,0) rectangle
+          (\\paperwidth,3cm);
+        \\node[anchor=east,xshift=.9\\paperwidth,rectangle,
+              rounded corners=20pt,inner sep=11pt,
+              fill=rblue]
+              {\\color{white}\\chapterlabel#1};
+       \\end{tikzpicture}
+      };
+   \\end{tikzpicture}
+  }
+\\titleformat{\\subsubsection}{\\color{rblue}\\normalfont\\bfseries}{$\\centerdot$}{.5em}{}
 \\setcounter{secnumdepth}{3}
 \\setcounter{tocdepth}{3}
-\\titleformat{\\subsubsection}{\\color{rblue}\\normalfont\\bfseries}{$\\centerdot$}{.5em}{}
 \\usepackage[bookmarksnumbered=true,pdfstartview=FitH]{hyperref}
-\\hypersetup{colorlinks, breaklinks, urlcolor=wwwcolor, linkcolor=wwwcolor, citecolor=MidnightBlue}
+\\hypersetup{colorlinks, breaklinks, urlcolor=rblue, linkcolor=wwwcolor, citecolor=rblue}
 '''
 ######################################################
 
