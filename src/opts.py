@@ -15,7 +15,7 @@ def doc(args, unknown_args):
     worker = LaTeX(args.title, args.author, args.date, args.toc, args.footnote, args.font, args.font_size,
                    table_font_size = 'footnotesize', no_num = args.no_section_number,
                    no_page = args.no_page_number, no_ref = False, twocols = args.twocols,
-                   landscape = args.landscape)
+                   landscape = args.landscape, additional_packages = args.additional_packages)
     pdflatex(regulate_output(args.filename, args.output), runner(worker), vanilla=args.vanilla)
     return
 
@@ -245,6 +245,8 @@ class Main:
         parser.add_argument('-f', '--vanilla',
                         action='store_true',
                         help='''force build document from scratch without using cached data''')
+        parser.add_argument('--additional_packages', metavar = 'pkg', nargs = '+',
+                            help = '''additional LaTeX packages, eg. "\\\\usepackage[fontset=ubuntu,UTF8]{ctex}"''')
 
     def getSlidesArguments(self, parser):
         parser.add_argument('-i', '--institute',

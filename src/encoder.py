@@ -227,7 +227,7 @@ class FigureInserter:
 class LaTeX(BaseEncoder):
     def __init__(self, title, author, date, toc, is_footnote, font,
                  font_size, table_font_size = 'footnotesize', no_num = False, no_page = False,
-                 no_ref = False, twocols = False, landscape = False, pause = False):
+                 no_ref = False, twocols = False, landscape = False, pause = False, additional_packages = None):
         super().__init__()
         # configurations
         self.swaps = [('\\', '!!\\backslash!!'),('$', '\$'),
@@ -266,6 +266,10 @@ class LaTeX(BaseEncoder):
             self.no_ref = no_ref
         self.twocols = twocols
         self.landscape = landscape
+        if additional_packages is None:
+            self.additional_packages = ''
+        else:
+            self.additional_packages = '\n'.join(additional_packages) + "\n"
 
     def GetURL(self, value, link_text = ''):
         return '\\url{%s}' % value.replace('\-\_', '\_').replace('$\sim$', '~')
@@ -373,7 +377,7 @@ class LaTeX(BaseEncoder):
     def Write(self, value):
         return '\\documentclass[oneside%s%s]{%s}' % (',twocolumn' if self.twocols else '',
                                                      ',landscape' if self.landscape else '', self.doctype) + \
-                                                     DOC_PACKAGES + \
+                                                     DOC_PACKAGES + self.additional_packages + \
                 ('\\usepackage[Lenny]{fncychap}\n' if self.doctype == 'report' else '') + \
                 ('\\usepackage{mathptmx}\n' if self.font == 'roman' else '') + \
                 '\\renewcommand\\%s{References}\n' % ('bibname' if self.doctype == 'report' else 'refname') + \

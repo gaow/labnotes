@@ -15,6 +15,13 @@ In order to use `bookdown` with `labnotes bind`, you have to install `pandoc`. O
 sudo apt-get install libcurl4-openssl-dev libssl-dev pandoc pandoc-citeproc
 ```
 
+For Chinese input support:
+
+```
+sudo apt-get install latex-cjk-all fonts-wqy-zenhei fonts-arphic-uming
+```
+(only applicable to `labnotes doc` command. You will have to use `labnotes doc ... --additional_packages "\\usepackage[fontset=ubuntu,UTF8]{ctex}"`)
+
 `labnotes` requires Python 3.4 or newer. If you have it, then you are ready to download and install `labnotes`:
 
 ```
