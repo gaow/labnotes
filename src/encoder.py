@@ -362,17 +362,17 @@ class LaTeX(BaseEncoder):
         return '\\chapter{' + value + '}'
 
     def GetSection(self, value, add_head, index = None):
-        return ('\\section*{' if self.no_num else '\\section{') + value + '}'
+        return ('\\section*{' if self.no_num and not self.toc else '\\section{') + value + '}'
 
     def GetHighlight(self, value):
         # return '\\shabox{' + value + '}'
         return '\\colorbox{yellow}{\\begin{varwidth}{\\dimexpr\\linewidth-2\\fboxsep}{\\color{red}\\textbf{' + value + '}}\\end{varwidth}}'
 
     def GetSubsubsection(self, value, index = None):
-        return ('\\subsubsection*{' if self.no_num else '\\subsubsection{') + value + '}'
+        return ('\\subsubsection*{' if self.no_num and not self.toc else '\\subsubsection{') + value + '}'
 
     def GetSubsection(self, value, add_head, index = None):
-        return ('\\subsection*{' if self.no_num else '\\subsection{') + value + '}'
+        return ('\\subsection*{' if self.no_num and not self.toc else '\\subsection{') + value + '}'
 
     def Write(self, value):
         return '\\documentclass[oneside%s%s]{%s}' % (',twocolumn' if self.twocols else '',
@@ -382,7 +382,8 @@ class LaTeX(BaseEncoder):
                 ('\\usepackage{mathptmx}\n' if self.font == 'roman' else '') + \
                 '\\renewcommand\\%s{References}\n' % ('bibname' if self.doctype == 'report' else 'refname') + \
                 (('\\renewcommand\\rmdefault{%s}\n' % FONT[self.font]) if (self.font != 'default' and self.font != 'roman') else '') + \
-                DOC_CONFIG + ('\\pagestyle{empty}\n' if self.no_page else '') + \
+                (DOC_CONFIG if not (self.no_num and self.toc) else DOC_CONFIG.replace("{secnumdepth}{3}", "{secnumdepth}{0}")) + \
+                ('\\pagestyle{empty}\n' if self.no_page else '') + \
                 (('\\setlength{\\columnsep}{%s}\\setlength{\\columnseprule}{%s}\n' % ('2em','0pt')) if self.twocols else '') + \
                 '\\title{%s}\n' % self.title + '\\author{%s}\n' % self.author + \
                 '\\date{%s}\n\\raggedbottom\n\\begin{document}\n' % self.date + \
