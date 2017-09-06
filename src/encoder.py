@@ -226,7 +226,7 @@ class FigureInserter:
 
 class LaTeX(BaseEncoder):
     def __init__(self, title, author, date, toc, is_footnote, font,
-                 font_size, table_font_size = 'footnotesize', no_num = False, no_page = False,
+                 font_size, table_font_size = None, no_num = False, no_page = False,
                  no_ref = False, twocols = False, landscape = False, pause = False, additional_packages = None):
         super().__init__()
         # configurations
@@ -303,7 +303,8 @@ class LaTeX(BaseEncoder):
             raise ValueError("Number of columns not consistent in table. Please replace empty columns with placeholder symbol, e.g. '-'.\n``{0} ...``".format('\t'.join(table[0])))
         try:
             cols = ''.join(['c' if len([item[i] for item in table if item[i].startswith('\\seqsplit')]) == 0 else 'p{{{}pt}}'.format((480-(ncols[0]-nseqsplit)*10)/nseqsplit) for i in range(ncols[0])])
-            head = '\\begin{center}\n{\\%s\\begin{longtable}{%s}\n\\hline\n' % (self.tablefont, cols)
+            head = '\\begin{center}\n{%s\\begin{longtable}{%s}\n\\hline\n' % \
+                   ("\\" + self.tablefont if self.tablefont is not None else '', cols)
             body = '&'.join(table[0]) + '\\\\\n' + '\\hline\n' + '\\\\\n'.join(['&'.join(item) for item in table[1:]]) + '\\\\\n'
             tail = '\\hline\n\\end{longtable}}\n\\end{center}\n'
         except IndexError:

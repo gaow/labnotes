@@ -13,7 +13,7 @@ def doc(args, unknown_args):
     runner = ParserCore(args.filename, 'tex', 'long' if args.long_ref else 'short', args.lite, args.stamp,
                         asset_path = args.asset_path)
     worker = LaTeX(args.title, args.author, args.date, args.toc, args.footnote, args.font, args.font_size,
-                   table_font_size = 'footnotesize', no_num = args.no_section_number,
+                   table_font_size = "small", no_num = args.no_section_number,
                    no_page = args.no_page_number, no_ref = False, twocols = args.twocols,
                    landscape = args.landscape, additional_packages = args.additional_packages)
     pdflatex(regulate_output(args.filename, args.output), runner(worker), vanilla=args.vanilla)

@@ -1000,7 +1000,7 @@ DOC_CONFIG = '''
 \\definecolor{bg}{rgb}{0.95,0.95,0.95}
 \\definecolor{rblue}{RGB}{16,183,179}
 \\definecolor{rgray}{RGB}{94,96,98}
-\\definecolor{wwwcolor}{rgb}{0,0.2,0.6}
+\\definecolor{dblue}{rgb}{0,0.2,0.6}
 \\newcommand*\\chapterlabel{}
 \\titleformat{\\chapter}
   {\\gdef\\chapterlabel{}
@@ -1024,7 +1024,7 @@ DOC_CONFIG = '''
 \\setcounter{secnumdepth}{3}
 \\setcounter{tocdepth}{3}
 \\usepackage[bookmarksnumbered=true,pdfstartview=FitH]{hyperref}
-\\hypersetup{colorlinks, breaklinks, urlcolor=rblue, linkcolor=wwwcolor, citecolor=rblue}
+\\hypersetup{colorlinks, breaklinks, urlcolor=rblue, linkcolor=dblue, citecolor=rblue}
 '''
 ######################################################
 
