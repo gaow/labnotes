@@ -956,6 +956,7 @@ DOC_PACKAGES = '''
 %%\\usepackage[utf8]{inputenc}
 %%\\usepackage{ucs}
 \\usepackage[explicit]{titlesec}
+\\usepackage{sectsty}
 \\usepackage{longtable}
 \\usepackage{seqsplit}
 \\usepackage{subfigure}
@@ -985,7 +986,7 @@ DOC_CONFIG = '''
 \\newcommand*\\circled[1]{\\kern-2.5em
   \\put(0,4){\\color{black}\\circle*{18}}\\put(0,4){\\circle{16}}
   \\put(-3,0){\\color{white}\\\\bfseries\\large#1}}
-\\linespread{1.1}
+\\linespread{1.2}
 \\setlength{\\parskip}{8pt plus 1pt minus 1pt}
 \\parindent 0ex
 \\geometry{left=0.8in,right=0.8in,top=0.8in,bottom=0.8in}
@@ -1018,7 +1019,8 @@ DOC_CONFIG = '''
       };
    \\end{tikzpicture}
   }
-\\titleformat{\\subsubsection}{\\color{rblue}\\normalfont\\bfseries}{$\\centerdot$}{.5em}{}
+\\sectionfont{\\color{rgray}\\normalfont\\huge\\bfseries}
+\\subsubsectionfont{\\color{rblue}\\normalfont\\bfseries}
 \\setcounter{secnumdepth}{3}
 \\setcounter{tocdepth}{3}
 \\usepackage[bookmarksnumbered=true,pdfstartview=FitH]{hyperref}
