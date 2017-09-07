@@ -150,9 +150,11 @@ class FigureInserter:
             # if (not tag.endswith('wiki')) and width > 1:
             #     width = 0.9
             x = []
-            for item in paths:
-                figs = glob.glob(os.path.join(os.path.expanduser(item), fig))
-                x.extend([(xx, width) for xx in figs])
+            for item in set(paths):
+                figs = list(set(glob.glob(os.path.join(os.path.expanduser(item), fig))))
+                for xx in figs:
+                    if (xx, width) not in x:
+                        x.append((xx, width))
             if len(x) == 0:
                 raise ValueError("Cannot find file ``%s`` under ``%s``" % (fig, repr(paths)))
             lines.extend(x)
