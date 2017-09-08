@@ -323,7 +323,7 @@ class LaTeX(BaseEncoder):
         return '\\bibitem{%s}\n[%s]\\\\%s\n' % (k, v1, v2)
 
     def FindBibKey(self, value):
-        return [m.group(1) for m in re.finditer(re.compile('\\cite{(.*?)}'), value)]
+        return [m.group(1) for m in re.finditer(re.compile(r'\\cite{(.*?)}'), value)]
 
     def GetCodes(self, text, k, label = None):
         if k.lower() not in SYNTAX:
