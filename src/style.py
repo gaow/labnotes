@@ -1024,7 +1024,7 @@ DOC_CONFIG = '''
 \\setcounter{secnumdepth}{3}
 \\setcounter{tocdepth}{3}
 \\usepackage[bookmarksnumbered=true,pdfstartview=FitH]{hyperref}
-\\hypersetup{colorlinks, breaklinks, urlcolor=rblue, linkcolor=dblue, citecolor=rblue}
+\\hypersetup{colorlinks, breaklinks, urlcolor=dblue, linkcolor=dblue, citecolor=MidnightBlue}
 '''
 ######################################################
 
