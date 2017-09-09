@@ -999,6 +999,7 @@ DOC_CONFIG = '''
 \\renewcommand{\\thesubfigure}{\\thefigure.\\arabic{subfigure}}
 \\definecolor{bg}{rgb}{0.95,0.95,0.95}
 \\definecolor{rblue}{RGB}{16,183,179}
+\\definecolor{rred}{RGB}{255,87,87}
 \\definecolor{rgray}{RGB}{94,96,98}
 \\definecolor{dblue}{rgb}{0,0.2,0.6}
 \\newcommand*\\chapterlabel{}
@@ -1020,7 +1021,7 @@ DOC_CONFIG = '''
    \\end{tikzpicture}
   }
 \\sectionfont{\\color{rgray}\\normalfont\\huge\\bfseries}
-\\subsubsectionfont{\\color{rblue}\\normalfont\\bfseries}
+\\subsubsectionfont{\\color{dblue}\\normalfont\\bfseries}
 \\setcounter{secnumdepth}{3}
 \\setcounter{tocdepth}{3}
 \\usepackage[bookmarksnumbered=true,pdfstartview=FitH]{hyperref}
