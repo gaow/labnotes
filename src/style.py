@@ -955,7 +955,8 @@ DOC_PACKAGES = '''
 \\usepackage{upquote}
 %%\\usepackage[utf8]{inputenc}
 %%\\usepackage{ucs}
-\\usepackage{titlesec}
+\\usepackage[explicit]{titlesec}
+\\usepackage{sectsty}
 \\usepackage{longtable}
 \\usepackage{seqsplit}
 \\usepackage{subfigure}
@@ -985,7 +986,7 @@ DOC_CONFIG = '''
 \\newcommand*\\circled[1]{\\kern-2.5em
   \\put(0,4){\\color{black}\\circle*{18}}\\put(0,4){\\circle{16}}
   \\put(-3,0){\\color{white}\\\\bfseries\\large#1}}
-\\linespread{1.1}
+\\linespread{1.2}
 \\setlength{\\parskip}{8pt plus 1pt minus 1pt}
 \\parindent 0ex
 \\geometry{left=0.8in,right=0.8in,top=0.8in,bottom=0.8in}
@@ -997,14 +998,34 @@ DOC_CONFIG = '''
 \\makeatother
 \\renewcommand{\\thesubfigure}{\\thefigure.\\arabic{subfigure}}
 \\definecolor{bg}{rgb}{0.95,0.95,0.95}
-\\definecolor{rblue}{rgb}{0,.14,.41}
+\\definecolor{rblue}{RGB}{16,183,179}
+\\definecolor{rred}{RGB}{255,87,87}
 \\definecolor{rgray}{RGB}{94,96,98}
-\\definecolor{wwwcolor}{rgb}{0,0.2,0.6}
+\\definecolor{dblue}{rgb}{0,0.2,0.6}
+\\newcommand*\\chapterlabel{}
+\\titleformat{\\chapter}
+  {\\gdef\\chapterlabel{}
+   \\normalfont\\sffamily\\Huge\\bfseries\\scshape}
+  {\\gdef\\chapterlabel{\\thechapter\\ }}{0pt}
+  {\\begin{tikzpicture}[remember picture,overlay]
+    \\node[yshift=-3cm] at (current page.north west)
+      {\\begin{tikzpicture}[remember picture, overlay]
+        \\draw[fill=rgray] (0,0) rectangle
+          (\\paperwidth,3cm);
+        \\node[anchor=east,xshift=.9\\paperwidth,rectangle,
+              rounded corners=20pt,inner sep=11pt,
+              fill=rblue]
+              {\\color{white}\\chapterlabel#1};
+       \\end{tikzpicture}
+      };
+   \\end{tikzpicture}
+  }
+\\sectionfont{\\color{rgray}\\normalfont\\huge\\bfseries}
+\\subsubsectionfont{\\color{dblue}\\normalfont\\bfseries}
 \\setcounter{secnumdepth}{3}
 \\setcounter{tocdepth}{3}
-\\titleformat{\\subsubsection}{\\color{rblue}\\normalfont\\bfseries}{$\\centerdot$}{.5em}{}
 \\usepackage[bookmarksnumbered=true,pdfstartview=FitH]{hyperref}
-\\hypersetup{colorlinks, breaklinks, urlcolor=wwwcolor, linkcolor=wwwcolor, citecolor=MidnightBlue}
+\\hypersetup{colorlinks, breaklinks, urlcolor=dblue, linkcolor=dblue, citecolor=MidnightBlue}
 '''
 ######################################################
 
