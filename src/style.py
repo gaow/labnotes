@@ -941,6 +941,7 @@ DOC_PACKAGES = '''
 \\usepackage{amssymb}
 \\usepackage{amsthm}
 \\usepackage{mathabx}
+\\usepackage{enumitem}
 \\usepackage[warn]{textcomp}
 \\newcommand\hmmax{0} % default 3
 \\usepackage{bm}
@@ -1026,6 +1027,7 @@ DOC_CONFIG = '''
 \\setcounter{tocdepth}{3}
 \\setlength{\\LTpre}{0pt}
 \\setlength{\\LTpost}{0pt}
+\\setlist[itemize]{noitemsep, topsep=0pt}
 \\usepackage[bookmarksnumbered=true,pdfstartview=FitH]{hyperref}
 \\hypersetup{colorlinks, breaklinks, urlcolor=dblue, linkcolor=dblue, citecolor=MidnightBlue}
 '''
