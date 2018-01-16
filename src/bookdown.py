@@ -5,9 +5,9 @@ from . import BOOKDOWN_CFG as cfg, BOOKDOWN_OUT as out, \
      BOOKDOWN_TEX as tex, BOOKDOWN_STYLE as style, \
      BOOKDOWN_TOC as toc, BOOKDOWN_IDX as idx
 from .utils import env, dict2str, cd
-from sos.sos_script import SoS_Script
-from sos.target import executable
-from sos_r.target import R_library
+from sos.parser import SoS_Script
+from sos.targets import executable
+from sos_r.targets import R_library
 
 def get_sos(files, pdf, workdir):
     bookdown_section = '''

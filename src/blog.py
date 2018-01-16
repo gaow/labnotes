@@ -7,8 +7,8 @@ from .parser import ParserCore
 from .encoder import Html
 from .style import BlogCSS
 from .utils import env, cd, dict2str
-from sos.sos_script import SoS_Script
-from sos.sos_executor import Base_Executor as SE
+from sos.parser import SoS_Script
+from sos.workflow_executor import Base_Executor as SE
 from sos.utils import logger
 
 class BlogCFG:
