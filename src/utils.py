@@ -218,6 +218,15 @@ def gettxtfromcmd(text, dirnames):
 def get_output(cmd):
     return check_output(cmd, shell = True).decode().strip()
 
+def is_chinese(uchar):
+    try:
+        if uchar >= u'\u4e00' and uchar<=u'\u9fa5':
+            return True
+        else:
+            return False
+    except:
+        return False
+
 def uniq(seq):
     seen = set()
     seen_add = seen.add

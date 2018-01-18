@@ -3,7 +3,7 @@
 import os, re, glob
 from collections import OrderedDict
 from sos.utils import logger
-from .utils import env, wraptxt
+from .utils import env, wraptxt, is_chinese
 from .style import DOC_PACKAGES, DOC_CONFIG, BM_MODE, BM_CONFIG, \
      BM_TITLE, BM_THANK, BM_THEME, HTML_STYLE, HTML_SYN
 
@@ -296,7 +296,7 @@ class LaTeX(BaseEncoder):
         return value + '\n\\end{itemize}'
 
     def GetTable(self, table, label = None):
-        table = [['\seqsplit{{{}}}'.format(iitem.replace(' ', '~'))
+        table = [['\seqsplit{%s}' % ''.join(['{%s}' % y if is_chinese(y) else y for y in iitem.replace(' ', '\\ ')])
                   if len([x for x in iitem if x == ' ']) > 2 else iitem for iitem in item]
                   for item in table]
         ncols = list(set([len(x) for x in table]))
