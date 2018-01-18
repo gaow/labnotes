@@ -692,6 +692,7 @@ BM_CONFIG = '''
 \\usepackage{pgfpages}
 \\usepackage{longtable}
 \\usepackage{seqsplit}
+\\usepackage{array}
 \\usepackage{subfigure}
 \\usepackage{multicol}
 \\usepackage{multirow}
@@ -708,6 +709,10 @@ BM_CONFIG = '''
 \\DeclareMathOperator*{\\E}{\\mathbb{E}}
 \\DeclareMathOperator*{\\V}{\\mathbb{V}}
 \\DeclareMathOperator*{\\defeq}{\\xlongequal{\\text{def}}}
+%\\newcolumntype{x}[1]{>{\\centering\\arraybackslash\\hspace{0pt}}p{#1}}
+\\newcolumntype{x}[1]{>{\\centering\\let\\newline\\\\\\arraybackslash\\hspace{0pt}}m{#1}}
+
+
 \\newcommand*{\\set}[1]{\\left\\{ #1 \\right\\}}
 \\newcommand*{\\Set}[2]{\\left\\{ \\, #1 \\colon #2 \\, \\right\\}}
 \\newcommand*{\\abs}[1]{\\left\\lvert #1 \\right\\rvert}
@@ -960,6 +965,7 @@ DOC_PACKAGES = '''
 \\usepackage{sectsty}
 \\usepackage{longtable}
 \\usepackage{seqsplit}
+\\usepackage{array}
 \\usepackage{subfigure}
 \\usepackage[multidot]{grffile}
 \\usepackage{float}
@@ -974,6 +980,7 @@ DOC_CONFIG = '''
 \\DeclareMathOperator*{\\E}{\\mathbb{E}}
 \\DeclareMathOperator*{\\V}{\\mathbb{V}}
 \\DeclareMathOperator*{\\defeq}{\\xlongequal{\\text{def}}}
+\\newcolumntype{x}[1]{>{\\centering\\let\\newline\\\\\\arraybackslash\\hspace{0pt}}m{#1}}
 \\newcommand*{\\set}[1]{\\left\\{ #1 \\right\\}}
 \\newcommand*{\\Set}[2]{\\left\\{ \\, #1 \\colon #2 \\, \\right\\}}
 \\newcommand*{\\abs}[1]{\\left\\lvert #1 \\right\\rvert}

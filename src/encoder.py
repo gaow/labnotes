@@ -304,7 +304,7 @@ class LaTeX(BaseEncoder):
         if len(ncols) > 1:
             raise ValueError("Number of columns not consistent in table. Please replace empty columns with placeholder symbol, e.g. '-'.\n``{0} ...``".format('\t'.join(table[0])))
         try:
-            cols = ''.join(['c' if len([item[i] for item in table if item[i].startswith('\\seqsplit')]) == 0 else 'p{{{}pt}}'.format((480-(ncols[0]-nseqsplit)*10)/nseqsplit) for i in range(ncols[0])])
+            cols = ''.join(['c' if len([item[i] for item in table if item[i].startswith('\\seqsplit')]) == 0 else 'x{{{}pt}}'.format(int(500 / (1 * (ncols[0]-nseqsplit) + 2 * nseqsplit) * 2)) for i in range(ncols[0])])
             head = '\\begin{center}\n{%s\\begin{longtable}{%s}\n\\hline\n' % \
                    ("\\" + self.tablefont if self.tablefont is not None else '', cols)
             body = '&'.join(table[0]) + '\\\\\n' + '\\hline\n' + '\\\\\n'.join(['&'.join(item) for item in table[1:]]) + '\\\\\n'
