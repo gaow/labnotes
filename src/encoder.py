@@ -296,15 +296,21 @@ class LaTeX(BaseEncoder):
         return value + '\n\\end{itemize}'
 
     def GetTable(self, table, label = None):
-        table = [['\seqsplit{%s}' % ''.join(['{%s}' % y if is_chinese(y) else y for y in iitem.replace(' ', '\\ ')])
+        ncols = list(set([len(x) for x in table]))
+        if label != 'nosplit':
+            table = [['\seqsplit{%s}' % ''.join(['{%s}' % y if is_chinese(y) else y for y in iitem.replace(' ', '\\ ')])
                   if len([x for x in iitem if x == ' ']) > 2 else iitem for iitem in item]
                   for item in table]
-        ncols = list(set([len(x) for x in table]))
-        nseqsplit = max([len([iitem for iitem in item if iitem.startswith('\\seqsplit')]) for item in table])
+            nseqsplit = max([len([iitem for iitem in item if iitem.startswith('\\seqsplit')]) for item in table])
+        else:
+            nseqsplit = None
         if len(ncols) > 1:
             raise ValueError("Number of columns not consistent in table. Please replace empty columns with placeholder symbol, e.g. '-'.\n``{0} ...``".format('\t'.join(table[0])))
         try:
-            cols = ''.join(['c' if len([item[i] for item in table if item[i].startswith('\\seqsplit')]) == 0 else 'x{{{}pt}}'.format(int(500 / (1 * (ncols[0]-nseqsplit) + 2 * nseqsplit) * 2)) for i in range(ncols[0])])
+            if nseqsplit is not None:
+                cols = ''.join(['c' if len([item[i] for item in table if item[i].startswith('\\seqsplit')]) == 0 else 'x{{{}pt}}'.format(int(500 / (1 * (ncols[0]-nseqsplit) + 2 * nseqsplit) * 2)) for i in range(ncols[0])])
+            else:
+                cols = ''.join(['c' for i in range(ncols[0])])
             head = '\\begin{center}\n{%s\\begin{longtable}{%s}\n\\hline\n' % \
                    ("\\" + self.tablefont if self.tablefont is not None else '', cols)
             body = '&'.join(table[0]) + '\\\\\n' + '\\hline\n' + '\\\\\n'.join(['&'.join(item) for item in table[1:]]) + '\\\\\n'
