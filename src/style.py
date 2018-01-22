@@ -990,7 +990,7 @@ DOC_CONFIG = '''
 \\newcommand{\\ie}{\\textit{i.e.}}
 
 %% Colored Blocks
-\\newcommand{\\CBc}[2]{\\tikz \\node[circle,scale=0.75,color=white,fill=#1]{\\textbf{#2}};}
+\\newcommand{\\CBc}[2]{\\tikz \\node[circle,scale=0.5,color=white,fill=#1]{\\textbf{#2}};}
 \\newcommand{\\CBr}[2]{\\tikz \\node[rectangle,scale=0.9,color=white,fill=#1]{\\textbf{#2}};}
 
 \\newcommand\\independent{\\protect\\mathpalette{\\protect\\independenT}{\\perp}}
