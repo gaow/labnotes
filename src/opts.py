@@ -202,9 +202,9 @@ class Main:
                         metavar='name',
                         type=str,
                         help='''name of output file''')
-        parser.add_argument('--toc',
-                        action='store_true',
-                        help='''generate table of contents''')
+        # parser.add_argument('--toc',
+        #                 action='store_true',
+        #                 help='''generate table of contents''')
         parser.add_argument('-l', '--lite',
                         action='store_true',
                         help='''mask commented-out text from output''')
@@ -219,6 +219,8 @@ class Main:
 #                        help='''do not include reference in the document''')
 
     def getDocArguments(self, parser):
+        parser.add_argument('--toc', type=int, choices = [0,1,2,3], default = 0,
+                        help='''generate table of contents''')
         parser.add_argument('--no_section_number',
                         action='store_true',
                         help='''generate un-numbered sections''')
@@ -249,6 +251,9 @@ class Main:
                             help = '''additional LaTeX packages, eg. "\\\\usepackage[fontset=ubuntu,UTF8]{ctex}"''')
 
     def getSlidesArguments(self, parser):
+        parser.add_argument('--toc',
+                        action='store_true',
+                        help='''generate table of contents''')
         parser.add_argument('-i', '--institute',
                         action='store',
                         help='''institute of author''')
@@ -275,6 +280,9 @@ class Main:
                         help='''force build document from scratch without using cached data''')
 
     def getHtmlArguments(self, parser):
+        parser.add_argument('--toc',
+                        action='store_true',
+                        help='''generate table of contents''')
         parser.add_argument('--columns',
                         type = int,
                         choices = [1,2,3],
@@ -292,6 +300,9 @@ class Main:
                         help='''rule to swap paths to figures for online publishing''')
 
     def getDokuwikiArguments(self, parser):
+        parser.add_argument('--toc',
+                        action='store_true',
+                        help='''generate table of contents''')
         parser.add_argument('--showall',
                         action='store_true',
                         help='''unfold source code / output fields in page by default''')
@@ -310,6 +321,9 @@ class Main:
                         help='''rule to swap paths to figures for online publishing''')
 
     def getMarkDownArguments(self, parser):
+        parser.add_argument('--toc',
+                        action='store_true',
+                        help='''generate table of contents''')
         parser.add_argument('--suffix',
                         metavar='EXT',
                         default='md',

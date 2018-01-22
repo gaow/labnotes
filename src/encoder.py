@@ -378,6 +378,11 @@ class LaTeX(BaseEncoder):
         return ('\\subsection*{' if self.no_num and not self.toc else '\\subsection{') + value + '}'
 
     def Write(self, value):
+        doc_conf = DOC_CONFIG
+        if self.toc:
+            doc_conf = doc_conf.replace("{tocdepth}{3}", "{tocdepth}{%s}" % self.toc)
+        if self.no_num and self.toc:
+            doc_conf = doc_conf.replace("{secnumdepth}{3}", "{secnumdepth}{0}")
         return '\\documentclass[oneside%s%s]{%s}' % (',twocolumn' if self.twocols else '',
                                                      ',landscape' if self.landscape else '', self.doctype) + \
                                                      DOC_PACKAGES + self.additional_packages + \
@@ -385,7 +390,7 @@ class LaTeX(BaseEncoder):
                 ('\\usepackage{mathptmx}\n' if self.font == 'roman' else '') + \
                 '\\renewcommand\\%s{References}\n' % ('bibname' if self.doctype == 'report' else 'refname') + \
                 (('\\renewcommand\\rmdefault{%s}\n' % FONT[self.font]) if (self.font != 'default' and self.font != 'roman') else '') + \
-                (DOC_CONFIG if not (self.no_num and self.toc) else DOC_CONFIG.replace("{secnumdepth}{3}", "{secnumdepth}{0}")) + \
+                doc_conf + \
                 ('\\pagestyle{empty}\n' if self.no_page else '') + \
                 (('\\setlength{\\columnsep}{%s}\\setlength{\\columnseprule}{%s}\n' % ('2em','0pt')) if self.twocols else '') + \
                 '\\title{%s}\n' % self.title + '\\author{%s}\n' % self.author + \
