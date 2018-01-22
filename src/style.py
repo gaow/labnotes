@@ -970,6 +970,7 @@ DOC_PACKAGES = '''
 \\usepackage[multidot]{grffile}
 \\usepackage{float}
 \\usepackage{varwidth}
+\\usepackage{tikz}
 \\usepackage[tikz]{bclogo}
 '''
 
@@ -987,6 +988,10 @@ DOC_CONFIG = '''
 \\newcommand*{\\p}[1]{\\Pr{\\left\\{ #1\\right\\}}}
 
 \\newcommand{\\ie}{\\textit{i.e.}}
+
+%% Colored Blocks
+\\newcommand{\\CBc}[2]{\\tikz \\node[circle,scale=0.75,color=white,fill=#1]{\\textbf{#2}};}
+\\newcommand{\\CBr}[2]{\\tikz \\node[rectangle,scale=0.9,color=white,fill=#1]{\\textbf{#2}};}
 
 \\newcommand\\independent{\\protect\\mathpalette{\\protect\\independenT}{\\perp}}
 \\def\\independenT#1#2{\\mathrel{\\rlap{$#1#2$}\\mkern2mu{#1#2}}}
