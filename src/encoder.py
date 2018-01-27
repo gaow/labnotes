@@ -186,7 +186,7 @@ class FigureInserter:
                 remote_path = os.path.dirname(fig)
             # syntax images
             if tag == 'tex':
-                lines[idx] = '\\includegraphics[width=%s\\textwidth]{%s}\n' % (width, fig)
+                lines[idx] = '\\includegraphics[width=%s\\textwidth]{%s}\n' % (width, fig.replace(os.path.expanduser('~'), '~'))
             elif tag == 'html':
                 if extension == 'pdf':
                     lines[idx] = '<a style="text-shadow: 1px 1px 1px #999;" href="{0}">{1}</a>\n'.\
