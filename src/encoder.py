@@ -151,7 +151,7 @@ class FigureInserter:
             #     width = 0.9
             x = []
             for item in set(paths):
-                figs = list(set(glob.glob(os.path.join(os.path.expanduser(item), fig))))
+                figs = list(set(glob.glob(os.path.join(os.path.expanduser(item), os.path.expanduser(fig)))))
                 for xx in figs:
                     if (xx, width) not in x:
                         x.append((xx, width))
@@ -186,7 +186,7 @@ class FigureInserter:
                 remote_path = os.path.dirname(fig)
             # syntax images
             if tag == 'tex':
-                lines[idx] = '\\includegraphics[width=%s\\textwidth]{%s}\n' % (width, fig.replace(os.path.expanduser('~'), '~'))
+                lines[idx] = '\\includegraphics[width=%s\\textwidth]{%s}\n' % (width, fig)
             elif tag == 'html':
                 if extension == 'pdf':
                     lines[idx] = '<a style="text-shadow: 1px 1px 1px #999;" href="{0}">{1}</a>\n'.\
