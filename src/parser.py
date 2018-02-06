@@ -56,8 +56,6 @@ class ParserCore:
                 self.dirnames.append(os.path.dirname(fn))
             with codecs.open(fn, 'r', encoding='UTF-8', errors='ignore') as f:
                 lines = [l.rstrip() for l in f.readlines()]
-                # handle manual line wrap `\`
-                lines = re.sub("\\\\\n\s*#*\s*", '', "\n".join(lines)).splitlines()
                 # in case I need to parse source code
                 if len(lines) > 0 and lines[0].startswith('#!/') \
                   and fn.split('.')[-1].lower() in lines[0].lower():
@@ -198,6 +196,7 @@ class ParserCore:
         # such as version, date, potentially
         start_subsection = end_subsection = count_chapter = count_section = count_subsection = 0
         while idx < len(self.text):
+            self.text[idx] = self.text[idx].strip()
             if idx in skip or self.text[idx] == '':
                 # no need to process
                 idx += 1
@@ -290,6 +289,16 @@ class ParserCore:
                 continue
             if self.text[idx].startswith(M):
                 # a plain line here
+                # handle manual line wrap `\`
+                if self.text[idx].endswith("\\"):
+                    if idx + 1 != len(self.text):
+                        # FIXME: here have to assume next line is also plain text.
+                        self.text[idx + 1] = self.text[idx][:-1] + re.sub("^\s*#*\s*", '', self.text[idx + 1])
+                        self.text[idx] = ''
+                        idx += 1
+                        continue
+                    else:
+                        self.text[idx] = self.text[idx][:-1]
                 self.text[idx] = worker.GetLine(self.Recode(self.text[idx][len(M):], worker).strip())
                 idx += 1
                 continue
