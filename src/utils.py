@@ -8,8 +8,7 @@ from io import StringIO
 from subprocess import PIPE, Popen, check_output
 import tempfile
 from sos.utils import logger
-from .minted import minted
-from .style import btheme, HTML_INDEX
+from .style import btheme, HTML_INDEX, minted
 from .doi import PaperList
 from collections import OrderedDict
 import codecs

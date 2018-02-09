@@ -2,5 +2,5 @@
 #fileformat=SOS1.0
 
 [upload]
-run:
- rsync -auzP labnotes ${CONFIG.business_webspace}/
+run: expand = True
+ rsync -auzP labnotes {CONFIG.business_webspace}/
