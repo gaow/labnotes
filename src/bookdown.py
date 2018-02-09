@@ -5,9 +5,8 @@ from . import BOOKDOWN_CFG as cfg, BOOKDOWN_OUT as out, \
      BOOKDOWN_TEX as tex, BOOKDOWN_STYLE as style, \
      BOOKDOWN_TOC as toc, BOOKDOWN_IDX as idx
 from .utils import env, dict2str, cd
-from sos.parser import SoS_Script
 from sos.targets import executable
-from sos_r.targets import R_library
+from sos.targets_r import R_library
 
 def get_sos(files, pdf, workdir):
     bookdown_section = '''
@@ -16,14 +15,13 @@ def get_sos(files, pdf, workdir):
 quiet = 'T'
 formats = ['bookdown::gitbook']
 input: %s
-task: workdir = %s
-R:
+R: workdir = %s, expand = '${ }'
 ###
 # Code below are copied from
 # https://github.com/rstudio/bookdown/blob/master/inst/examples/_render.R
 ###
 quiet = ${quiet}
-formats = c(${formats!r,})
+formats = c(${formats:r,})
 travis = !is.na(Sys.getenv('CI', NA))
 
 # provide default formats if necessary
@@ -32,7 +30,7 @@ if (length(formats) == 0) formats = c(
 )
 # render the book to all formats unless they are specified via command-line args
 for (fmt in formats) {
-  cmd = sprintf("bookdown::render_book(c(${input!r,}), '%%s', preview = T, quiet = %%s)", fmt, quiet)
+  cmd = sprintf("bookdown::render_book(c(${_input:r,}), '%%s', preview = T, quiet = %%s)", fmt, quiet)
   res = bookdown:::Rscript(c('-e', shQuote(cmd)))
   if (res != 0) stop('Failed to compile the book to ', fmt)
   if (travis && fmt == 'bookdown::epub_book')
@@ -44,8 +42,8 @@ for (fmt in formats) {
 [2]
 input: %s
 output: %s
-run:
-    labnotes doc ${input!q} -o ${output!q} %s
+run: expand = '${ }'
+    labnotes doc ${_input:q} -o ${_output:q} %s
 ''' % (repr(pdf[0]), repr(os.path.join(workdir, pdf[1], '_main.pdf')), pdf[2])
     else:
         pdf_section = ''
@@ -107,7 +105,7 @@ def prepare_bookdown(files, title, author, date, description, no_section_number,
     if no_section_number:
         out['bookdown::gitbook']['number_sections'] = 0
     if pdf:
-        pdf = (pdf, cfg['output_dir'], '{} {} {} --toc --long_ref --font_size 12 {}'.\
+        pdf = (pdf, cfg['output_dir'], '{} {} {} --toc 3 --long_ref --font_size 12 {}'.\
                format('-a {}'.format(repr(author)) if author else '',
                       '-t {}'.format(repr(title)) if title else '',
                       '-d {}'.format(repr(date)) if date else '',

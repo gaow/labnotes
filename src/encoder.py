@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 import os, re, glob
 from collections import OrderedDict
-from sos.utils import logger
-from .utils import env, wraptxt, is_chinese
+from .utils import env, wraptxt, is_chinese, logger
 from .style import DOC_PACKAGES, DOC_CONFIG, BM_MODE, BM_CONFIG, \
      BM_TITLE, BM_THANK, BM_THEME, HTML_STYLE, HTML_SYN
 

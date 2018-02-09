@@ -7,7 +7,6 @@ import yaml
 from io import StringIO
 from subprocess import PIPE, Popen, check_output
 import tempfile
-from sos.utils import logger
 from .style import btheme, HTML_INDEX, minted
 from .doi import PaperList
 from collections import OrderedDict
@@ -56,6 +55,66 @@ class Environment:
                         os.makedirs(self.tmp_dir)
 
 env = Environment()
+
+
+class Logger:
+    def __init__(self):
+        self.__width_cache = 1
+        self.verbosity = 2
+
+    def error(self, msg = None, exit = True):
+        if msg is None:
+            sys.stderr.write('\n')
+            return
+        if type(msg) is list:
+            msg = ' '.join(map(str, msg))
+        else:
+            msg = str(msg)
+        start = '\n' if msg.startswith('\n') else ''
+        end = '\n' if msg.endswith('\n') else ''
+        msg = msg.strip()
+        if exit:
+            sys.stderr.write(start + "\033[1;40;33mERROR: {}\033[0m\n".format(msg) + end)
+            sys.exit()
+        else:
+            sys.stderr.write(start + "\033[1;40;35mWARNING: {}\033[0m\n".format(msg) + end)
+
+    def log(self, msg = None, flush=False, debug=False):
+        if msg is None:
+            sys.stderr.write('\n')
+            return
+        if type(msg) is list:
+            msg = ' '.join(map(str, msg))
+        else:
+            msg = str(msg)
+        start = "{0:{width}}".format('\r', width = self.__width_cache + 10) + "\r" if flush else ''
+        end = '' if flush else '\n'
+        start = '\n' + start if msg.startswith('\n') else start
+        end = end + '\n' if msg.endswith('\n') else end
+        msg = msg.strip()
+        if debug:
+            sys.stderr.write(start + "\033[1;40;34mDEBUG: {}\033[0m".format(msg) + end)
+        else:
+            sys.stderr.write(start + "\033[1;40;32mINFO: {}\033[0m".format(msg) + end)
+        self.__width_cache = len(msg)
+
+    def debug(self, msg = None, flush = False):
+        if self.verbosity < 3:
+            return
+        self.log(msg, flush, True)
+
+    def info(self, msg = None, flush = False):
+        if self.verbosity < 2:
+            return
+        self.log(msg, flush, False)
+
+    def warning(self, msg = None):
+        if self.verbosity == 0:
+            return
+        self.error(msg, False)
+
+logger = Logger()
+
 
 def getPaper(doi, reference_format):
     doi = doi.rstrip('/')

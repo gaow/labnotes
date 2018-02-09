@@ -2,7 +2,7 @@
 import sys, os
 from collections import OrderedDict
 from dsc import HTML_CSS, HTML_JS
-from dsc.utils import flatten_list, make_html_name
+from dsc.utils import make_html_name
 
 def figs2html(content, to_file, title):
     '''

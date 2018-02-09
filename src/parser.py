@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import os, re, hashlib, codecs
-from sos.utils import logger
-from .utils import env, getPaper, multispace2tab, \
+from .utils import env, logger, getPaper, multispace2tab, \
      gettxtfromfile, gettxtfromcmd, get_output
 from .encoder import FigureInserter, M, SYNTAX
 
