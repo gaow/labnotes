@@ -292,7 +292,7 @@ def uniq(seq):
 
 def pdflatex(fname, text, vanilla=False, beamer_institute = None):
     def empty(directory, name):
-        for item in ['out','toc','aux','log','nav','snm','vrb']:
+        for item in ['out','toc','aux','nav','snm','vrb']:
             item = os.path.join(directory, '{0}.{1}'.format(name, item))
             if os.path.exists(item): os.remove(item)
     # setup temp dir
