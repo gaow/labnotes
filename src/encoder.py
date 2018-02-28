@@ -140,26 +140,32 @@ class FigureInserter:
         for x in text.split(';'):
             if not x.strip():
                 continue
-            try:
-                fig, width = x.strip().split()
-                width = float(width)
-            except ValueError:
-                fig = x.split()[0]
+            x = x.strip().split()
+            fig = width = page = None
+            if len(x) == 1:
+                fig = x[0]
                 width = 0.9
+            elif len(x) == 2:
+                fig = x[0]
+                width = float(x[1])
+            else:
+                fig = x[0]
+                width = float(x[1])
+                page = int(x[2])
             # if (not tag.endswith('wiki')) and width > 1:
             #     width = 0.9
             x = []
             for item in set(paths):
                 figs = list(set(glob.glob(os.path.join(os.path.expanduser(item), os.path.expanduser(fig)))))
                 for xx in figs:
-                    if (xx, width) not in x:
-                        x.append((xx, width))
+                    if (xx, width, page) not in x:
+                        x.append((xx, width, page))
             if len(x) == 0:
                 raise ValueError("Cannot find file ``%s`` under ``%s``" % (fig, repr(paths)))
             lines.extend(x)
         # Insert figures
         for idx, line in enumerate(lines):
-            fig, width = line
+            fig, width, page = line
             fname = os.path.basename(fig)
             if not '.' in fname:
                 raise ValueError("Cannot determine file format for ``{0}``. Valid extensions are ``{1}``".\
@@ -185,7 +191,9 @@ class FigureInserter:
                 remote_path = os.path.dirname(fig)
             # syntax images
             if tag == 'tex':
-                lines[idx] = '\\includegraphics[width=%s\\textwidth]{%s}\n' % (width, fig)
+                lines[idx] = '\\includegraphics[%swidth=%s\\textwidth]{%s}\n' % (f'page={page},'
+                                                                                 if page is not None else '',
+                                                                                 width, fig)
             elif tag == 'html':
                 if extension == 'pdf':
                     lines[idx] = '<a style="text-shadow: 1px 1px 1px #999;" href="{0}">{1}</a>\n'.\
