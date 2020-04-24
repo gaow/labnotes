@@ -1061,7 +1061,7 @@ body {
 	margin: 6em 3% 19em 3%;
 	background: #fff;
 	font-family: 'Lucida Grande', 'Lucida Sans', 'Lucida Sans Unicode', Tahoma, sans-serif;
-	font-size: 11pt;
+	font-size: 12pt;
 	line-height: 150%;
 	text-align:justify;
 	color: #555;
@@ -1074,7 +1074,7 @@ body
 	margin:40px 0;
 	padding:0;
 	font-family: 'PT Sans', 'Lucida Grande', 'Lucida Sans', 'Lucida Sans Unicode', Tahoma, sans-serif;
-	font-size: 11pt;
+	font-size: 12pt;
 	text-align:justify;
 	line-height: 150%;
 	color: #333;
@@ -1128,13 +1128,13 @@ a:hover
 .normal
 {
 	font-family: 'PT Sans', Helvetica, Arial, sans-serif;
-	font-size: 11pt;
+	font-size: 12pt;
 }
 
 em
 {
 	font-family: Georgia, Helvetica, Arial, sans-serif;
-	font-size: 11pt;
+	font-size: 12pt;
 }
 
 .minorhead
@@ -1240,7 +1240,7 @@ em
 .subsubheading
 {
 	margin-top: 15px;
-	font-size: 11pt;
+	font-size: 12pt;
 	font-weight: bold;
 	color: #304860;
 	/* font-style: oblique; */
@@ -1393,7 +1393,7 @@ body
 	margin:40px 0;
 	padding:0;
 	font-family: 'PT Sans', 'Lucida Grande', 'Lucida Sans', 'Lucida Sans Unicode', Tahoma, sans-serif;
-	font-size: 11pt;
+	font-size: 12pt;
 	text-align:justify;
 	line-height: 150%;
 	color: #333;
@@ -1403,7 +1403,7 @@ em
 {
     font-style: italic;
 	font-family: Georgia, Helvetica, Arial, sans-serif;
-	font-size: 11pt;
+	font-size: 12pt;
 }
 
 ol {list-style-type: circle;}
@@ -1443,7 +1443,7 @@ ol {list-style-type: circle;}
 .subsubheading
 {
 	margin-top: 15px;
-	font-size: 11pt;
+	font-size: 12pt;
 	font-weight: bold;
 	color: #304860;
 	/* font-style: oblique; */
