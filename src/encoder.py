@@ -156,7 +156,7 @@ class FigureInserter:
             #     width = 0.9
             x = []
             for item in set(paths):
-                figs = list(set(glob.glob(os.path.join(os.path.expanduser(item), os.path.expanduser(fig)))))
+                figs = sorted(set(glob.glob(os.path.join(os.path.expanduser(item), os.path.expanduser(fig)))))
                 for xx in figs:
                     if (xx, width, page) not in x:
                         x.append((xx, width, page))
