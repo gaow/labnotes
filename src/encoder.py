@@ -291,9 +291,9 @@ class LaTeX(BaseEncoder):
             return '{\\color{MidnightBlue}%s}~\\cite{%s}' % (value1, value3)
 
     def FmtListItem(self, value, level):
-        value = re.sub(r'^{0}'.format(M * level), '\\item ', value)
+        value = re.sub(r'^{0}'.format(M * level), '\\\item ', value)
         if self.pause:
-            value = value.replace('\\item -', '\\pause \\item ')
+            value = value.replace('\\\item -', '\\pause \\\item ')
         return value
 
     def FmtListStart(self, value, level):
